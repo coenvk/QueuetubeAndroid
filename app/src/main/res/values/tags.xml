@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="initialize" type="id" />
+    <item name="videoId" type="id" />
+    <item name="thumbnailloader" type="id" />
+</resources>

@@ -1,0 +1,158 @@
+package com.arman.queuetube.modules.search;
+
+import android.annotation.SuppressLint;
+import android.os.AsyncTask;
+
+import com.arman.queuetube.config.Constants;
+import com.arman.queuetube.model.VideoData;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.model.SearchListResponse;
+import com.google.api.services.youtube.model.SearchResult;
+import com.google.api.services.youtube.model.Video;
+import com.google.api.services.youtube.model.VideoListResponse;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+public class YouTubeSearcher {
+
+    private YouTube youTube;
+    private YouTube.Search.List relatedQuery;
+    private YouTube.Search.List query;
+    private YouTube.Videos.List videoRequest;
+
+    private List<VideoData> tempList;
+
+    public YouTubeSearcher() {
+        this.tempList = new ArrayList<>();
+        this.youTube = new YouTube.Builder(new NetHttpTransport(),
+                new JacksonFactory(), new HttpRequestInitializer() {
+            @Override
+            public void initialize(HttpRequest request) throws IOException {
+            }
+        }).setApplicationName("Queuetube").build();
+
+        try {
+            query = youTube.search().list("id,snippet");
+            query.setKey(Constants.Key.API_KEY);
+            query.setType("video");
+            query.setMaxResults(10L);
+            query.setFields("items(id/videoId,snippet/title,snippet/channelTitle,snippet/publishedAt,snippet/description,snippet/thumbnails/default/url)");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            relatedQuery = youTube.search().list("id,snippet");
+            relatedQuery.setKey(Constants.Key.API_KEY);
+            relatedQuery.setMaxResults(5L);
+            relatedQuery.setFields("items(id/videoId,snippet/title,snippet/channelTitle,snippet/publishedAt,snippet/description,snippet/thumbnails/default/url)");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            videoRequest = youTube.videos().list("statistics");
+            videoRequest.setFields("items(statistics)");
+            videoRequest.setKey(Constants.Key.API_KEY);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public VideoData requestDetails(final VideoData videoData) {
+        @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, List<Video>> task = new AsyncTask<Void, Void, List<Video>>() {
+            @Override
+            protected List<Video> doInBackground(Void... params) {
+                List<Video> videoList = new ArrayList<>();
+                try {
+                    System.out.println(videoData.getId());
+                    videoRequest.setId(videoData.getId());
+                    VideoListResponse response = videoRequest.execute();
+                    System.out.println(response.getItems().size());
+                    videoList.addAll(response.getItems());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return videoList;
+            }
+        };
+        try {
+            List<Video> videoList = task.execute().get();
+            if (videoList != null && videoList.size() > 0) {
+                Video video = videoList.get(0);
+                videoData.setStatistics(video.getStatistics());
+            }
+            return videoData;
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        return videoData;
+    }
+
+    public VideoData nextAutoplay(final String currentId) {
+        @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, List<SearchResult>> task = new AsyncTask<Void, Void, List<SearchResult>>() {
+            @Override
+            protected List<SearchResult> doInBackground(Void... params) {
+                relatedQuery.setRelatedToVideoId(currentId);
+                List<SearchResult> results = new ArrayList<>();
+                try {
+                    SearchListResponse response = query.execute();
+                    results.addAll(response.getItems());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return results;
+            }
+        };
+        try {
+            List<SearchResult> results = task.execute().get();
+            VideoData videoData = new VideoData();
+            for (int i = results.size() - 1; i >= 0; i--) {
+                SearchResult result = results.get(i);
+                if (!currentId.equals(result.getId().getVideoId())) {
+                    videoData.setTo(result);
+                    return videoData;
+                }
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public List<VideoData> search(String keywords) {
+        @SuppressLint("StaticFieldLeak") AsyncTask<String, Void, List<SearchResult>> task = new AsyncTask<String, Void, List<SearchResult>>() {
+            @Override
+            protected List<SearchResult> doInBackground(String... strings) {
+                query.setQ(strings[0]);
+                List<SearchResult> results = new ArrayList<>();
+                try {
+                    SearchListResponse response = query.execute();
+                    results.addAll(response.getItems());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return results;
+            }
+        };
+        this.tempList.clear();
+        try {
+            List<SearchResult> results = task.execute(keywords).get();
+            for (int i = 0; i < results.size(); i++) {
+                this.tempList.add(new VideoData(results.get(i)));
+            }
+            return this.tempList;
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        return this.tempList;
+    }
+
+}

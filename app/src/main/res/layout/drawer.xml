@@ -7,7 +7,15 @@
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <include layout="@layout/top_nav" />
+    <FrameLayout
+        android:id="@+id/main_fragment_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <FrameLayout
+        android:id="@+id/list_fragment_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/drawer_navigation_view"
@@ -16,16 +24,6 @@
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/drawer_header"
-        app:menu="@menu/drawer_items">
-
-        <!--<ExpandableListView-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginTop="10dp"-->
-            <!--android:background="@android:color/white"-->
-            <!--android:dividerHeight="0dp"-->
-            <!--android:groupIndicator="@null" />-->
-
-    </com.google.android.material.navigation.NavigationView>
+        app:menu="@menu/drawer_items"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>

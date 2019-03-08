@@ -41,12 +41,6 @@
             android:supportsPictureInPicture="false"
             android:theme="@style/AppTheme.BackScreen" />
 
-        <activity android:name=".activities.PlaylistActivity"
-            android:label="Playlist"
-            android:screenOrientation="portrait"
-            android:supportsPictureInPicture="false"
-            android:theme="@style/AppTheme.BackScreen" />
-
         <activity
             android:name=".activities.MainActivity"
             android:label="@string/app_name"

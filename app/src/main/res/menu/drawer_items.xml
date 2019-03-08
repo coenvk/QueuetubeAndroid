@@ -9,24 +9,8 @@
             android:title="Home" />
         <item
             android:id="@+id/menu_item_playlists"
-            android:checkable="false"
-            android:title="Playlists">
-            <menu android:id="@+id/playlists_menu">
-                <group
-                    android:id="@+id/playlists_menu_group_main"
-                    android:checkableBehavior="none">
-                    <item
-                        android:id="@+id/playlists_menu_favorites"
-                        android:title="Favorites" />
-                    <item
-                        android:id="@+id/playlists_menu_history"
-                        android:title="History" />
-                    <item
-                        android:id="@+id/playlists_menu_add_new"
-                        android:title="Add new playlist" />
-                </group>
-            </menu>
-        </item>
+            android:icon="@drawable/ic_playlist_play_black_24dp"
+            android:title="Playlists" />
     </group>
     <group
         android:id="@+id/menu_group_about"

@@ -1,70 +1,39 @@
 package com.arman.queuetube.activities;
 
-import android.content.BroadcastReceiver;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.SearchView;
 
 import com.arman.queuetube.R;
-import com.arman.queuetube.config.Constants;
-import com.arman.queuetube.fragments.PlayerFragment;
-import com.arman.queuetube.fragments.pager.ViewPagerAdapter;
+import com.arman.queuetube.fragments.ListFragment;
+import com.arman.queuetube.fragments.MainFragment;
 import com.arman.queuetube.listeners.DrawerItemListener;
-import com.arman.queuetube.modules.search.SearchListener;
-import com.arman.queuetube.util.notifications.receivers.NotificationReceiver;
 import com.arman.queuetube.util.services.KillNotificationService;
-import com.arman.queuetube.util.transformers.DepthPageTransformer;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.tabs.TabLayout;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager;
 import androidx.viewpager.widget.ViewPager;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "MainActivity";
-    public static final int RECOVERY_DIALOG_REQUEST = 1;
+
+    public static final int MAIN_FRAGMENT = 0;
+    public static final int LIST_FRAGMENT = 1;
 
     private DrawerLayout drawerLayout;
 
-    private ViewPager viewPager;
-    private ViewPagerAdapter pagerAdapter;
+    private MainFragment mainFragment;
+    private ListFragment listFragment;
 
-    private BroadcastReceiver broadcastReceiver;
-
-    private void setupReceiver() {
-        this.broadcastReceiver = new NotificationReceiver((PlayerFragment) this.pagerAdapter.getPlayerFragment());
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Constants.Action.NEXT_ACTION);
-        filter.addAction(Constants.Action.MAIN_ACTION);
-        filter.addAction(Constants.Action.PAUSE_ACTION);
-        filter.addAction(Constants.Action.PLAY_ACTION);
-        filter.addAction(Constants.Action.STOP_ACTION);
-        registerReceiver(this.broadcastReceiver, filter);
-    }
-
-    private void setupActionBar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
-    }
+    private int currentFragment;
 
     private void setupDrawer() {
         this.drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -74,28 +43,34 @@ public class MainActivity extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(new DrawerItemListener(this, this.drawerLayout));
     }
 
-    private void setupAdView() {
-        MobileAds.initialize(this, Constants.Key.TEST_AD_KEY);
-        AdView adView = (AdView) findViewById(R.id.ad_view);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        adView.loadAd(adRequest);
+    public void switchToMainFragment() {
+        if (this.currentFragment != MAIN_FRAGMENT) {
+            if (this.mainFragment != null) {
+                getSupportFragmentManager().beginTransaction().show(this.mainFragment).commit();
+            } else {
+                this.mainFragment = new MainFragment();
+                getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_frame, this.mainFragment).commit();
+            }
+            if (this.listFragment != null) {
+                getSupportFragmentManager().beginTransaction().hide(this.listFragment).commit();
+            }
+            this.currentFragment = MAIN_FRAGMENT;
+        }
     }
 
-    private void setupPager() {
-        this.viewPager = (ViewPager) findViewById(R.id.view_pager);
-
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(this.viewPager);
-
-        this.pagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-        this.viewPager.setAdapter(this.pagerAdapter);
-        this.viewPager.setPageTransformer(true, new DepthPageTransformer());
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(this.broadcastReceiver);
+    public void switchToListFragment() {
+        if (this.currentFragment != LIST_FRAGMENT) {
+            if (this.listFragment != null) {
+                getSupportFragmentManager().beginTransaction().show(this.listFragment).commit();
+            } else {
+                this.listFragment = new ListFragment();
+                getSupportFragmentManager().beginTransaction().replace(R.id.list_fragment_frame, this.listFragment).commit();
+            }
+            if (this.mainFragment != null) {
+                getSupportFragmentManager().beginTransaction().hide(this.mainFragment).commit();
+            }
+            this.currentFragment = LIST_FRAGMENT;
+        }
     }
 
     @Override
@@ -104,14 +79,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        this.currentFragment = -1;
+
         startService(new Intent(this, KillNotificationService.class));
 
-        setupPager();
-        setupReceiver();
-
-        setupActionBar();
+        switchToMainFragment();
         setupDrawer();
-        setupAdView();
     }
 
     @Override
@@ -120,13 +93,7 @@ public class MainActivity extends AppCompatActivity {
         inflater.inflate(R.menu.menu_search, menu);
         MenuItem item = menu.findItem(R.id.action_search);
         final SearchView view = (SearchView) item.getActionView();
-        view.setOnSearchClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MainActivity.this.viewPager.setCurrentItem(ViewPagerAdapter.SEARCH_INDEX);
-            }
-        });
-        view.setOnQueryTextListener(new SearchListener((PlayerFragment) this.pagerAdapter.getPlayerFragment()));
+        this.mainFragment.addSearchListeners(view);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -145,22 +112,20 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (this.viewPager.getCurrentItem() == 0) {
-            super.onBackPressed();
+        if (this.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            this.drawerLayout.closeDrawers();
+        } else if (this.currentFragment == MAIN_FRAGMENT) {
+            ViewPager viewPager = this.mainFragment.getViewPager();
+            if (viewPager.getCurrentItem() == 0) {
+                super.onBackPressed();
+            } else {
+                viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
+            }
         } else {
-            this.viewPager.setCurrentItem(this.viewPager.getCurrentItem() - 1);
+            NavigationView navigationView = (NavigationView) this.drawerLayout.findViewById(R.id.drawer_navigation_view);
+            navigationView.getMenu().findItem(R.id.menu_item_home).setChecked(true);
+            this.switchToMainFragment();
         }
     }
-
-    //    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        if (requestCode == RECOVERY_DIALOG_REQUEST) {
-//            getYouTubePlayerProvider().initialize(API_KEY, this);
-//        }
-//    }
-//
-//    protected YouTubePlayer.Provider getYouTubePlayerProvider() {
-//        return (YouTubePlayerView) findViewById(R.id.youtube_player);
-//    }
 
 }

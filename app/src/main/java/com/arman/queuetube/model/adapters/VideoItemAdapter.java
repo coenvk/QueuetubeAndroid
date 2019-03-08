@@ -9,6 +9,7 @@ import com.arman.queuetube.model.VideoData;
 import com.arman.queuetube.model.viewholders.VideoViewHolder;
 import com.arman.queuetube.util.itemtouchhelper.adapters.ItemTouchHelperAdapter;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -23,6 +24,11 @@ public class VideoItemAdapter extends RecyclerView.Adapter<VideoViewHolder> impl
     private List<VideoData> videoData;
     private OnItemClickListener clickListener;
     private OnDragListener dragListener;
+
+    public VideoItemAdapter() {
+        super();
+        this.videoData = new ArrayList<>();
+    }
 
     public VideoItemAdapter(List<VideoData> videoData, OnItemClickListener clickListener, OnDragListener dragListener) {
         super();

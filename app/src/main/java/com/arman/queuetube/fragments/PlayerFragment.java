@@ -1,11 +1,13 @@
 package com.arman.queuetube.fragments;
 
 import android.media.AudioManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -13,7 +15,10 @@ import com.arman.queuetube.R;
 import com.arman.queuetube.fragments.pager.ViewPagerAdapter;
 import com.arman.queuetube.model.VideoData;
 import com.arman.queuetube.model.adapters.VideoItemAdapter;
+import com.arman.queuetube.modules.playlists.PlaylistHelper;
+import com.arman.queuetube.modules.search.SearchTask;
 import com.arman.queuetube.modules.search.YouTubeSearcher;
+import com.arman.queuetube.util.VideoSharer;
 import com.arman.queuetube.util.notifications.NotificationHelper;
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.IFramePlayerOptions;
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.PlayerConstants;
@@ -24,19 +29,26 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.player.listeners.YouTubeP
 import com.pierfrancescosoffritti.androidyoutubeplayer.ui.PlayerUIController;
 import com.pierfrancescosoffritti.androidyoutubeplayer.utils.YouTubePlayerTracker;
 
-import java.util.List;
+import java.util.Collection;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.viewpager.widget.ViewPager;
 
 public class PlayerFragment extends Fragment implements YouTubePlayerInitListener {
 
+    private SearchTask searchTask;
     private YouTubeSearcher ytSearcher;
 
     private LinearLayout fragmentLayout;
     private TextView videoTitleView;
+
+    private ImageView favoriteButton;
+    private ImageView addToPlaylistButton;
+    private ImageView shareButton;
 
     private YouTubePlayerView ytPlayerView;
     private YouTubePlayer ytPlayer;
@@ -44,10 +56,11 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
     private boolean ytPlayerReady;
     private boolean ytPlayerVideoSet;
     private boolean ytPlayerPlaying;
+    private boolean ytPlayerStopped;
 
     private VideoData currentVideo;
 
-    private PlaylistFragment playlistFragment;
+    private QueueFragment queueFragment;
     private SearchFragment searchFragment;
 
     private NotificationHelper notificationHelper;
@@ -57,6 +70,31 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+    }
+
+    public boolean setQueueTo(Collection<VideoData> videoData) {
+        return this.getPlaylistAdapter().setAll(videoData);
+    }
+
+    public boolean addToQueue(Collection<VideoData> videoData) {
+        return this.getPlaylistAdapter().addAll(videoData);
+    }
+
+    public boolean addToQueue(VideoData video) {
+        return this.getPlaylistAdapter().add(video);
+    }
+
+    public void showAddToPlaylistDialog() {
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        DialogFragment dialog = new AddToPlaylistFragment();
+        dialog.show(fragmentManager, "add_to_playlist_dialog");
+//        if (getResources().getBoolean(R.bool.large_layout)) {
+//            dialog.show(fragmentManager, "add_to_playlist_dialog");
+//        } else {
+//            FragmentTransaction transaction = fragmentManager.beginTransaction();
+//            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+//            transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
+//        }
     }
 
     @Override
@@ -88,40 +126,134 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
         this.fragmentLayout = (LinearLayout) view.findViewById(R.id.player_fragment_layout);
         this.videoTitleView = (TextView) this.fragmentLayout.findViewById(R.id.video_title_text_view);
 
+        this.favoriteButton = (ImageView) this.fragmentLayout.findViewById(R.id.favorite_button);
+        this.addToPlaylistButton = (ImageView) this.fragmentLayout.findViewById(R.id.add_to_playlist_button);
+        this.shareButton = (ImageView) this.fragmentLayout.findViewById(R.id.share_button);
+
+        this.favoriteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                PlayerFragment.this.favoriteVideo(!PlayerFragment.this.currentVideo.isFavorited());
+            }
+        });
+
+        this.addToPlaylistButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                PlayerFragment.this.showAddToPlaylistDialog();
+            }
+        });
+
+        this.shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                VideoSharer.share(getContext(), PlayerFragment.this.currentVideo);
+            }
+        });
+
         ViewPager viewPager = (ViewPager) getActivity().findViewById(R.id.view_pager);
         ViewPagerAdapter viewPagerAdapter = (ViewPagerAdapter) viewPager.getAdapter();
-        this.playlistFragment = (PlaylistFragment) viewPagerAdapter.getFragmentByIndex(ViewPagerAdapter.PLAYLIST_INDEX);
+        this.queueFragment = (QueueFragment) viewPagerAdapter.getFragmentByIndex(ViewPagerAdapter.QUEUE_INDEX);
         this.searchFragment = (SearchFragment) viewPagerAdapter.getFragmentByIndex(ViewPagerAdapter.SEARCH_INDEX);
+
+        this.searchTask = new SearchTask(this.ytSearcher, this.searchFragment);
 
         this.notificationHelper = new NotificationHelper(getActivity());
     }
 
-    private boolean autoplayEnabled() {
+    public void updateVideo(boolean favorited) {
+        this.currentVideo.setFavorited(favorited);
+        this.adjustFavoriteButton(favorited);
+    }
+
+    private void favoriteVideo(boolean favorited) {
+        if (favorited) {
+            PlaylistHelper.writeTo(PlaylistHelper.FAVORITES, this.currentVideo);
+        } else {
+            PlaylistHelper.removeFrom(PlaylistHelper.FAVORITES, this.currentVideo);
+        }
+
+        this.updateVideo(favorited);
+    }
+
+    private void adjustFavoriteButton(boolean favorited) {
+        if (favorited) {
+            this.favoriteButton.setImageDrawable(getActivity().getDrawable(R.drawable.ic_star_black_36dp));
+        } else {
+            this.favoriteButton.setImageDrawable(getActivity().getDrawable(R.drawable.ic_star_outline_black_36dp));
+        }
+    }
+
+    private boolean isAutoplayEnabled() {
         return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(getContext().getString(R.string.enable_autoplay_key), false);
     }
 
     public void query(String query) {
-        List<VideoData> searchResults = this.ytSearcher.search(query);
-        this.searchFragment.getResultsAdapter().setAll(searchResults);
-        if (!searchResults.isEmpty()) {
-            this.searchFragment.showResults();
-            this.searchFragment.scrollToTop();
-        } else {
-            this.searchFragment.showEmptyText();
+        AsyncTask.Status status = this.searchTask.getStatus();
+        if (status != AsyncTask.Status.RUNNING) {
+            if (status == AsyncTask.Status.FINISHED) {
+                this.searchTask = new SearchTask(this.ytSearcher, this.searchFragment);
+            }
+            this.searchTask.execute(query);
         }
     }
 
     private VideoItemAdapter getPlaylistAdapter() {
-        return this.playlistFragment.getPlaylistAdapter();
+        return this.queueFragment.getQueueAdapter();
+    }
+
+    public boolean forcePlayNext() {
+        boolean ret = false;
+        if (this.ytPlayerReady && this.ytPlayerVideoSet) {
+            this.skip();
+            if (!this.getPlaylistAdapter().isEmpty()) {
+                this.queueFragment.showQueue();
+            }
+        } else {
+            ret = this.tryPlayNext();
+        }
+        return ret;
     }
 
     public boolean tryPlayNext() {
+        return this.tryPlayNext(true);
+    }
+
+    public boolean tryPlayNext(boolean autoplayIfEnabled) {
+        boolean ret = false;
         if (this.ytPlayerReady && !this.ytPlayerVideoSet) {
             if (!this.getPlaylistAdapter().isEmpty()) {
-                this.currentVideo.setTo(this.getPlaylistAdapter().pop());
+                VideoData nextVideo = this.getPlaylistAdapter().pop();
+                this.currentVideo.setTo(nextVideo);
+                this.ytPlayer.cueVideo(this.currentVideo.getId(), 0);
+                ret = true;
+            } else if (this.isAutoplayEnabled() && autoplayIfEnabled) {
+                VideoData nextVideo = this.ytSearcher.nextAutoplay(this.currentVideo.getId());
+                if (nextVideo != null) {
+                    this.currentVideo.setTo(nextVideo);
+                    this.ytPlayer.cueVideo(this.currentVideo.getId(), 0);
+                    ret = true;
+                }
+            }
+        }
+        if (!this.getPlaylistAdapter().isEmpty()) {
+            this.queueFragment.showQueue();
+        }
+        return ret;
+    }
+
+    private boolean doTryPlayNext() {
+        return this.doTryPlayNext(true);
+    }
+
+    private boolean doTryPlayNext(boolean autoplayIfEnabled) {
+        if (this.ytPlayerReady && !this.ytPlayerVideoSet) {
+            if (!this.getPlaylistAdapter().isEmpty()) {
+                VideoData nextVideo = this.getPlaylistAdapter().pop();
+                this.currentVideo.setTo(nextVideo);
                 this.ytPlayer.cueVideo(this.currentVideo.getId(), 0);
                 return true;
-            } else if (this.autoplayEnabled()) {
+            } else if (this.isAutoplayEnabled() && autoplayIfEnabled) {
                 VideoData nextVideo = this.ytSearcher.nextAutoplay(this.currentVideo.getId());
                 if (nextVideo != null) {
                     this.currentVideo.setTo(nextVideo);
@@ -134,15 +266,19 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
     }
 
     public void playNext() {
-        if (!tryPlayNext()) {
+        if (!doTryPlayNext(!this.ytPlayerStopped)) {
             this.fragmentLayout.setVisibility(View.GONE);
             NotificationHelper.destroyNotification(getContext());
         }
     }
 
     public void stop() {
-        this.playlistFragment.getPlaylistAdapter().clear();
-        this.playlistFragment.showEmptyText();
+        this.stop(false);
+    }
+
+    public void stop(boolean autoplayIfEnabled) {
+        this.queueFragment.getQueueAdapter().clear();
+        this.ytPlayerStopped = !autoplayIfEnabled;
         this.ytPlayer.seekTo(this.ytPlayerTracker.getVideoDuration());
     }
 
@@ -157,7 +293,7 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
     public void skip() {
         if (this.ytPlayer != null) {
             if (this.getPlaylistAdapter().isEmpty()) {
-                this.stop();
+                this.stop(true);
             } else {
                 onEnd();
             }
@@ -165,8 +301,16 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
     }
 
     private void onEnd() {
+        PlaylistHelper.writeTo(PlaylistHelper.HISTORY, this.currentVideo, 0);
+
         this.ytPlayerVideoSet = false;
+
         this.playNext();
+        if (this.getPlaylistAdapter().isEmpty()) {
+            this.queueFragment.showEmptyText();
+        }
+
+        this.ytPlayerStopped = false;
     }
 
     private void onPlaying() {
@@ -181,11 +325,14 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
 
     private void onVideoCued() {
         this.currentVideo.setTo(this.ytSearcher.requestDetails(this.currentVideo));
+        boolean favorited = PlaylistHelper.isFavorited(this.currentVideo);
+        this.currentVideo.setFavorited(favorited);
+        this.adjustFavoriteButton(favorited);
         this.videoTitleView.setText(this.currentVideo.getTitle());
         if (this.fragmentLayout.getVisibility() == View.GONE) {
             this.fragmentLayout.setVisibility(View.VISIBLE);
         }
-        ytPlayer.play();
+        this.ytPlayer.play();
         this.notificationHelper.updateNotificationIfBuilt(this.currentVideo.getTitle(), true);
         this.ytPlayerVideoSet = true;
     }
@@ -252,7 +399,7 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
 
                 @Override
                 public void onError(PlayerConstants.PlayerError error) {
-                    System.out.println(error);
+                    PlayerFragment.this.skip();
                 }
 
                 @Override
@@ -281,6 +428,10 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
                 }
             });
         }
+    }
+
+    public VideoData getCurrentVideo() {
+        return currentVideo;
     }
 
 }

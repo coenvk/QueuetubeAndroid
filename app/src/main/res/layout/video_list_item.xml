@@ -2,47 +2,48 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="120dp"
     android:layout_margin="4dp"
     android:background="@color/bootstrap_gray_lightest"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?selectableItemBackground"
-    android:minHeight="120dp"
+    android:padding="8dp"
     app:cardCornerRadius="8dp"
     app:contentPadding="10dp">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="horizontal">
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:gravity="center"
-                android:weightSum="10">
+                android:weightSum="2">
 
                 <TextView
                     android:id="@+id/video_title"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="9"
+                    android:layout_weight="1"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="#000000"
+                    android:textColor="@color/textColorPrimary"
                     android:textSize="16sp" />
 
                 <com.google.android.youtube.player.YouTubeThumbnailView
                     android:id="@+id/youtube_thumbnail"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:adjustViewBounds="true"
+                    android:layout_marginStart="10dp"
                     android:background="@android:color/darker_gray"
                     android:maxWidth="120dp"
                     android:scaleType="centerCrop"

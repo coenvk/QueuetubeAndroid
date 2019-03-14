@@ -7,15 +7,7 @@
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <FrameLayout
-        android:id="@+id/main_fragment_frame"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
-    <FrameLayout
-        android:id="@+id/list_fragment_frame"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+    <include layout="@layout/app_bar_wrapper" />
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/drawer_navigation_view"
@@ -24,6 +16,6 @@
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/drawer_header"
-        app:menu="@menu/drawer_items"/>
+        app:menu="@menu/drawer_items" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

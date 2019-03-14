@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/bootstrap_gray_lightest"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?selectableItemBackground"
+    android:gravity="center_vertical"
+    android:minHeight="50dp"
+    android:orientation="vertical"
+    android:padding="11dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:weightSum="10">
+
+                <TextView
+                    android:id="@+id/playlists_item_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="9"
+                    android:maxLines="1"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    style="@style/Widget.AppCompat.ActionButton"
+                    android:id="@+id/playlists_item_delete_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_delete_black_24dp" />
+
+            </TableRow>
+
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -58,8 +58,8 @@ public class YouTubeSearcher {
         }
 
         try {
-            videoRequest = youTube.videos().list("statistics");
-            videoRequest.setFields("items(statistics)");
+            videoRequest = youTube.videos().list("id,snippet,statistics");
+            videoRequest.setFields("items(id,snippet/title,snippet/channelTitle,snippet/publishedAt,snippet/description,snippet/thumbnails/default/url,statistics)");
             videoRequest.setKey(Constants.Key.API_KEY);
         } catch (IOException e) {
             e.printStackTrace();
@@ -72,10 +72,8 @@ public class YouTubeSearcher {
             protected List<Video> doInBackground(Void... params) {
                 List<Video> videoList = new ArrayList<>();
                 try {
-                    System.out.println(videoData.getId());
                     videoRequest.setId(videoData.getId());
                     VideoListResponse response = videoRequest.execute();
-                    System.out.println(response.getItems().size());
                     videoList.addAll(response.getItems());
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -87,7 +85,7 @@ public class YouTubeSearcher {
             List<Video> videoList = task.execute().get();
             if (videoList != null && videoList.size() > 0) {
                 Video video = videoList.get(0);
-                videoData.setStatistics(video.getStatistics());
+                videoData.setTo(video);
             }
             return videoData;
         } catch (InterruptedException | ExecutionException e) {
@@ -128,29 +126,17 @@ public class YouTubeSearcher {
     }
 
     public List<VideoData> search(String keywords) {
-        @SuppressLint("StaticFieldLeak") AsyncTask<String, Void, List<SearchResult>> task = new AsyncTask<String, Void, List<SearchResult>>() {
-            @Override
-            protected List<SearchResult> doInBackground(String... strings) {
-                query.setQ(strings[0]);
-                List<SearchResult> results = new ArrayList<>();
-                try {
-                    SearchListResponse response = query.execute();
-                    results.addAll(response.getItems());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return results;
-            }
-        };
-        this.tempList.clear();
+        query.setQ(keywords);
+        List<SearchResult> results = new ArrayList<>();
         try {
-            List<SearchResult> results = task.execute(keywords).get();
-            for (int i = 0; i < results.size(); i++) {
-                this.tempList.add(new VideoData(results.get(i)));
-            }
-            return this.tempList;
-        } catch (InterruptedException | ExecutionException e) {
+            SearchListResponse response = query.execute();
+            results.addAll(response.getItems());
+        } catch (IOException e) {
             e.printStackTrace();
+        }
+        this.tempList.clear();
+        for (int i = 0; i < results.size(); i++) {
+            this.tempList.add(new VideoData(results.get(i)));
         }
         return this.tempList;
     }

@@ -4,7 +4,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import com.arman.queuetube.fragments.PlayerFragment;
-import com.arman.queuetube.fragments.PlaylistFragment;
+import com.arman.queuetube.fragments.QueueFragment;
 import com.arman.queuetube.R;
 import com.arman.queuetube.fragments.SearchFragment;
 import com.arman.queuetube.model.adapters.VideoItemAdapter;
@@ -24,9 +24,9 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
 
     public static final int NUM_PAGES = 2;
 
-    public static final int PLAYLIST_INDEX = 0;
+    public static final int QUEUE_INDEX = 0;
     public static final int SEARCH_INDEX = 1;
-    public static final String[] PAGE_TITLES = {"Playlist", "Search"};
+    public static final String[] PAGE_TITLES = {"Queue", "Search"};
 
     private Fragment playerFragment;
 
@@ -38,7 +38,7 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
         this.fragments = new LinkedList<>();
         this.fragmentTitles = new LinkedList<>();
 
-        this.addFragment(new PlaylistFragment());
+        this.addFragment(new QueueFragment());
         this.addFragment(new SearchFragment());
 
         this.playerFragment = new PlayerFragment();
@@ -86,9 +86,9 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
     }
 
     public void addFragment(Fragment fragment) {
-        if (fragment instanceof PlaylistFragment) {
-            this.fragmentTitles.add(PAGE_TITLES[PLAYLIST_INDEX]);
-            ((PlaylistFragment) fragment).setOnItemClickListener(new PlaylistItemClickListener());
+        if (fragment instanceof QueueFragment) {
+            this.fragmentTitles.add(PAGE_TITLES[QUEUE_INDEX]);
+            ((QueueFragment) fragment).setOnItemClickListener(new QueueItemClickListener());
         } else if (fragment instanceof SearchFragment) {
             this.fragmentTitles.add(PAGE_TITLES[SEARCH_INDEX]);
             ((SearchFragment) fragment).setOnItemClickListener(new SearchItemClickListener());
@@ -96,14 +96,14 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
         this.fragments.add(fragment);
     }
 
-    public class PlaylistItemClickListener implements VideoItemAdapter.OnItemClickListener {
+    public class QueueItemClickListener implements VideoItemAdapter.OnItemClickListener {
 
         @Override
         public void onClick(final RecyclerView.ViewHolder viewHolder) {
             viewHolder.itemView.setClickable(false);
-            final PlaylistFragment playlistFragment = (PlaylistFragment) ViewPagerAdapter.this.getFragmentByIndex(PLAYLIST_INDEX);
+            final QueueFragment queueFragment = (QueueFragment) ViewPagerAdapter.this.getFragmentByIndex(QUEUE_INDEX);
 
-            Animation animation = AnimationUtils.loadAnimation(playlistFragment.getActivity(), R.anim.remove_from_playlist);
+            Animation animation = AnimationUtils.loadAnimation(queueFragment.getActivity(), R.anim.remove_from_queue);
 
             animation.setAnimationListener(new Animation.AnimationListener() {
                 @Override
@@ -113,9 +113,9 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    playlistFragment.getPlaylistAdapter().remove(viewHolder.getAdapterPosition());
-                    if (playlistFragment.getPlaylistAdapter().isEmpty()) {
-                        playlistFragment.showEmptyText();
+                    queueFragment.getQueueAdapter().remove(viewHolder.getAdapterPosition());
+                    if (queueFragment.getQueueAdapter().isEmpty()) {
+                        queueFragment.showEmptyText();
                     }
                 }
 
@@ -134,17 +134,14 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
 
         @Override
         public void onClick(final RecyclerView.ViewHolder viewHolder) {
-            final PlaylistFragment playlistFragment = (PlaylistFragment) ViewPagerAdapter.this.getFragmentByIndex(PLAYLIST_INDEX);
+            final QueueFragment queueFragment = (QueueFragment) ViewPagerAdapter.this.getFragmentByIndex(QUEUE_INDEX);
             final SearchFragment searchFragment = (SearchFragment) ViewPagerAdapter.this.getFragmentByIndex(SEARCH_INDEX);
 
             Animation animation = AnimationUtils.loadAnimation(viewHolder.itemView.getContext(), R.anim.add_from_search_results);
             viewHolder.itemView.startAnimation(animation);
 
-            playlistFragment.getPlaylistAdapter().add(searchFragment.getResultsAdapter().get(viewHolder.getAdapterPosition()));
-            if (!((PlayerFragment) ViewPagerAdapter.this.playerFragment).tryPlayNext()) {
-                playlistFragment.showPlaylist();
-            }
-
+            queueFragment.getQueueAdapter().add(searchFragment.getResultsAdapter().get(viewHolder.getAdapterPosition()));
+            ((PlayerFragment) ViewPagerAdapter.this.playerFragment).tryPlayNext();
         }
 
     }

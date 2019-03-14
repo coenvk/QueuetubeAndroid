@@ -1,10 +1,15 @@
 package com.arman.queuetube.model;
 
+import android.text.Html;
+
 import com.google.api.services.youtube.model.SearchResult;
+import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoStatistics;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import androidx.annotation.NonNull;
 
 public class VideoData {
 
@@ -18,12 +23,18 @@ public class VideoData {
     private int likes;
     private int dislikes;
 
+    private boolean favorited;
+
     public VideoData() {
 
     }
 
+    public VideoData(String id) {
+        this.id = id;
+    }
+
     public VideoData(String title, String thumbnailUrl, String id, String publishedOn, String channel, String description) {
-        this.title = title;
+        this.setTitle(title);
         this.thumbnailUrl = thumbnailUrl;
         this.id = id;
         this.publishedOn = publishedOn;
@@ -35,8 +46,16 @@ public class VideoData {
         this.setTo(result);
     }
 
+    public VideoData(Video video) {
+        this.setTo(video);
+    }
+
+    public VideoData(JSONObject object) {
+        this.setTo(object);
+    }
+
     public void setTo(SearchResult result) {
-        this.title = result.getSnippet().getTitle();
+        this.setTitle(result.getSnippet().getTitle());
         this.thumbnailUrl = result.getSnippet().getThumbnails().getDefault().getUrl();
         this.id = result.getId().getVideoId();
         this.publishedOn = result.getSnippet().getPublishedAt().toString();
@@ -44,15 +63,30 @@ public class VideoData {
         this.description = result.getSnippet().getDescription();
     }
 
-    public List<String> asList() {
-        List<String> strings = new ArrayList<>();
-        strings.add(this.description);
-        strings.add(this.publishedOn);
-        strings.add(this.channel);
-        strings.add(String.valueOf(this.views));
-        strings.add(String.valueOf(this.likes));
-        strings.add(String.valueOf(this.dislikes));
-        return strings;
+    public void setTo(Video video) {
+        this.setTitle(video.getSnippet().getTitle());
+        this.thumbnailUrl = video.getSnippet().getThumbnails().getDefault().getUrl();
+        this.id = video.getId();
+        this.publishedOn = video.getSnippet().getPublishedAt().toString();
+        this.channel = video.getSnippet().getChannelTitle();
+        this.description = video.getSnippet().getDescription();
+        this.setStatistics(video.getStatistics());
+    }
+
+    public void setTo(JSONObject object) {
+        try {
+            this.setTitle(object.getString("title"));
+            this.thumbnailUrl = object.getString("thumbnailUrl");
+            this.id = object.getString("id");
+            this.publishedOn = object.getString("publishedOn");
+            this.channel = object.getString("channel");
+            this.description = object.getString("description");
+            this.views = object.getInt("views");
+            this.likes = object.getInt("likes");
+            this.dislikes = object.getInt("dislikes");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setTo(VideoData videoData) {
@@ -65,6 +99,15 @@ public class VideoData {
         this.setViews(videoData.getViews());
         this.setLikes(videoData.getLikes());
         this.setDislikes(videoData.getDislikes());
+        this.setFavorited(videoData.isFavorited());
+    }
+
+    public boolean isFavorited() {
+        return favorited;
+    }
+
+    public void setFavorited(boolean favorited) {
+        this.favorited = favorited;
     }
 
     public String getDescription() {
@@ -88,7 +131,7 @@ public class VideoData {
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        this.title = Html.fromHtml(title, Html.FROM_HTML_MODE_COMPACT).toString();
     }
 
     public String getThumbnailUrl() {
@@ -152,6 +195,12 @@ public class VideoData {
         this.setViews(statistics.getViewCount().intValue());
         this.setLikes(statistics.getLikeCount().intValue());
         this.setDislikes(statistics.getDislikeCount().intValue());
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "[" + this.id + "]: " + this.title;
     }
 
 }

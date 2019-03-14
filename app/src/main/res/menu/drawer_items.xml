@@ -8,9 +8,25 @@
             android:icon="@drawable/ic_home_black_24dp"
             android:title="Home" />
         <item
+            android:id="@+id/menu_item_favorites"
+            android:icon="@drawable/ic_playlist_star_black_24dp"
+            android:title="Favorites" />
+        <item
+            android:id="@+id/menu_item_history"
+            android:icon="@drawable/ic_history_black_24dp"
+            android:title="History" />
+        <item
+            android:id="@+id/menu_item_stream"
+            android:enabled="false"
+            android:icon="@drawable/ic_monitor_black_24dp"
+            android:title="Stream"
+            android:visible="false" />
+        <item
             android:id="@+id/menu_item_playlists"
+            android:enabled="false"
             android:icon="@drawable/ic_playlist_play_black_24dp"
-            android:title="Playlists" />
+            android:title="Playlists"
+            android:visible="false" />
     </group>
     <group
         android:id="@+id/menu_group_about"

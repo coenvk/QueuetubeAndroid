@@ -1,24 +1,38 @@
 package com.arman.queuetube.activities;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.SearchView;
+import android.widget.LinearLayout;
 
 import com.arman.queuetube.R;
-import com.arman.queuetube.fragments.ListFragment;
+import com.arman.queuetube.config.Constants;
 import com.arman.queuetube.fragments.MainFragment;
+import com.arman.queuetube.fragments.PlayerFragment;
+import com.arman.queuetube.fragments.PlaylistFragment;
+import com.arman.queuetube.fragments.StreamFragment;
 import com.arman.queuetube.listeners.DrawerItemListener;
+import com.arman.queuetube.model.VideoData;
+import com.arman.queuetube.modules.playlists.PlaylistHelper;
 import com.arman.queuetube.util.services.KillNotificationService;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.navigation.NavigationView;
 
+import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager.widget.ViewPager;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,12 +40,18 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
 
     public static final int MAIN_FRAGMENT = 0;
-    public static final int LIST_FRAGMENT = 1;
+    public static final int STREAM_FRAGMENT = 1;
+    public static final int FAVORITES_FRAGMENT = 2;
+    public static final int HISTORY_FRAGMENT = 3;
 
     private DrawerLayout drawerLayout;
+    private ActionBarDrawerToggle drawerToggle;
+    private LinearLayout extendedToolbar;
 
     private MainFragment mainFragment;
-    private ListFragment listFragment;
+    private PlaylistFragment favoritesFragment;
+    private StreamFragment streamFragment;
+    private PlaylistFragment historyFragment;
 
     private int currentFragment;
 
@@ -40,37 +60,193 @@ public class MainActivity extends AppCompatActivity {
 
         NavigationView navigationView = this.drawerLayout.findViewById(R.id.drawer_navigation_view);
         navigationView.setCheckedItem(R.id.menu_item_home);
-        navigationView.setNavigationItemSelectedListener(new DrawerItemListener(this, this.drawerLayout));
+        DrawerItemListener drawerListener = new DrawerItemListener(this, this.drawerLayout);
+        navigationView.setNavigationItemSelectedListener(drawerListener);
+        this.drawerLayout.addDrawerListener(drawerListener);
+    }
+
+    private void setupActionBar() {
+        Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+
+        this.setupDrawerToggle(toolbar);
+    }
+
+    private void setupDrawerToggle(Toolbar toolbar) {
+        this.drawerToggle = new ActionBarDrawerToggle(this, this.drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
+        this.drawerLayout.addDrawerListener(this.drawerToggle);
+    }
+
+    private void setupAdView() {
+        MobileAds.initialize(this, Constants.Key.TEST_AD_KEY);
+        AdView adView = (AdView) this.findViewById(R.id.ad_view);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        adView.loadAd(adRequest);
+    }
+
+    private void setupPlaylistFragment(int index) {
+        Bundle bundle = new Bundle();
+        switch (index) {
+            case FAVORITES_FRAGMENT:
+                bundle.putString("playlistName", PlaylistHelper.FAVORITES);
+                this.favoritesFragment = new PlaylistFragment();
+                this.favoritesFragment.setArguments(bundle);
+                break;
+            case HISTORY_FRAGMENT:
+                bundle.putString("playlistName", PlaylistHelper.HISTORY);
+                this.historyFragment = new PlaylistFragment();
+                this.historyFragment.setArguments(bundle);
+                this.historyFragment.setArguments(bundle);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void setupFragments() {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+        this.setupPlaylistFragment(FAVORITES_FRAGMENT);
+        transaction.replace(R.id.favorites_fragment_frame, this.favoritesFragment).hide(this.favoritesFragment);
+
+        this.setupPlaylistFragment(HISTORY_FRAGMENT);
+        transaction.replace(R.id.history_fragment_frame, this.historyFragment).hide(this.historyFragment);
+
+        this.streamFragment = new StreamFragment();
+        transaction.replace(R.id.stream_fragment_frame, this.streamFragment).hide(this.streamFragment);
+
+        transaction.commit();
+
+        this.switchToMainFragment();
     }
 
     public void switchToMainFragment() {
         if (this.currentFragment != MAIN_FRAGMENT) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             if (this.mainFragment != null) {
-                getSupportFragmentManager().beginTransaction().show(this.mainFragment).commit();
+                transaction.show(this.mainFragment);
+                this.refreshVideoFavorited();
             } else {
                 this.mainFragment = new MainFragment();
-                getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_frame, this.mainFragment).commit();
+                transaction.replace(R.id.main_fragment_frame, this.mainFragment);
             }
-            if (this.listFragment != null) {
-                getSupportFragmentManager().beginTransaction().hide(this.listFragment).commit();
+            if (this.favoritesFragment != null) {
+                transaction.hide(this.favoritesFragment);
             }
+            if (this.historyFragment != null) {
+                transaction.hide(this.historyFragment);
+            }
+            if (this.streamFragment != null) {
+                transaction.hide(this.streamFragment);
+            }
+            if (this.extendedToolbar != null) {
+                this.extendedToolbar.setVisibility(View.VISIBLE);
+            }
+            transaction.commitNow();
             this.currentFragment = MAIN_FRAGMENT;
         }
     }
 
-    public void switchToListFragment() {
-        if (this.currentFragment != LIST_FRAGMENT) {
-            if (this.listFragment != null) {
-                getSupportFragmentManager().beginTransaction().show(this.listFragment).commit();
+    public void switchToFavoritesFragment() {
+        if (this.currentFragment != FAVORITES_FRAGMENT) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            if (this.favoritesFragment != null) {
+                transaction.show(this.favoritesFragment);
             } else {
-                this.listFragment = new ListFragment();
-                getSupportFragmentManager().beginTransaction().replace(R.id.list_fragment_frame, this.listFragment).commit();
+                this.setupPlaylistFragment(FAVORITES_FRAGMENT);
+                transaction.replace(R.id.favorites_fragment_frame, this.favoritesFragment);
             }
             if (this.mainFragment != null) {
-                getSupportFragmentManager().beginTransaction().hide(this.mainFragment).commit();
+                transaction.hide(this.mainFragment);
             }
-            this.currentFragment = LIST_FRAGMENT;
+            if (this.historyFragment != null) {
+                transaction.hide(this.historyFragment);
+            }
+            if (this.streamFragment != null) {
+                transaction.hide(this.streamFragment);
+            }
+            if (this.extendedToolbar != null) {
+                this.extendedToolbar.setVisibility(View.GONE);
+            }
+            transaction.commitNow();
+            this.currentFragment = FAVORITES_FRAGMENT;
         }
+    }
+
+    public void switchToHistoryFragment() {
+        if (this.currentFragment != HISTORY_FRAGMENT) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            if (this.historyFragment != null) {
+                transaction.show(this.historyFragment);
+            } else {
+                this.setupPlaylistFragment(HISTORY_FRAGMENT);
+                transaction.replace(R.id.history_fragment_frame, this.historyFragment);
+            }
+            if (this.mainFragment != null) {
+                transaction.hide(this.mainFragment);
+            }
+            if (this.favoritesFragment != null) {
+                transaction.hide(this.favoritesFragment);
+            }
+            if (this.streamFragment != null) {
+                transaction.hide(this.streamFragment);
+            }
+            if (this.extendedToolbar != null) {
+                this.extendedToolbar.setVisibility(View.GONE);
+            }
+            transaction.commitNow();
+            this.currentFragment = HISTORY_FRAGMENT;
+        }
+    }
+
+    public void switchToStreamFragment() {
+        if (this.currentFragment != STREAM_FRAGMENT) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            if (this.streamFragment != null) {
+                transaction.show(this.streamFragment);
+            } else {
+                this.streamFragment = new StreamFragment();
+                transaction.replace(R.id.stream_fragment_frame, this.streamFragment);
+            }
+            if (this.mainFragment != null) {
+                transaction.hide(this.mainFragment);
+            }
+            if (this.favoritesFragment != null) {
+                transaction.hide(this.favoritesFragment);
+            }
+            if (this.historyFragment != null) {
+                transaction.hide(this.historyFragment);
+            }
+            if (this.extendedToolbar != null) {
+                this.extendedToolbar.setVisibility(View.GONE);
+            }
+            transaction.commitNow();
+            this.currentFragment = STREAM_FRAGMENT;
+        }
+    }
+
+    public boolean setQueueTo(List<VideoData> videos) {
+        PlayerFragment playerFragment = (PlayerFragment) this.mainFragment.getPagerAdapter().getPlayerFragment();
+        boolean ret = playerFragment.setQueueTo(videos);
+        playerFragment.forcePlayNext();
+        return ret;
+    }
+
+    public boolean addToQueue(VideoData item) {
+        PlayerFragment playerFragment = (PlayerFragment) this.mainFragment.getPagerAdapter().getPlayerFragment();
+        boolean ret = playerFragment.addToQueue(item);
+        playerFragment.tryPlayNext();
+        return ret;
+    }
+
+    public void refreshVideoFavorited() {
+        PlayerFragment playerFragment = (PlayerFragment) this.mainFragment.getPagerAdapter().getPlayerFragment();
+        VideoData currentVideo = playerFragment.getCurrentVideo();
+        playerFragment.updateVideo(PlaylistHelper.isFavorited(currentVideo));
     }
 
     @Override
@@ -79,26 +255,26 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        PlaylistHelper.onCreate(this);
+
         this.currentFragment = -1;
 
         startService(new Intent(this, KillNotificationService.class));
 
-        switchToMainFragment();
-        setupDrawer();
-    }
+        this.extendedToolbar = (LinearLayout) findViewById(R.id.main_extended_toolbar);
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_search, menu);
-        MenuItem item = menu.findItem(R.id.action_search);
-        final SearchView view = (SearchView) item.getActionView();
-        this.mainFragment.addSearchListeners(view);
-        return super.onCreateOptionsMenu(menu);
+        setupDrawer();
+        setupAdView();
+        setupActionBar();
+        setupFragments();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (this.drawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+
         switch (item.getItemId()) {
             case R.id.action_search:
                 return true;
@@ -113,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (this.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            this.drawerLayout.closeDrawers();
+            this.drawerLayout.closeDrawer(GravityCompat.START);
         } else if (this.currentFragment == MAIN_FRAGMENT) {
             ViewPager viewPager = this.mainFragment.getViewPager();
             if (viewPager.getCurrentItem() == 0) {
@@ -125,6 +301,36 @@ public class MainActivity extends AppCompatActivity {
             NavigationView navigationView = (NavigationView) this.drawerLayout.findViewById(R.id.drawer_navigation_view);
             navigationView.getMenu().findItem(R.id.menu_item_home).setChecked(true);
             this.switchToMainFragment();
+        }
+    }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        this.drawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        this.drawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    public void refreshPlaylists() {
+        this.favoritesFragment.loadPlaylist();
+        this.historyFragment.loadPlaylist();
+    }
+
+    public void refreshPlaylist(String playlistName) {
+        switch (playlistName) {
+            case PlaylistHelper.FAVORITES:
+                this.favoritesFragment.loadPlaylist();
+                break;
+            case PlaylistHelper.HISTORY:
+                this.historyFragment.loadPlaylist();
+                break;
+            default:
+                break;
         }
     }
 

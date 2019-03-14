@@ -1,47 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="300dp"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp"
     android:background="@color/bootstrap_gray_lightest"
-    android:clickable="true"
-    android:focusable="true"
     android:foreground="?selectableItemBackground"
     android:minHeight="120dp"
-    app:cardCornerRadius="8dp"
-    app:contentPadding="10dp">
+    android:padding="8dp">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="horizontal">
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:weightSum="10">
+                android:layout_height="match_parent"
+                android:weightSum="2">
 
-                <TextView
-                    android:id="@+id/video_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="9"
-                    android:maxLines="3"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="#000000"
-                    android:textSize="16sp" />
+                <!--<ImageButton-->
+                <!--android:id="@+id/playlist_item_drag_handle"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:background="@drawable/ic_blur_black_24dp"-->
+                <!--android:layout_gravity="center_vertical"-->
+                <!--/>-->
 
                 <com.google.android.youtube.player.YouTubeThumbnailView
                     android:id="@+id/youtube_thumbnail"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="10dp"
                     android:layout_weight="1"
                     android:adjustViewBounds="true"
                     android:background="@android:color/darker_gray"
@@ -49,10 +42,38 @@
                     android:scaleType="centerCrop"
                     android:visibility="invisible" />
 
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:weightSum="6">
+
+                    <TextView
+                        android:id="@+id/video_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="5"
+                        android:maxLines="3"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:textColor="@color/textColorPrimary"
+                        android:textSize="16sp" />
+
+                    <ImageView
+                        android:id="@+id/playlist_item_options_button"
+                        style="@style/Widget.AppCompat.ActionButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:src="@drawable/ic_dots_vertical_black_24dp" />
+
+                </LinearLayout>
+
             </TableRow>
 
         </LinearLayout>
 
     </LinearLayout>
 
-</androidx.cardview.widget.CardView>
+</LinearLayout>

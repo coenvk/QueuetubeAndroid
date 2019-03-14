@@ -63,8 +63,6 @@ public class ExpandableTextView extends TextView {
 
     private CharSequence getTrimmedText() {
         if (originalText != null && originalText.length() > trimLength) {
-            System.out.println(originalText);
-            System.out.println(originalText.subSequence(0, trimLength + 1));
             return new SpannableStringBuilder(originalText, 0, trimLength + 1).append(ELLIPSIS);
         } else {
             return originalText;

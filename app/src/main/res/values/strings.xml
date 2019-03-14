@@ -9,7 +9,7 @@
     <string name="tab_search">Search</string>
     <string name="tab_player">Player</string>
     <string name="youtube_player_tag">youtube_player</string>
-    <string name="playlist_empty_text">Your playlist is empty</string>
+    <string name="queue_empty_text">Your queue is empty</string>
     <string name="search_results_empty_text">There are no search results</string>
     <string name="add_videos_text">Add videos in \nthe search tab</string>
     <string name="title_activity_settings">Settings</string>
@@ -96,4 +96,7 @@
     <string name="summary_support">Report technical issues or suggest new features</string>
     <string name="send_feedback_title">Send feedback</string>
     <string name="choose_email_client">Choose email client</string>
+
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
 </resources>

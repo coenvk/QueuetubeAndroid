@@ -1,9 +1,9 @@
 package com.arman.queuetube.util.services;
 
-import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.IBinder;
 
 import com.arman.queuetube.util.notifications.NotificationHelper;
@@ -14,10 +14,26 @@ import androidx.core.app.JobIntentService;
 
 public class KillNotificationService extends JobIntentService {
 
+    public class KillBinder extends Binder {
+
+        public Service service;
+
+        public KillBinder(Service service) {
+            this.service = service;
+        }
+
+    }
+
+    private KillBinder binder;
+
+    public KillNotificationService() {
+        this.binder = new KillBinder(this);
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return this.binder;
     }
 
     @Override
@@ -37,6 +53,7 @@ public class KillNotificationService extends JobIntentService {
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
         clearNotification();
     }
 

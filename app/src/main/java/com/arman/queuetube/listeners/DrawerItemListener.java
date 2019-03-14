@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.arman.queuetube.R;
 import com.arman.queuetube.activities.MainActivity;
@@ -11,14 +12,16 @@ import com.arman.queuetube.activities.SettingsActivity;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.annotation.NonNull;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 
-public class DrawerItemListener implements NavigationView.OnNavigationItemSelectedListener {
+public class DrawerItemListener implements NavigationView.OnNavigationItemSelectedListener, DrawerLayout.DrawerListener {
 
     private DrawerLayout drawerLayout;
     private MainActivity activity;
+
+    private boolean switchFragment;
+    private int fragmentResId;
 
     public DrawerItemListener(MainActivity activity, DrawerLayout drawerLayout) {
         this.drawerLayout = drawerLayout;
@@ -31,34 +34,27 @@ public class DrawerItemListener implements NavigationView.OnNavigationItemSelect
 
         if (item.isCheckable()) {
             item.setChecked(true);
-
+            this.fragmentResId = id;
+            this.switchFragment = true;
+        } else {
             switch (id) {
-                case R.id.menu_item_home:
-                    activity.switchToMainFragment();
-                    break;
-                case R.id.menu_item_playlists:
-                    activity.switchToListFragment();
-                    break;
+                case R.id.menu_item_settings:
+                    this.activity.startActivity(new Intent(activity, SettingsActivity.class));
+                    return true;
+                case R.id.menu_item_rate:
+                    this.launchMarket();
+                    return true;
+                case R.id.menu_item_buy_pro:
+                    return true;
+                case R.id.menu_item_info:
+                    return true;
+                default:
+                    return false;
             }
-
-            this.drawerLayout.closeDrawers();
-            return true;
         }
 
-        switch (id) {
-            case R.id.menu_item_settings:
-                this.activity.startActivity(new Intent(activity, SettingsActivity.class));
-                return true;
-            case R.id.menu_item_rate:
-                this.launchMarket();
-                return true;
-            case R.id.menu_item_buy_pro:
-                return true;
-            case R.id.menu_item_info:
-                return true;
-            default:
-                return false;
-        }
+        this.drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     private void launchMarket() {
@@ -78,6 +74,45 @@ public class DrawerItemListener implements NavigationView.OnNavigationItemSelect
             marketIntent.setFlags(flags);
             activity.startActivity(marketIntent);
         }
+    }
+
+    @Override
+    public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+
+    }
+
+    @Override
+    public void onDrawerOpened(@NonNull View drawerView) {
+
+    }
+
+    @Override
+    public void onDrawerClosed(@NonNull View drawerView) {
+        if (this.switchFragment) {
+            switch (this.fragmentResId) {
+                case R.id.menu_item_home:
+                    activity.switchToMainFragment();
+                    break;
+                case R.id.menu_item_favorites:
+                    activity.switchToFavoritesFragment();
+                    break;
+                case R.id.menu_item_history:
+                    activity.switchToHistoryFragment();
+                    break;
+                case R.id.menu_item_stream:
+                    activity.switchToStreamFragment();
+                    break;
+                case R.id.menu_item_playlists:
+                    // TODO
+                    break;
+            }
+            this.switchFragment = false;
+        }
+    }
+
+    @Override
+    public void onDrawerStateChanged(int newState) {
+
     }
 
 }

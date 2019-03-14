@@ -4,6 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SearchView;
@@ -42,47 +45,46 @@ public class MainFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        this.setHasOptionsMenu(true);
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        this.setupActionBar(view);
         this.setupPager(view);
-        this.setupAdView(view);
         this.setupReceiver();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_search, menu);
+        MenuItem item = menu.findItem(R.id.action_search);
+        final SearchView view = (SearchView) item.getActionView();
+        this.addSearchListeners(view);
     }
 
     public ViewPager getViewPager() {
         return viewPager;
     }
 
-    private void setupActionBar(View view) {
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
-        activity.setSupportActionBar(toolbar);
-
-        ActionBar actionBar = activity.getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
-    }
-
-    private void setupAdView(View view) {
-        MobileAds.initialize(getActivity(), Constants.Key.TEST_AD_KEY);
-        AdView adView = (AdView) getActivity().findViewById(R.id.ad_view);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        adView.loadAd(adRequest);
+    public ViewPagerAdapter getPagerAdapter() {
+        return pagerAdapter;
     }
 
     private void setupPager(View view) {
         this.viewPager = (ViewPager) view.findViewById(R.id.view_pager);
 
-        TabLayout tabLayout = (TabLayout) view.findViewById(R.id.tabs);
+        TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(this.viewPager);
 
-        this.pagerAdapter = new ViewPagerAdapter(getChildFragmentManager());
+        this.pagerAdapter = new ViewPagerAdapter(getFragmentManager());
         this.viewPager.setAdapter(this.pagerAdapter);
         this.viewPager.setPageTransformer(true, new DepthPageTransformer());
     }
 
-    public void addSearchListeners(SearchView view) {
+    private void addSearchListeners(SearchView view) {
         view.setOnSearchClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

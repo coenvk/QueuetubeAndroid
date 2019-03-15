@@ -177,19 +177,28 @@ public class PlaylistHelper {
         return true;
     }
 
-    public static boolean reorder(String name, int fromIndex, int toIndex) {
+    private static boolean insert(JSONArray array, int pos, Object obj) {
         try {
-            JSONObject root = read();
-            JSONArray playlist = getPlaylist(root, name);
-            if (playlist != null) {
-                JSONObject video = playlist.getJSONObject(fromIndex);
-                playlist.remove(fromIndex);
-                playlist.put(toIndex, video);
-                executeSave(root.toString());
-                return true;
+            for (int i = array.length(); i > pos; i--) {
+                array.put(i, array.get(i - 1));
             }
+            array.put(pos, obj);
         } catch (JSONException e) {
-            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean reorder(String name, int fromIndex, int toIndex) {
+        JSONObject root = read();
+        JSONArray playlist = getPlaylist(root, name);
+        if (playlist != null) {
+            Object video = playlist.remove(fromIndex);
+            if (!insert(playlist, toIndex, video)) {
+                return false;
+            }
+            executeSave(root.toString());
+            return true;
         }
         return false;
     }
@@ -200,10 +209,11 @@ public class PlaylistHelper {
             JSONArray playlist = getPlaylist(root, name);
             if (playlist != null) {
                 for (int i = 0; i < playlist.length(); i++) {
-                    JSONObject obj = playlist.getJSONObject(i);
+                    JSONObject obj = (JSONObject) playlist.remove(i);
                     if (obj.get("id").equals(video.getId())) {
-                        playlist.remove(i);
-                        playlist.put(toIndex, video);
+                        if (!insert(playlist, toIndex, video)) {
+                            return false;
+                        }
                         executeSave(root.toString());
                         return true;
                     }
@@ -263,11 +273,10 @@ public class PlaylistHelper {
         assert root != null;
         JSONArray playlist = getPlaylist(root, name);
         if (playlist != null) {
-            try {
-                playlist.put(index, createVideo(video));
-            } catch (JSONException e) {
+            if (!insert(playlist, index, createVideo(video))) {
                 return false;
             }
+            executeSave(root.toString());
             return true;
         }
         return false;

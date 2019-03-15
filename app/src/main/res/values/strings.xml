@@ -99,4 +99,6 @@
 
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
+    <string name="save_history_title">Save history</string>
+    <string name="save_history_key">save_history</string>
 </resources>

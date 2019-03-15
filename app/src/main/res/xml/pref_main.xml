@@ -8,6 +8,11 @@
             android:key="@string/enable_autoplay_key"
             android:title="@string/enable_autoplay_title" />
 
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="@string/save_history_key"
+            android:title="@string/save_history_title" />
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Notifications">

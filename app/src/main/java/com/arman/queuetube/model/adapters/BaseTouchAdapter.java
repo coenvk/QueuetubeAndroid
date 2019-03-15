@@ -41,7 +41,7 @@ public abstract class BaseTouchAdapter<E, VH extends BaseTouchViewHolder<E>> ext
     }
 
     @Override
-    public boolean onItemDragged(int fromIndex, int toIndex) {
+    public boolean onItemDragged(int fromIndex, int toIndex, boolean dragFinished) {
         Collections.swap(this.items, fromIndex, toIndex);
         this.notifyItemMoved(fromIndex, toIndex);
         return true;

@@ -92,7 +92,10 @@ public class NotificationHelper {
                 .setStyle(new androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle())
                 .setCustomContentView(views)
                 .setAutoCancel(false)
-                .setOngoing(true);
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
+                .setSound(null)
+                .setDefaults(0);
 
         if (currentVersionSupportExpandedNotification) {
             builder.setCustomBigContentView(expandedViews);
@@ -104,6 +107,7 @@ public class NotificationHelper {
             NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
             channel.enableVibration(false);
             channel.enableLights(false);
+            channel.setSound(null, null);
             this.notificationManager.createNotificationChannel(channel);
         }
     }

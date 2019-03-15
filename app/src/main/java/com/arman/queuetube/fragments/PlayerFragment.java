@@ -184,8 +184,12 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
         }
     }
 
+    private boolean shouldSaveHistory() {
+        return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(getString(R.string.save_history_key), true);
+    }
+
     private boolean isAutoplayEnabled() {
-        return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(getContext().getString(R.string.enable_autoplay_key), false);
+        return PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(getString(R.string.enable_autoplay_key), false);
     }
 
     public void query(String query) {
@@ -301,7 +305,9 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
     }
 
     private void onEnd() {
-        PlaylistHelper.writeTo(PlaylistHelper.HISTORY, this.currentVideo, 0);
+        if (this.shouldSaveHistory()) {
+            PlaylistHelper.writeTo(PlaylistHelper.HISTORY, this.currentVideo);
+        }
 
         this.ytPlayerVideoSet = false;
 

@@ -20,8 +20,12 @@ public class VideoItemTouchHelper extends ItemTouchHelper {
 
         private ItemTouchHelperAdapter adapter;
 
+        private int dragFromIndex, dragToIndex;
+
         public Callback(ItemTouchHelperAdapter adapter) {
             this.adapter = adapter;
+            this.dragFromIndex = -1;
+            this.dragToIndex = -1;
         }
 
         @Override
@@ -32,6 +36,11 @@ public class VideoItemTouchHelper extends ItemTouchHelper {
         @Override
         public boolean isItemViewSwipeEnabled() {
             return false;
+        }
+
+        @Override
+        public boolean canDropOver(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder current, @NonNull RecyclerView.ViewHolder target) {
+            return current.getItemViewType() == target.getItemViewType();
         }
 
         @Override
@@ -46,7 +55,16 @@ public class VideoItemTouchHelper extends ItemTouchHelper {
             if (viewHolder.getItemViewType() != target.getItemViewType()) {
                 return false;
             }
-            this.adapter.onItemDragged(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+
+            int fromIndex = viewHolder.getAdapterPosition();
+            int toIndex = target.getAdapterPosition();
+
+            if (this.dragFromIndex < 0) {
+                this.dragFromIndex = fromIndex;
+            }
+            this.dragToIndex = toIndex;
+
+            this.adapter.onItemDragged(viewHolder.getAdapterPosition(), target.getAdapterPosition(), false);
             return true;
         }
 
@@ -80,6 +98,11 @@ public class VideoItemTouchHelper extends ItemTouchHelper {
         @Override
         public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
             super.clearView(recyclerView, viewHolder);
+
+            if (this.dragFromIndex > 0 && this.dragFromIndex != this.dragToIndex) {
+                this.adapter.onItemDragged(this.dragFromIndex, this.dragToIndex, true);
+            }
+            this.dragFromIndex = this.dragToIndex = -1;
 
             viewHolder.itemView.setAlpha(1f);
             if (viewHolder instanceof ItemTouchHelperViewHolder) {

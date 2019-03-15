@@ -6,33 +6,21 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.arman.queuetube.R;
-import com.arman.queuetube.model.VideoData;
 import com.arman.queuetube.model.viewholders.PlaylistItemViewHolder;
 import com.arman.queuetube.model.viewholders.VideoViewHolder;
 import com.arman.queuetube.modules.playlists.PlaylistHelper;
 
-import java.util.List;
-
 public class PlaylistItemAdapter extends VideoItemAdapter {
 
-    public PlaylistItemAdapter(Context context) {
-        super(context);
-    }
+    private String playlistName;
 
-    public PlaylistItemAdapter(Context context, List<VideoData> videoData, OnItemClickListener clickListener, OnItemDragListener dragListener) {
-        super(context, videoData, clickListener, dragListener);
-    }
-
-    public PlaylistItemAdapter(Context context, OnItemClickListener clickListener) {
-        super(context, clickListener);
-    }
-
-    public PlaylistItemAdapter(Context context, OnItemDragListener dragListener) {
+    public PlaylistItemAdapter(Context context, String playlistName, OnItemDragListener dragListener) {
         super(context, dragListener);
+        this.playlistName = playlistName;
     }
 
-    public PlaylistItemAdapter(Context context, OnItemClickListener clickListener, OnItemDragListener dragListener) {
-        super(context, clickListener, dragListener);
+    public String getPlaylistName() {
+        return playlistName;
     }
 
     @Override
@@ -44,8 +32,7 @@ public class PlaylistItemAdapter extends VideoItemAdapter {
 
     @Override
     public boolean onItemDragged(int fromIndex, int toIndex) {
-        // TODO: save reordered playlist
-//        PlaylistHelper.reorder(PlaylistHelper.FAVORITES, fromIndex, toIndex);
+        PlaylistHelper.reorder(this.playlistName, fromIndex, toIndex);
         return super.onItemDragged(fromIndex, toIndex);
     }
 

@@ -102,7 +102,7 @@ public class PlaylistFragment extends Fragment {
         this.playlistView = (RecyclerView) this.refreshLayout.findViewById(R.id.playlist_view);
         this.playlistView.setHasFixedSize(true);
 
-        this.playlistAdapter = new PlaylistItemAdapter(getActivity(), new VideoItemAdapter.OnItemDragListener() {
+        this.playlistAdapter = new PlaylistItemAdapter(getActivity(), this.playlistName, new VideoItemAdapter.OnItemDragListener() {
             @Override
             public void onDrag(RecyclerView.ViewHolder viewHolder) {
                 PlaylistFragment.this.itemTouchHelper.startDrag(viewHolder);

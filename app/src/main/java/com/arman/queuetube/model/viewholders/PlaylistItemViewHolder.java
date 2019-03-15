@@ -8,7 +8,6 @@ import android.widget.PopupMenu;
 
 import com.arman.queuetube.R;
 import com.arman.queuetube.activities.MainActivity;
-import com.arman.queuetube.fragments.PlaylistFragment;
 import com.arman.queuetube.model.VideoData;
 import com.arman.queuetube.model.adapters.PlaylistItemAdapter;
 import com.arman.queuetube.model.adapters.VideoItemAdapter;
@@ -42,8 +41,7 @@ public class PlaylistItemViewHolder extends VideoViewHolder {
                         break;
                     case R.id.playlist_item_option_remove:
                         PlaylistItemViewHolder.this.adapter.remove(PlaylistItemViewHolder.this.item);
-                        // TODO: remove from this playlist
-//                        PlaylistHelper.removeFrom(PlaylistHelper.FAVORITES, PlaylistItemViewHolder.this.item);
+                        PlaylistHelper.removeFrom(PlaylistItemViewHolder.this.adapter.getPlaylistName(), PlaylistItemViewHolder.this.item);
                         break;
                     case R.id.playlist_item_option_share:
                         VideoSharer.share(PlaylistItemViewHolder.this.adapter.getContext(), PlaylistItemViewHolder.this.item);

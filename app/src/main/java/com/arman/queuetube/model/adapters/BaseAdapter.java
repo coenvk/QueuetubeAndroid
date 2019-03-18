@@ -9,6 +9,7 @@ import com.arman.queuetube.model.viewholders.BaseViewHolder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -82,66 +83,6 @@ public abstract class BaseAdapter<E, VH extends BaseViewHolder<E>> extends Recyc
     public void clear() {
         this.items.clear();
         this.notifyDataSetChanged();
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull VH holder, int position, @NonNull List<Object> payloads) {
-        super.onBindViewHolder(holder, position, payloads);
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        return super.getItemViewType(position);
-    }
-
-    @Override
-    public void setHasStableIds(boolean hasStableIds) {
-        super.setHasStableIds(hasStableIds);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return super.getItemId(position);
-    }
-
-    @Override
-    public void onViewRecycled(@NonNull VH holder) {
-        super.onViewRecycled(holder);
-    }
-
-    @Override
-    public boolean onFailedToRecycleView(@NonNull VH holder) {
-        return super.onFailedToRecycleView(holder);
-    }
-
-    @Override
-    public void onViewAttachedToWindow(@NonNull VH holder) {
-        super.onViewAttachedToWindow(holder);
-    }
-
-    @Override
-    public void onViewDetachedFromWindow(@NonNull VH holder) {
-        super.onViewDetachedFromWindow(holder);
-    }
-
-    @Override
-    public void registerAdapterDataObserver(@NonNull RecyclerView.AdapterDataObserver observer) {
-        super.registerAdapterDataObserver(observer);
-    }
-
-    @Override
-    public void unregisterAdapterDataObserver(@NonNull RecyclerView.AdapterDataObserver observer) {
-        super.unregisterAdapterDataObserver(observer);
-    }
-
-    @Override
-    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
-        super.onAttachedToRecyclerView(recyclerView);
-    }
-
-    @Override
-    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
-        super.onDetachedFromRecyclerView(recyclerView);
     }
 
     @NonNull

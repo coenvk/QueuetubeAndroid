@@ -1,5 +1,8 @@
 package com.arman.queuetube.modules.search;
 
+import android.annotation.SuppressLint;
+import android.os.AsyncTask;
+
 import com.arman.queuetube.config.Constants;
 import com.arman.queuetube.model.VideoData;
 import com.google.api.client.http.HttpRequest;
@@ -15,6 +18,7 @@ import com.google.api.services.youtube.model.VideoListResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class YouTubeSearcher {
 
@@ -33,24 +37,6 @@ public class YouTubeSearcher {
             public void initialize(HttpRequest request) throws IOException {
             }
         }).setApplicationName("Queuetube").build();
-
-        if (this.query == null) {
-            if (!this.initQuery()) {
-                return;
-            }
-        }
-
-        if (this.relatedQuery == null) {
-            if (!this.initRelatedQuery()) {
-                return;
-            }
-        }
-
-        if (this.videoRequest == null) {
-            if (!this.initVideoRequest()) {
-                return;
-            }
-        }
     }
 
     private boolean initQuery() {
@@ -92,15 +78,30 @@ public class YouTubeSearcher {
     public VideoData requestDetails(final VideoData videoData) {
         if (this.videoRequest == null) {
             if (!this.initVideoRequest()) {
-                return new VideoData();
+                return videoData;
             }
         }
+        @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, List<Video>> task = new AsyncTask<Void, Void, List<Video>>() {
+            @Override
+            protected List<Video> doInBackground(Void... params) {
+                List<Video> videoList = new ArrayList<>();
+                try {
+                    videoRequest.setId(videoData.getId());
+                    VideoListResponse response = videoRequest.execute();
+                    videoList.addAll(response.getItems());
+                } catch (IOException e) {
+                }
+                return videoList;
+            }
+        };
         try {
-            videoRequest.setId(videoData.getId());
-            VideoListResponse response = videoRequest.execute();
-            Video video = response.getItems().get(0);
-            videoData.setTo(video);
-        } catch (IOException e) {
+            List<Video> videoList = task.execute().get();
+            if (videoList != null && videoList.size() > 0) {
+                Video video = videoList.get(0);
+                videoData.setTo(video);
+            }
+            return videoData;
+        } catch (InterruptedException | ExecutionException e) {
         }
         return videoData;
     }
@@ -111,11 +112,21 @@ public class YouTubeSearcher {
                 return new VideoData();
             }
         }
-        relatedQuery.setRelatedToVideoId(currentId);
-        List<SearchResult> results;
+        @SuppressLint("StaticFieldLeak") AsyncTask<Void, Void, List<SearchResult>> task = new AsyncTask<Void, Void, List<SearchResult>>() {
+            @Override
+            protected List<SearchResult> doInBackground(Void... params) {
+                relatedQuery.setRelatedToVideoId(currentId);
+                List<SearchResult> results = new ArrayList<>();
+                try {
+                    SearchListResponse response = query.execute();
+                    results.addAll(response.getItems());
+                } catch (IOException e) {
+                }
+                return results;
+            }
+        };
         try {
-            SearchListResponse response = query.execute();
-            results = response.getItems();
+            List<SearchResult> results = task.execute().get();
             VideoData videoData = new VideoData();
             for (int i = results.size() - 1; i >= 0; i--) {
                 SearchResult result = results.get(i);
@@ -124,7 +135,7 @@ public class YouTubeSearcher {
                     return videoData;
                 }
             }
-        } catch (IOException e) {
+        } catch (InterruptedException | ExecutionException e) {
         }
         return null;
     }

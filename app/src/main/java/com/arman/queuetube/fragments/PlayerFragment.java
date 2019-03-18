@@ -308,7 +308,7 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
 
     private void onEnd() {
         if (this.shouldSaveHistory()) {
-            PlaylistHelper.writeTo(PlaylistHelper.HISTORY, this.currentVideo);
+            PlaylistHelper.writeToOrReorder(PlaylistHelper.HISTORY, this.currentVideo, 0);
         }
 
         this.ytPlayerVideoSet = false;

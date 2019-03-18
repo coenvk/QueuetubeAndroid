@@ -5,9 +5,7 @@ import android.text.Html;
 import com.google.api.services.youtube.model.SearchResult;
 import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoStatistics;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 import androidx.annotation.NonNull;
 
@@ -50,7 +48,7 @@ public class VideoData {
         this.setTo(video);
     }
 
-    public VideoData(JSONObject object) {
+    public VideoData(JsonObject object) {
         this.setTo(object);
     }
 
@@ -73,20 +71,16 @@ public class VideoData {
         this.setStatistics(video.getStatistics());
     }
 
-    public void setTo(JSONObject object) {
-        try {
-            this.setTitle(object.getString("title"));
-            this.thumbnailUrl = object.getString("thumbnailUrl");
-            this.id = object.getString("id");
-            this.publishedOn = object.getString("publishedOn");
-            this.channel = object.getString("channel");
-            this.description = object.getString("description");
-            this.views = object.getInt("views");
-            this.likes = object.getInt("likes");
-            this.dislikes = object.getInt("dislikes");
-        } catch (JSONException e) {
-
-        }
+    public void setTo(JsonObject object) {
+        this.setTitle(object.get("title").getAsString());
+        this.thumbnailUrl = object.get("thumbnailUrl").getAsString();
+        this.id = object.get("id").getAsString();
+        this.publishedOn = object.get("publishedOn").getAsString();
+        this.channel = object.get("channel").getAsString();
+        this.description = object.get("description").getAsString();
+        this.views = object.get("views").getAsInt();
+        this.likes = object.get("likes").getAsInt();
+        this.dislikes = object.get("dislikes").getAsInt();
     }
 
     public void setTo(VideoData videoData) {

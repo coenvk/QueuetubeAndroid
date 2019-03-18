@@ -137,7 +137,7 @@ public class DefaultPlaylistFragment extends Fragment {
     public void finishRefresh() {
         this.refreshLayout.setRefreshing(false);
         int videoCount = this.playlistAdapter.getItemCount();
-        String subtitle = String.valueOf(videoCount) + " video's";
+        String subtitle = String.valueOf(videoCount) + " videos";
         this.headerSubtitleView.setText(subtitle);
         if (videoCount == 0) {
             this.playAllButton.setVisibility(View.GONE);

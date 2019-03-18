@@ -43,8 +43,10 @@ public class PlaylistItemAdapter extends VideoItemAdapter {
     public boolean onItemDragged(int fromIndex, int toIndex, boolean dragFinished) {
         if (dragFinished) {
             PlaylistHelper.reorder(this.playlistName, fromIndex, toIndex);
+            return true;
+        } else {
+            return super.onItemDragged(fromIndex, toIndex, false);
         }
-        return super.onItemDragged(fromIndex, toIndex, dragFinished);
     }
 
 }

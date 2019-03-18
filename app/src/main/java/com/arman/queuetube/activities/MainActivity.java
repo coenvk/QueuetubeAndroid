@@ -15,6 +15,7 @@ import com.arman.queuetube.fragments.DefaultPlaylistFragment;
 import com.arman.queuetube.fragments.MainFragment;
 import com.arman.queuetube.fragments.PlayerFragment;
 import com.arman.queuetube.fragments.PlaylistFragment;
+import com.arman.queuetube.fragments.PlaylistsFragment;
 import com.arman.queuetube.fragments.StreamFragment;
 import com.arman.queuetube.listeners.DrawerItemListener;
 import com.arman.queuetube.model.VideoData;
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private DefaultPlaylistFragment favoritesFragment;
     private DefaultPlaylistFragment historyFragment;
     private StreamFragment streamFragment;
+    private PlaylistsFragment playlistsFragment;
 
     private WifiReceiver wifiReceiver;
 
@@ -112,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
             case HISTORY_FRAGMENT:
                 bundle.putString("playlistName", PlaylistHelper.HISTORY);
                 this.historyFragment = new DefaultPlaylistFragment();
-                this.historyFragment.setArguments(bundle);
                 this.historyFragment.setArguments(bundle);
                 break;
             default:
@@ -339,19 +340,6 @@ public class MainActivity extends AppCompatActivity {
     public void refreshPlaylists() {
         this.favoritesFragment.loadPlaylist();
         this.historyFragment.loadPlaylist();
-    }
-
-    public void refreshPlaylist(String playlistName) {
-        switch (playlistName) {
-            case PlaylistHelper.FAVORITES:
-                this.favoritesFragment.loadPlaylist();
-                break;
-            case PlaylistHelper.HISTORY:
-                this.historyFragment.loadPlaylist();
-                break;
-            default:
-                break;
-        }
     }
 
 }

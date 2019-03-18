@@ -5,10 +5,12 @@ import android.os.AsyncTask;
 
 import com.arman.queuetube.activities.MainActivity;
 import com.arman.queuetube.model.VideoData;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -26,6 +28,9 @@ public class PlaylistHelper {
     private static final String STORAGE_FILE_NAME = "playlists.json";
     private static Context context;
     private static SavePlaylistsTask savePlaylistsTask;
+
+    private static Gson gson;
+    private static JsonParser parser;
 
     private static void executeSave(String string) {
         AsyncTask.Status status = savePlaylistsTask.getStatus();
@@ -60,143 +65,104 @@ public class PlaylistHelper {
     public static void onCreate(Context context) {
         PlaylistHelper.context = context;
         savePlaylistsTask = new SavePlaylistsTask((MainActivity) context);
+        gson = new Gson();
+        parser = new JsonParser();
         boolean fileExists = doesFileExist();
         if (!fileExists) {
-            JSONObject root = new JSONObject();
-            try {
-                JSONArray playlists = new JSONArray();
-                playlists.put(newPlaylist(PlaylistHelper.HISTORY));
-                playlists.put(newPlaylist(PlaylistHelper.FAVORITES));
+            JsonObject root = new JsonObject();
+            JsonArray playlists = new JsonArray();
+            playlists.add(newPlaylist(PlaylistHelper.HISTORY));
+            playlists.add(newPlaylist(PlaylistHelper.FAVORITES));
 
-                root.put("playlists", playlists);
-                executeSave(root.toString());
-            } catch (JSONException e) {
-
-            }
+            root.add("playlists", playlists);
+            executeSave(root.toString());
         }
     }
 
-    public static JSONArray getFavorites() {
+    public static JsonArray getFavorites() {
         return getPlaylist(read(), PlaylistHelper.FAVORITES);
     }
 
-    public static JSONArray getHistory() {
+    public static JsonArray getHistory() {
         return getPlaylist(read(), PlaylistHelper.HISTORY);
     }
 
     public static boolean isFavorited(VideoData video) {
-        JSONArray favorites = getFavorites();
-        try {
-            for (int i = 0; i < favorites.length(); i++) {
-                JSONObject obj = favorites.getJSONObject(i);
-                String id = obj.getString("id");
-                if (id.equals(video.getId())) {
-                    return true;
-                }
+        JsonArray favorites = getFavorites();
+        for (int i = 0; i < favorites.size(); i++) {
+            JsonObject obj = favorites.get(i).getAsJsonObject();
+            String id = obj.get("id").getAsString();
+            if (id.equals(video.getId())) {
+                return true;
             }
-        } catch (JSONException e) {
-
         }
         return false;
     }
 
-    private static JSONObject newPlaylist(String name) {
-        JSONObject obj = new JSONObject();
-        try {
-            obj.put("name", name);
-            obj.put("playlist", new JSONArray());
-        } catch (JSONException e) {
-
-        }
+    private static JsonObject newPlaylist(String name) {
+        JsonObject obj = new JsonObject();
+        obj.add("name", new JsonPrimitive(name));
+        obj.add("playlist", new JsonArray());
         return obj;
     }
 
-    private static JSONObject createVideo(VideoData video) {
-        JSONObject obj = new JSONObject();
-        try {
-            obj.put("title", video.getTitle());
-            obj.put("thumbnailUrl", video.getThumbnailUrl());
-            obj.put("id", video.getId());
-            obj.put("publishedOn", video.getPublishedOn());
-            obj.put("channel", video.getChannel());
-            obj.put("description", video.getDescription());
-            obj.put("views", video.getViews());
-            obj.put("likes", video.getLikes());
-            obj.put("dislikes", video.getDislikes());
-        } catch (JSONException e) {
-
-        }
-        return obj;
+    private static JsonObject createVideo(VideoData video) {
+        return gson.toJsonTree(video).getAsJsonObject();
     }
 
-    public static JSONArray getPlaylists() {
+    public static JsonArray getPlaylists() {
         return getPlaylists(read());
     }
 
-    private static JSONArray getPlaylists(JSONObject root) {
-        try {
-            return root.getJSONArray("playlists");
-        } catch (JSONException e) {
-
-        }
-        return null;
+    private static JsonArray getPlaylists(JsonObject root) {
+        return root.get("playlists").getAsJsonArray();
     }
 
-    public static JSONArray getPlaylist(String name) {
-        JSONObject root = read();
+    public static JsonArray getPlaylist(String name) {
+        JsonObject root = read();
         assert root != null;
         return getPlaylist(root, name);
     }
 
-    private static JSONArray getPlaylist(JSONObject root, String name) {
-        JSONArray playlists = getPlaylists(root);
-        try {
-            assert playlists != null;
-            for (int i = 0; i < playlists.length(); i++) {
-                JSONObject obj = playlists.getJSONObject(i);
-                if (obj.getString("name").equals(name)) {
-                    return obj.getJSONArray("playlist");
-                }
+    private static JsonArray getPlaylist(JsonObject root, String name) {
+        JsonArray playlists = getPlaylists(root);
+        assert playlists != null;
+        for (int i = 0; i < playlists.size(); i++) {
+            JsonObject obj = playlists.get(i).getAsJsonObject();
+            if (obj.get("name").getAsString().equals(name)) {
+                return obj.getAsJsonArray("playlist");
             }
-        } catch (JSONException e) {
-
         }
         return null;
     }
 
     public static boolean writeNew(String name) {
-        JSONObject root = read();
+        JsonObject root = read();
         assert root != null;
-        JSONArray playlists = getPlaylists(root);
+        JsonArray playlists = getPlaylists(root);
         assert playlists != null;
 
-        JSONObject obj = newPlaylist(name);
+        JsonObject obj = newPlaylist(name);
 
-        playlists.put(obj);
+        playlists.add(obj);
         executeSave(root.toString());
         return true;
     }
 
-    private static boolean insert(JSONArray array, int pos, Object obj) {
-        try {
-            for (int i = array.length(); i > pos; i--) {
-                array.put(i, array.get(i - 1));
-            }
-            array.put(pos, obj);
-        } catch (JSONException e) {
-            System.out.println(e.getMessage());
-            return false;
+    private static boolean insert(JsonArray array, int pos, JsonObject obj) {
+        array.add(new JsonObject());
+        for (int i = array.size() - 1; i > pos; i--) {
+            array.set(i, array.get(i - 1));
         }
+        array.set(pos, obj);
         return true;
     }
 
     public static boolean reorder(String name, int fromIndex, int toIndex) {
-        JSONObject root = read();
-        JSONArray playlist = getPlaylist(root, name);
+        JsonObject root = read();
+        JsonArray playlist = getPlaylist(root, name);
         if (playlist != null) {
-            Object video = playlist.remove(fromIndex);
-            System.out.println(video);
-            System.out.println(fromIndex + " -> " + toIndex);
+            JsonObject video = playlist.remove(fromIndex).getAsJsonObject();
             if (!insert(playlist, toIndex, video)) {
                 return false;
             }
@@ -207,74 +173,121 @@ public class PlaylistHelper {
     }
 
     public static boolean reorder(String name, VideoData video, int toIndex) {
-        try {
-            JSONObject root = read();
-            JSONArray playlist = getPlaylist(root, name);
-            if (playlist != null) {
-                for (int i = 0; i < playlist.length(); i++) {
-                    JSONObject obj = (JSONObject) playlist.remove(i);
-                    if (obj.get("id").equals(video.getId())) {
-                        if (!insert(playlist, toIndex, video)) {
-                            return false;
-                        }
-                        executeSave(root.toString());
-                        return true;
+        JsonObject root = read();
+        JsonArray playlist = getPlaylist(root, name);
+        if (playlist != null) {
+            for (int i = 0; i < playlist.size(); i++) {
+                JsonObject obj = playlist.get(i).getAsJsonObject();
+                if (obj.get("id").getAsString().equals(video.getId())) {
+                    playlist.remove(i);
+                    if (!insert(playlist, toIndex, obj)) {
+                        return false;
                     }
+                    executeSave(root.toString());
+                    return true;
                 }
             }
-        } catch (JSONException e) {
-
         }
         return false;
     }
 
     public static boolean removeFrom(String name, VideoData video) {
-        try {
-            JSONObject root = read();
-            JSONArray playlist = getPlaylist(root, name);
-            if (playlist != null) {
-                for (int i = 0; i < playlist.length(); i++) {
-                    JSONObject obj = playlist.getJSONObject(i);
-                    if (obj.get("id").equals(video.getId())) {
-                        playlist.remove(i);
-                        executeSave(root.toString());
-                        return true;
-                    }
+        JsonObject root = read();
+        JsonArray playlist = getPlaylist(root, name);
+        if (playlist != null) {
+            for (int i = 0; i < playlist.size(); i++) {
+                JsonObject obj = playlist.get(i).getAsJsonObject();
+                if (obj.get("id").getAsString().equals(video.getId())) {
+                    playlist.remove(i);
+                    executeSave(root.toString());
+                    return true;
                 }
             }
-        } catch (JSONException e) {
-
         }
         return false;
     }
 
     public static boolean writeToNew(String name, VideoData video) {
-        try {
-            JSONObject root = read();
-            JSONArray playlists = getPlaylists(root);
-            assert playlists != null;
+        JsonObject root = read();
+        JsonArray playlists = getPlaylists(root);
+        assert playlists != null;
 
-            JSONArray playlist = getPlaylist(root, name);
-            if (playlist == null) {
-                JSONObject obj = newPlaylist(name);
-                playlists.put(obj);
-                playlist = obj.getJSONArray("playlist");
-            }
-            if (playlist != null) {
-                playlist.put(createVideo(video));
-                executeSave(root.toString());
-                return true;
-            }
-        } catch (JSONException e) {
+        JsonArray playlist = getPlaylist(root, name);
+        if (playlist == null) {
+            JsonObject obj = newPlaylist(name);
+            playlists.add(obj);
+            playlist = obj.getAsJsonArray("playlist");
+        }
+        if (playlist != null) {
+            playlist.add(createVideo(video));
+            executeSave(root.toString());
+            return true;
+        }
+        return false;
+    }
 
+    public static boolean writeToIfNotFound(String name, VideoData video) {
+        JsonObject root = read();
+        assert root != null;
+        JsonArray playlist = getPlaylist(root, name);
+        if (playlist != null) {
+            for (JsonElement jsonElement : playlist) {
+                JsonObject obj = jsonElement.getAsJsonObject();
+                if (obj.get("id").getAsString().equals(video.getId())) {
+                    return false;
+                }
+            }
+            playlist.add(createVideo(video));
+            executeSave(root.toString());
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean writeToIfNotFound(String name, VideoData video, int index) {
+        JsonObject root = read();
+        assert root != null;
+        JsonArray playlist = getPlaylist(root, name);
+        if (playlist != null) {
+            for (JsonElement jsonElement : playlist) {
+                JsonObject obj = jsonElement.getAsJsonObject();
+                if (obj.get("id").getAsString().equals(video.getId())) {
+                    return false;
+                }
+            }
+            if (!insert(playlist, index, createVideo(video))) {
+                return false;
+            }
+            executeSave(root.toString());
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean writeToOrReorder(String name, VideoData video, int index) {
+        JsonObject root = read();
+        assert root != null;
+        JsonArray playlist = getPlaylist(root, name);
+        if (playlist != null) {
+            for (int i = 0; i < playlist.size(); i++) {
+                JsonObject obj = playlist.get(i).getAsJsonObject();
+                if (obj.get("id").getAsString().equals(video.getId())) {
+                    playlist.remove(i);
+                    if (!insert(playlist, index, obj)) {
+                        return false;
+                    }
+                    executeSave(root.toString());
+                    return true;
+                }
+            }
         }
         return false;
     }
 
     public static boolean writeTo(String name, VideoData video, int index) {
-        JSONObject root = read();
+        JsonObject root = read();
         assert root != null;
-        JSONArray playlist = getPlaylist(root, name);
+        JsonArray playlist = getPlaylist(root, name);
         if (playlist != null) {
             if (!insert(playlist, index, createVideo(video))) {
                 return false;
@@ -286,27 +299,27 @@ public class PlaylistHelper {
     }
 
     public static boolean writeTo(String name, VideoData video) {
-        JSONObject root = read();
+        JsonObject root = read();
         assert root != null;
-        JSONArray playlist = getPlaylist(root, name);
+        JsonArray playlist = getPlaylist(root, name);
         if (playlist != null) {
-            playlist.put(createVideo(video));
+            playlist.add(createVideo(video));
             executeSave(root.toString());
             return true;
         }
         return false;
     }
 
-    public static JSONObject read() {
+    public static JsonObject read() {
         try {
-            return new JSONObject(doRead());
-        } catch (JSONException | IOException e) {
-
+            return parser.parse(doRead()).getAsJsonObject();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return null;
     }
 
-    private static boolean write(JSONObject obj) {
+    private static boolean write(JsonObject obj) {
         String json = obj.toString();
         executeSave(json);
         return true;
@@ -319,40 +332,30 @@ public class PlaylistHelper {
     }
 
     public static boolean remove(String name) {
-        try {
-            JSONObject root = read();
-            JSONArray playlists = getPlaylists(root);
-            for (int i = 0; i < playlists.length(); i++) {
-                JSONObject playlist = playlists.getJSONObject(i);
-                if (playlist.getString("name").equals(name)) {
-                    playlists.remove(i);
-                    executeSave(root.toString());
-                    return true;
-                }
+        JsonObject root = read();
+        JsonArray playlists = getPlaylists(root);
+        for (int i = 0; i < playlists.size(); i++) {
+            JsonObject playlist = playlists.get(i).getAsJsonObject();
+            if (playlist.get("name").getAsString().equals(name)) {
+                playlists.remove(i);
+                executeSave(root.toString());
+                return true;
             }
-
-        } catch (JSONException e) {
-
         }
         return false;
     }
 
     public static boolean clear(String name) {
-        try {
-            JSONObject root = read();
-            JSONArray playlists = getPlaylists(root);
-            for (int i = 0; i < playlists.length(); i++) {
-                JSONObject playlist = playlists.getJSONObject(i);
-                if (playlist.getString("name").equals(name)) {
-                    playlists.remove(i);
-                    playlists.put(newPlaylist(name));
-                    executeSave(root.toString());
-                    return true;
-                }
+        JsonObject root = read();
+        JsonArray playlists = getPlaylists(root);
+        for (int i = 0; i < playlists.size(); i++) {
+            JsonObject playlist = playlists.get(i).getAsJsonObject();
+            if (playlist.get("name").getAsString().equals(name)) {
+                playlists.remove(i);
+                playlists.add(newPlaylist(name));
+                executeSave(root.toString());
+                return true;
             }
-
-        } catch (JSONException e) {
-
         }
         return false;
     }

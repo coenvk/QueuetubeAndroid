@@ -24,12 +24,16 @@ public class PlaylistsViewHolder extends BaseTouchViewHolder<String> {
     @Override
     public void bind(String item, BaseTouchAdapter.OnItemClickListener clickListener, BaseTouchAdapter.OnItemDragListener dragListener) {
         super.bind(item, clickListener, dragListener);
-        this.deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                PlaylistHelper.remove(PlaylistsViewHolder.this.titleView.getText().toString());
-            }
-        });
+        if (item.equals(PlaylistHelper.FAVORITES) || item.equals(PlaylistHelper.HISTORY)) {
+            this.deleteButton.setVisibility(View.GONE);
+        } else {
+            this.deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    PlaylistHelper.remove(PlaylistsViewHolder.this.titleView.getText().toString());
+                }
+            });
+        }
     }
 
 }

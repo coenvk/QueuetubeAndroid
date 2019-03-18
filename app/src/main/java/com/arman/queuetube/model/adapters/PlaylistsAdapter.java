@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.arman.queuetube.R;
 import com.arman.queuetube.model.viewholders.PlaylistsViewHolder;
@@ -15,9 +16,6 @@ import androidx.annotation.NonNull;
 public class PlaylistsAdapter extends BaseTouchAdapter<String, PlaylistsViewHolder> {
 
     public static final String TAG = "PlaylistsAdapter";
-
-    private List<String> playlists;
-    private VideoItemAdapter.OnItemClickListener clickListener;
 
     public PlaylistsAdapter(Context context) {
         super(context);
@@ -45,6 +43,13 @@ public class PlaylistsAdapter extends BaseTouchAdapter<String, PlaylistsViewHold
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.playlists_item, parent, false);
         return new PlaylistsViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull PlaylistsViewHolder holder, int position) {
+        super.onBindViewHolder(holder, position);
+        TextView textView = (TextView) holder.itemView.findViewById(R.id.playlists_item_title);
+        textView.setText(this.items.get(position));
     }
 
 }

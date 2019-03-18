@@ -19,6 +19,15 @@ public class PlaylistItemAdapter extends VideoItemAdapter {
         this.playlistName = playlistName;
     }
 
+    public PlaylistItemAdapter(Context context) {
+        super(context);
+    }
+
+    public PlaylistItemAdapter(Context context, String playlistName) {
+        super(context);
+        this.playlistName = playlistName;
+    }
+
     public String getPlaylistName() {
         return playlistName;
     }

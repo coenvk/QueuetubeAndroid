@@ -8,6 +8,18 @@
 
     <include layout="@layout/drawer" />
 
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/error_message_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom"
+        android:background="@color/design_default_color_error"
+        android:padding="5dp"
+        android:text="You don't have an internet connection"
+        android:textColor="@color/textColorPrimaryInverse"
+        android:visibility="gone" />
+
     <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
         android:id="@+id/ad_view"
         android:layout_width="match_parent"

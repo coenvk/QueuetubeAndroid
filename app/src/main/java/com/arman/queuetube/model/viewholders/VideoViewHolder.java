@@ -1,8 +1,8 @@
 package com.arman.queuetube.model.viewholders;
 
-import android.view.DragEvent;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.arman.queuetube.R;
 import com.arman.queuetube.config.Constants;
@@ -46,6 +46,8 @@ public class VideoViewHolder extends BaseTouchViewHolder<VideoData> {
 
                         @Override
                         public void onThumbnailError(YouTubeThumbnailView youTubeThumbnailView, YouTubeThumbnailLoader.ErrorReason errorReason) {
+                            youTubeThumbnailView.setVisibility(View.VISIBLE);
+                            Toast.makeText(titleView.getContext(), "You don't have an internet connection", Toast.LENGTH_LONG).show();
                             youTubeThumbnailLoader.release();
                         }
                     });

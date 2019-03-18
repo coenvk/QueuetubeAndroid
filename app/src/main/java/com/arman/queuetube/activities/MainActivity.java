@@ -1,7 +1,9 @@
 package com.arman.queuetube.activities;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -9,6 +11,7 @@ import android.widget.LinearLayout;
 
 import com.arman.queuetube.R;
 import com.arman.queuetube.config.Constants;
+import com.arman.queuetube.fragments.DefaultPlaylistFragment;
 import com.arman.queuetube.fragments.MainFragment;
 import com.arman.queuetube.fragments.PlayerFragment;
 import com.arman.queuetube.fragments.PlaylistFragment;
@@ -16,6 +19,7 @@ import com.arman.queuetube.fragments.StreamFragment;
 import com.arman.queuetube.listeners.DrawerItemListener;
 import com.arman.queuetube.model.VideoData;
 import com.arman.queuetube.modules.playlists.PlaylistHelper;
+import com.arman.queuetube.util.notifications.receivers.WifiReceiver;
 import com.arman.queuetube.util.services.KillNotificationService;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -49,11 +53,20 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout extendedToolbar;
 
     private MainFragment mainFragment;
-    private PlaylistFragment favoritesFragment;
+    private DefaultPlaylistFragment favoritesFragment;
+    private DefaultPlaylistFragment historyFragment;
     private StreamFragment streamFragment;
-    private PlaylistFragment historyFragment;
+
+    private WifiReceiver wifiReceiver;
 
     private int currentFragment;
+
+    private void setupWifiReceiver() {
+        this.wifiReceiver = new WifiReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(this.wifiReceiver, filter);
+    }
 
     private void setupDrawer() {
         this.drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -98,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case HISTORY_FRAGMENT:
                 bundle.putString("playlistName", PlaylistHelper.HISTORY);
-                this.historyFragment = new PlaylistFragment();
+                this.historyFragment = new DefaultPlaylistFragment();
                 this.historyFragment.setArguments(bundle);
                 this.historyFragment.setArguments(bundle);
                 break;
@@ -263,6 +276,7 @@ public class MainActivity extends AppCompatActivity {
 
         this.extendedToolbar = (LinearLayout) findViewById(R.id.main_extended_toolbar);
 
+        setupWifiReceiver();
         setupDrawer();
         setupAdView();
         setupActionBar();
@@ -314,6 +328,12 @@ public class MainActivity extends AppCompatActivity {
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         this.drawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(this.wifiReceiver);
     }
 
     public void refreshPlaylists() {

@@ -58,7 +58,7 @@ public class LoadPlaylistsTask extends AsyncTask<Void, Integer, List<String>> {
                 strings.add(playlist.getString("name"));
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return strings;
     }

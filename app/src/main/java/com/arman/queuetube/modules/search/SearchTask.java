@@ -4,9 +4,7 @@ import android.os.AsyncTask;
 
 import com.arman.queuetube.fragments.SearchFragment;
 import com.arman.queuetube.model.VideoData;
-import com.arman.queuetube.model.adapters.VideoItemAdapter;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class SearchTask extends AsyncTask<String, Integer, List<VideoData>> {

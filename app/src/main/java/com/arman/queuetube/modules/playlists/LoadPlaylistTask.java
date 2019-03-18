@@ -2,6 +2,7 @@ package com.arman.queuetube.modules.playlists;
 
 import android.os.AsyncTask;
 
+import com.arman.queuetube.fragments.DefaultPlaylistFragment;
 import com.arman.queuetube.fragments.PlaylistFragment;
 import com.arman.queuetube.model.VideoData;
 
@@ -14,9 +15,9 @@ import java.util.List;
 
 public class LoadPlaylistTask extends AsyncTask<String, Integer, List<VideoData>> {
 
-    private PlaylistFragment playlistFragment;
+    private DefaultPlaylistFragment playlistFragment;
 
-    public LoadPlaylistTask(PlaylistFragment playlistFragment) {
+    public LoadPlaylistTask(DefaultPlaylistFragment playlistFragment) {
         super();
         this.playlistFragment = playlistFragment;
     }
@@ -29,10 +30,10 @@ public class LoadPlaylistTask extends AsyncTask<String, Integer, List<VideoData>
                 VideoData videoData = new VideoData(video);
                 videos.add(videoData);
             }
-            return videos;
         } catch (JSONException e) {
-            return new ArrayList<>();
+
         }
+        return videos;
     }
 
     @Override

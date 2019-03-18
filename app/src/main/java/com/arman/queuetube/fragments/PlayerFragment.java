@@ -232,7 +232,8 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
                 this.ytPlayer.cueVideo(this.currentVideo.getId(), 0);
                 ret = true;
             } else if (this.isAutoplayEnabled() && autoplayIfEnabled) {
-                VideoData nextVideo = this.ytSearcher.nextAutoplay(this.currentVideo.getId());
+                VideoData nextVideo = null;
+                nextVideo = this.ytSearcher.nextAutoplay(this.currentVideo.getId());
                 if (nextVideo != null) {
                     this.currentVideo.setTo(nextVideo);
                     this.ytPlayer.cueVideo(this.currentVideo.getId(), 0);
@@ -258,7 +259,8 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
                 this.ytPlayer.cueVideo(this.currentVideo.getId(), 0);
                 return true;
             } else if (this.isAutoplayEnabled() && autoplayIfEnabled) {
-                VideoData nextVideo = this.ytSearcher.nextAutoplay(this.currentVideo.getId());
+                VideoData nextVideo = null;
+                nextVideo = this.ytSearcher.nextAutoplay(this.currentVideo.getId());
                 if (nextVideo != null) {
                     this.currentVideo.setTo(nextVideo);
                     this.ytPlayer.cueVideo(this.currentVideo.getId(), 0);
@@ -331,6 +333,7 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
 
     private void onVideoCued() {
         this.currentVideo.setTo(this.ytSearcher.requestDetails(this.currentVideo));
+
         boolean favorited = PlaylistHelper.isFavorited(this.currentVideo);
         this.currentVideo.setFavorited(favorited);
         this.adjustFavoriteButton(favorited);

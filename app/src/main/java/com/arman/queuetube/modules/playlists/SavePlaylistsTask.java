@@ -20,7 +20,7 @@ public class SavePlaylistsTask extends AsyncTask<String, Integer, Void> {
         try {
             PlaylistHelper.doWrite(strings[0]);
         } catch (IOException e) {
-            e.printStackTrace();
+
         }
         return null;
     }

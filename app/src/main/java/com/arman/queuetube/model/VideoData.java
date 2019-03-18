@@ -85,7 +85,7 @@ public class VideoData {
             this.likes = object.getInt("likes");
             this.dislikes = object.getInt("dislikes");
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
     }
 

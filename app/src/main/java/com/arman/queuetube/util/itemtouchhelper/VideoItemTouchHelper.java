@@ -99,7 +99,7 @@ public class VideoItemTouchHelper extends ItemTouchHelper {
         public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
             super.clearView(recyclerView, viewHolder);
 
-            if (this.dragFromIndex > 0 && this.dragFromIndex != this.dragToIndex) {
+            if (this.dragFromIndex >= 0 && this.dragFromIndex != this.dragToIndex) {
                 this.adapter.onItemDragged(this.dragFromIndex, this.dragToIndex, true);
             }
             this.dragFromIndex = this.dragToIndex = -1;

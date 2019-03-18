@@ -71,7 +71,7 @@ public class PlaylistHelper {
                 root.put("playlists", playlists);
                 executeSave(root.toString());
             } catch (JSONException e) {
-                e.printStackTrace();
+
             }
         }
     }
@@ -95,7 +95,7 @@ public class PlaylistHelper {
                 }
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return false;
     }
@@ -106,7 +106,7 @@ public class PlaylistHelper {
             obj.put("name", name);
             obj.put("playlist", new JSONArray());
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return obj;
     }
@@ -124,7 +124,7 @@ public class PlaylistHelper {
             obj.put("likes", video.getLikes());
             obj.put("dislikes", video.getDislikes());
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return obj;
     }
@@ -137,7 +137,7 @@ public class PlaylistHelper {
         try {
             return root.getJSONArray("playlists");
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return null;
     }
@@ -159,7 +159,7 @@ public class PlaylistHelper {
                 }
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return null;
     }
@@ -184,6 +184,7 @@ public class PlaylistHelper {
             }
             array.put(pos, obj);
         } catch (JSONException e) {
+            System.out.println(e.getMessage());
             return false;
         }
         return true;
@@ -194,6 +195,8 @@ public class PlaylistHelper {
         JSONArray playlist = getPlaylist(root, name);
         if (playlist != null) {
             Object video = playlist.remove(fromIndex);
+            System.out.println(video);
+            System.out.println(fromIndex + " -> " + toIndex);
             if (!insert(playlist, toIndex, video)) {
                 return false;
             }
@@ -220,7 +223,7 @@ public class PlaylistHelper {
                 }
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return false;
     }
@@ -240,7 +243,7 @@ public class PlaylistHelper {
                 }
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return false;
     }
@@ -263,7 +266,7 @@ public class PlaylistHelper {
                 return true;
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return false;
     }
@@ -298,7 +301,7 @@ public class PlaylistHelper {
         try {
             return new JSONObject(doRead());
         } catch (JSONException | IOException e) {
-            e.printStackTrace();
+
         }
         return null;
     }
@@ -329,7 +332,7 @@ public class PlaylistHelper {
             }
 
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return false;
     }
@@ -349,7 +352,7 @@ public class PlaylistHelper {
             }
 
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
         return false;
     }

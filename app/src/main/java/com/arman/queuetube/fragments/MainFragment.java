@@ -14,19 +14,12 @@ import android.widget.SearchView;
 import com.arman.queuetube.R;
 import com.arman.queuetube.config.Constants;
 import com.arman.queuetube.fragments.pager.ViewPagerAdapter;
-import com.arman.queuetube.modules.search.SearchListener;
 import com.arman.queuetube.util.notifications.receivers.NotificationReceiver;
 import com.arman.queuetube.util.transformers.DepthPageTransformer;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.tabs.TabLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
@@ -91,7 +84,20 @@ public class MainFragment extends Fragment {
                 MainFragment.this.viewPager.setCurrentItem(ViewPagerAdapter.SEARCH_INDEX);
             }
         });
-        view.setOnQueryTextListener(new SearchListener((PlayerFragment) this.pagerAdapter.getPlayerFragment()));
+        view.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                MainFragment.this.viewPager.setCurrentItem(ViewPagerAdapter.SEARCH_INDEX);
+                PlayerFragment playerFragment = (PlayerFragment) MainFragment.this.pagerAdapter.getPlayerFragment();
+                playerFragment.query(s);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                return false;
+            }
+        });
     }
 
     private void setupReceiver() {

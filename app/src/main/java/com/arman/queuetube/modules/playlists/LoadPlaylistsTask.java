@@ -3,8 +3,10 @@ package com.arman.queuetube.modules.playlists;
 import android.os.AsyncTask;
 
 import com.arman.queuetube.fragments.PlaylistsFragment;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +28,8 @@ public class LoadPlaylistsTask extends AsyncTask<Void, Integer, List<String>> {
     @Override
     protected void onPostExecute(List<String> strings) {
         super.onPostExecute(strings);
-        strings.remove(PlaylistHelper.FAVORITES);
-        strings.remove(PlaylistHelper.HISTORY);
+        strings.remove(JSONPlaylistHelper.FAVORITES);
+        strings.remove(JSONPlaylistHelper.HISTORY);
         this.playlistsFragment.getPlaylistsAdapter().setAll(strings);
         this.playlistsFragment.finishRefresh();
     }
@@ -50,11 +52,15 @@ public class LoadPlaylistsTask extends AsyncTask<Void, Integer, List<String>> {
 
     @Override
     protected List<String> doInBackground(Void... voids) {
-        JsonArray playlists = PlaylistHelper.getPlaylists();
+        JSONArray playlists = JSONPlaylistHelper.getPlaylists();
         List<String> strings = new ArrayList<>();
-        for (int i = 0; i < playlists.size(); i++) {
-            JsonObject playlist = playlists.get(i).getAsJsonObject();
-            strings.add(playlist.get("name").getAsString());
+        try {
+            for (int i = 0; i < playlists.length(); i++) {
+                JSONObject playlist = playlists.getJSONObject(i);
+                strings.add(playlist.getString("name"));
+            }
+        } catch (JSONException e) {
+
         }
         return strings;
     }

@@ -11,7 +11,6 @@ import android.widget.LinearLayout;
 
 import com.arman.queuetube.R;
 import com.arman.queuetube.config.Constants;
-import com.arman.queuetube.fragments.DefaultPlaylistFragment;
 import com.arman.queuetube.fragments.MainFragment;
 import com.arman.queuetube.fragments.PlayerFragment;
 import com.arman.queuetube.fragments.PlaylistFragment;
@@ -19,7 +18,7 @@ import com.arman.queuetube.fragments.PlaylistsFragment;
 import com.arman.queuetube.fragments.StreamFragment;
 import com.arman.queuetube.listeners.DrawerItemListener;
 import com.arman.queuetube.model.VideoData;
-import com.arman.queuetube.modules.playlists.PlaylistHelper;
+import com.arman.queuetube.modules.playlists.JSONPlaylistHelper;
 import com.arman.queuetube.util.notifications.receivers.WifiReceiver;
 import com.arman.queuetube.util.services.KillNotificationService;
 import com.google.android.gms.ads.AdRequest;
@@ -27,7 +26,7 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.navigation.NavigationView;
 
-import java.util.List;
+import java.util.Collection;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -40,7 +39,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager.widget.ViewPager;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements PlaylistFragment.OnPlayItemsListener {
 
     public static final String TAG = "MainActivity";
 
@@ -48,14 +48,15 @@ public class MainActivity extends AppCompatActivity {
     public static final int STREAM_FRAGMENT = 1;
     public static final int FAVORITES_FRAGMENT = 2;
     public static final int HISTORY_FRAGMENT = 3;
+    public static final int PLAYLISTS_FRAGMENT = 4;
 
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
     private LinearLayout extendedToolbar;
 
     private MainFragment mainFragment;
-    private DefaultPlaylistFragment favoritesFragment;
-    private DefaultPlaylistFragment historyFragment;
+    private PlaylistFragment favoritesFragment;
+    private PlaylistFragment historyFragment;
     private StreamFragment streamFragment;
     private PlaylistsFragment playlistsFragment;
 
@@ -107,14 +108,17 @@ public class MainActivity extends AppCompatActivity {
         Bundle bundle = new Bundle();
         switch (index) {
             case FAVORITES_FRAGMENT:
-                bundle.putString("playlistName", PlaylistHelper.FAVORITES);
+                bundle.putString("playlistName", JSONPlaylistHelper.FAVORITES);
                 this.favoritesFragment = new PlaylistFragment();
                 this.favoritesFragment.setArguments(bundle);
+                this.favoritesFragment.setOnPlayItemsListener(this);
                 break;
             case HISTORY_FRAGMENT:
-                bundle.putString("playlistName", PlaylistHelper.HISTORY);
-                this.historyFragment = new DefaultPlaylistFragment();
+                bundle.putString("playlistName", JSONPlaylistHelper.HISTORY);
+                bundle.putBoolean("isClickable", false);
+                this.historyFragment = new PlaylistFragment();
                 this.historyFragment.setArguments(bundle);
+                this.historyFragment.setOnPlayItemsListener(this);
                 break;
             default:
                 break;
@@ -129,6 +133,9 @@ public class MainActivity extends AppCompatActivity {
 
         this.setupPlaylistFragment(HISTORY_FRAGMENT);
         transaction.replace(R.id.history_fragment_frame, this.historyFragment).hide(this.historyFragment);
+
+//        this.playlistsFragment = new PlaylistsFragment();
+//        transaction.replace(R.id.playlists_fragment_frame, this.playlistsFragment).hide(this.playlistsFragment);
 
         this.streamFragment = new StreamFragment();
         transaction.replace(R.id.stream_fragment_frame, this.streamFragment).hide(this.streamFragment);
@@ -154,6 +161,9 @@ public class MainActivity extends AppCompatActivity {
             if (this.historyFragment != null) {
                 transaction.hide(this.historyFragment);
             }
+//            if (this.playlistsFragment != null) {
+//                transaction.hide(this.playlistsFragment);
+//            }
             if (this.streamFragment != null) {
                 transaction.hide(this.streamFragment);
             }
@@ -217,6 +227,35 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void switchToPlaylistsFragment() {
+        if (this.currentFragment != PLAYLISTS_FRAGMENT) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            if (this.playlistsFragment != null) {
+                transaction.show(this.playlistsFragment);
+            } else {
+                this.playlistsFragment = new PlaylistsFragment();
+                transaction.replace(R.id.playlists_fragment_frame, this.playlistsFragment);
+            }
+            if (this.mainFragment != null) {
+                transaction.hide(this.mainFragment);
+            }
+            if (this.favoritesFragment != null) {
+                transaction.hide(this.favoritesFragment);
+            }
+            if (this.historyFragment != null) {
+                transaction.hide(this.historyFragment);
+            }
+            if (this.streamFragment != null) {
+                transaction.hide(this.streamFragment);
+            }
+            if (this.extendedToolbar != null) {
+                this.extendedToolbar.setVisibility(View.GONE);
+            }
+            transaction.commitNow();
+            this.currentFragment = PLAYLISTS_FRAGMENT;
+        }
+    }
+
     public void switchToStreamFragment() {
         if (this.currentFragment != STREAM_FRAGMENT) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -235,6 +274,9 @@ public class MainActivity extends AppCompatActivity {
             if (this.historyFragment != null) {
                 transaction.hide(this.historyFragment);
             }
+//            if (this.playlistsFragment != null) {
+//                transaction.hide(this.playlistsFragment);
+//            }
             if (this.extendedToolbar != null) {
                 this.extendedToolbar.setVisibility(View.GONE);
             }
@@ -243,24 +285,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public boolean setQueueTo(List<VideoData> videos) {
-        PlayerFragment playerFragment = (PlayerFragment) this.mainFragment.getPagerAdapter().getPlayerFragment();
-        boolean ret = playerFragment.setQueueTo(videos);
-        playerFragment.forcePlayNext();
-        return ret;
-    }
-
-    public boolean addToQueue(VideoData item) {
-        PlayerFragment playerFragment = (PlayerFragment) this.mainFragment.getPagerAdapter().getPlayerFragment();
-        boolean ret = playerFragment.addToQueue(item);
-        playerFragment.tryPlayNext();
-        return ret;
-    }
-
     public void refreshVideoFavorited() {
         PlayerFragment playerFragment = (PlayerFragment) this.mainFragment.getPagerAdapter().getPlayerFragment();
         VideoData currentVideo = playerFragment.getCurrentVideo();
-        playerFragment.updateVideo(PlaylistHelper.isFavorited(currentVideo));
+        playerFragment.updateVideo(JSONPlaylistHelper.isFavorited(currentVideo));
     }
 
     @Override
@@ -269,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        PlaylistHelper.onCreate(this);
+        JSONPlaylistHelper.onCreate(this);
 
         this.currentFragment = -1;
 
@@ -338,8 +366,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void refreshPlaylists() {
-        this.favoritesFragment.loadPlaylist();
-        this.historyFragment.loadPlaylist();
+        if (this.playlistsFragment != null) {
+            this.playlistsFragment.loadPlaylists();
+        }
+        if (this.favoritesFragment != null) {
+            this.favoritesFragment.loadPlaylist();
+        }
+        if (this.historyFragment != null) {
+            this.historyFragment.loadPlaylist();
+        }
+    }
+
+    @Override
+    public void onPlayAll(Collection<VideoData> videos) {
+        PlayerFragment playerFragment = (PlayerFragment) this.mainFragment.getPagerAdapter().getPlayerFragment();
+        if (playerFragment.setQueueTo(videos)) {
+            playerFragment.forcePlayNext();
+        }
+    }
+
+    @Override
+    public void onPlay(VideoData video) {
+        PlayerFragment playerFragment = (PlayerFragment) this.mainFragment.getPagerAdapter().getPlayerFragment();
+        if (playerFragment.addToQueue(video)) {
+            playerFragment.tryPlayNext();
+        }
     }
 
 }

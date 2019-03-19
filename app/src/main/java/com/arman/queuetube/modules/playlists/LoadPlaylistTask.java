@@ -2,36 +2,44 @@ package com.arman.queuetube.modules.playlists;
 
 import android.os.AsyncTask;
 
-import com.arman.queuetube.fragments.DefaultPlaylistFragment;
+import com.arman.queuetube.fragments.PlaylistFragment;
 import com.arman.queuetube.model.VideoData;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class LoadPlaylistTask extends AsyncTask<String, Integer, List<VideoData>> {
 
-    private DefaultPlaylistFragment playlistFragment;
+    private PlaylistFragment playlistFragment;
 
-    public LoadPlaylistTask(DefaultPlaylistFragment playlistFragment) {
+    public LoadPlaylistTask(PlaylistFragment playlistFragment) {
         super();
         this.playlistFragment = playlistFragment;
     }
 
-    private List<VideoData> createPlaylist(JsonArray array) {
+    private List<VideoData> createPlaylist(JSONArray array) {
         List<VideoData> videos = new ArrayList<>();
-        for (int i = 0; i < array.size(); i++) {
-            JsonObject video = array.get(i).getAsJsonObject();
-            VideoData videoData = new VideoData(video);
-            videos.add(videoData);
+        try {
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject video = array.getJSONObject(i);
+                VideoData videoData = new VideoData(video);
+                videos.add(videoData);
+            }
+        } catch (JSONException e) {
+
         }
         return videos;
     }
 
     @Override
     protected List<VideoData> doInBackground(String... strings) {
-        JsonArray playlist = PlaylistHelper.getPlaylist(strings[0]);
+        JSONArray playlist = JSONPlaylistHelper.getPlaylist(strings[0]);
         return this.createPlaylist(playlist);
     }
 

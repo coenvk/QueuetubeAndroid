@@ -15,7 +15,14 @@ public class PlaylistActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setupActionBar();
-        getSupportFragmentManager().beginTransaction().replace(android.R.id.content, new PlaylistFragment()).commit();
+
+        String playlistName = getIntent().getStringExtra("playlistName");
+        Bundle bundle = new Bundle();
+        bundle.putString("playlistName", playlistName);
+        PlaylistFragment fragment = new PlaylistFragment();
+        fragment.setArguments(bundle);
+
+        getSupportFragmentManager().beginTransaction().replace(android.R.id.content, fragment).commit();
     }
 
     private void setupActionBar() {

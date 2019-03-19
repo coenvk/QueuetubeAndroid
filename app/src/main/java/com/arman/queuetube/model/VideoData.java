@@ -7,6 +7,9 @@ import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoStatistics;
 import com.google.gson.JsonObject;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import androidx.annotation.NonNull;
 
 public class VideoData {
@@ -52,6 +55,10 @@ public class VideoData {
         this.setTo(object);
     }
 
+    public VideoData(JSONObject object) {
+        this.setTo(object);
+    }
+
     public void setTo(SearchResult result) {
         this.setTitle(result.getSnippet().getTitle());
         this.thumbnailUrl = result.getSnippet().getThumbnails().getDefault().getUrl();
@@ -81,6 +88,22 @@ public class VideoData {
         this.views = object.get("views").getAsInt();
         this.likes = object.get("likes").getAsInt();
         this.dislikes = object.get("dislikes").getAsInt();
+    }
+
+    public void setTo(JSONObject object) {
+        try {
+            this.setTitle(object.getString("title"));
+            this.thumbnailUrl = object.getString("thumbnailUrl");
+            this.id = object.getString("id");
+            this.publishedOn = object.getString("publishedOn");
+            this.channel = object.getString("channel");
+            this.description = object.getString("description");
+            this.views = object.getInt("views");
+            this.likes = object.getInt("likes");
+            this.dislikes = object.getInt("dislikes");
+        } catch (JSONException e) {
+
+        }
     }
 
     public void setTo(VideoData videoData) {

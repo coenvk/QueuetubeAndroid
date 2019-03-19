@@ -17,4 +17,8 @@ public abstract class BaseViewHolder<E> extends RecyclerView.ViewHolder {
         this.item = item;
     }
 
+    public E getItem() {
+        return item;
+    }
+
 }

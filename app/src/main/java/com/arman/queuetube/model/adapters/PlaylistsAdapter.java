@@ -1,6 +1,5 @@
 package com.arman.queuetube.model.adapters;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,24 +16,24 @@ public class PlaylistsAdapter extends BaseTouchAdapter<String, PlaylistsViewHold
 
     public static final String TAG = "PlaylistsAdapter";
 
-    public PlaylistsAdapter(Context context) {
-        super(context);
+    public PlaylistsAdapter() {
+        super();
     }
 
-    public PlaylistsAdapter(Context context, OnItemClickListener clickListener) {
-        super(context, clickListener);
+    public PlaylistsAdapter(OnItemClickListener clickListener) {
+        super(clickListener);
     }
 
-    public PlaylistsAdapter(Context context, OnItemDragListener dragListener) {
-        super(context, dragListener);
+    public PlaylistsAdapter(OnItemDragListener dragListener) {
+        super(dragListener);
     }
 
-    public PlaylistsAdapter(Context context, OnItemClickListener clickListener, OnItemDragListener dragListener) {
-        super(context, clickListener, dragListener);
+    public PlaylistsAdapter(OnItemClickListener clickListener, OnItemDragListener dragListener) {
+        super(clickListener, dragListener);
     }
 
-    public PlaylistsAdapter(Context context, List<String> items, OnItemClickListener clickListener, OnItemDragListener dragListener) {
-        super(context, items, clickListener, dragListener);
+    public PlaylistsAdapter(List<String> items, OnItemClickListener clickListener, OnItemDragListener dragListener) {
+        super(items, clickListener, dragListener);
     }
 
     @NonNull

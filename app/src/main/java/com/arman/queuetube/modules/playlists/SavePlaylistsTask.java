@@ -18,7 +18,7 @@ public class SavePlaylistsTask extends AsyncTask<String, Integer, Void> {
     @Override
     protected Void doInBackground(String... strings) {
         try {
-            PlaylistHelper.doWrite(strings[0]);
+            JSONPlaylistHelper.doWrite(strings[0]);
         } catch (IOException e) {
 
         }

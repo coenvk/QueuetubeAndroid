@@ -17,14 +17,12 @@ import androidx.recyclerview.widget.RecyclerView;
 public abstract class BaseAdapter<E, VH extends BaseViewHolder<E>> extends RecyclerView.Adapter<VH> {
 
     protected List<E> items;
-    protected Context context;
 
-    public BaseAdapter(Context context) {
-        this(context, new ArrayList<E>());
+    public BaseAdapter() {
+        this(new ArrayList<E>());
     }
 
-    public BaseAdapter(Context context, List<E> items) {
-        this.context = context;
+    public BaseAdapter(List<E> items) {
         this.items = items;
     }
 
@@ -114,10 +112,6 @@ public abstract class BaseAdapter<E, VH extends BaseViewHolder<E>> extends Recyc
 
     public List<E> getAll() {
         return this.items;
-    }
-
-    public Context getContext() {
-        return context;
     }
 
 }

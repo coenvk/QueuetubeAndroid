@@ -15,7 +15,8 @@ import com.arman.queuetube.R;
 import com.arman.queuetube.fragments.pager.ViewPagerAdapter;
 import com.arman.queuetube.model.VideoData;
 import com.arman.queuetube.model.adapters.VideoItemAdapter;
-import com.arman.queuetube.modules.playlists.PlaylistHelper;
+import com.arman.queuetube.modules.playlists.GsonPlaylistHelper;
+import com.arman.queuetube.modules.playlists.JSONPlaylistHelper;
 import com.arman.queuetube.modules.search.SearchTask;
 import com.arman.queuetube.modules.search.YouTubeSearcher;
 import com.arman.queuetube.util.VideoSharer;
@@ -33,7 +34,6 @@ import java.util.Collection;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.viewpager.widget.ViewPager;
@@ -86,7 +86,8 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
 
     public void showAddToPlaylistDialog() {
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        DialogFragment dialog = new AddToPlaylistFragment();
+        AddToPlaylistFragment dialog = new AddToPlaylistFragment();
+        dialog.setVideo(this.currentVideo);
         dialog.show(fragmentManager, "add_to_playlist_dialog");
 //        if (getResources().getBoolean(R.bool.large_layout)) {
 //            dialog.show(fragmentManager, "add_to_playlist_dialog");
@@ -168,9 +169,9 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
 
     private void favoriteVideo(boolean favorited) {
         if (favorited) {
-            PlaylistHelper.writeTo(PlaylistHelper.FAVORITES, this.currentVideo);
+            JSONPlaylistHelper.writeTo(JSONPlaylistHelper.FAVORITES, this.currentVideo);
         } else {
-            PlaylistHelper.removeFrom(PlaylistHelper.FAVORITES, this.currentVideo);
+            JSONPlaylistHelper.removeFrom(JSONPlaylistHelper.FAVORITES, this.currentVideo);
         }
 
         this.updateVideo(favorited);
@@ -308,7 +309,7 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
 
     private void onEnd() {
         if (this.shouldSaveHistory()) {
-            PlaylistHelper.writeToOrReorder(PlaylistHelper.HISTORY, this.currentVideo, 0);
+            JSONPlaylistHelper.writeToOrReorder(JSONPlaylistHelper.HISTORY, this.currentVideo, 0);
         }
 
         this.ytPlayerVideoSet = false;
@@ -334,7 +335,7 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
     private void onVideoCued() {
         this.currentVideo.setTo(this.ytSearcher.requestDetails(this.currentVideo));
 
-        boolean favorited = PlaylistHelper.isFavorited(this.currentVideo);
+        boolean favorited = JSONPlaylistHelper.isFavorited(this.currentVideo);
         this.currentVideo.setFavorited(favorited);
         this.adjustFavoriteButton(favorited);
         this.videoTitleView.setText(this.currentVideo.getTitle());

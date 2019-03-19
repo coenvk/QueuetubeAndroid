@@ -103,7 +103,7 @@ public class DrawerItemListener implements NavigationView.OnNavigationItemSelect
                     activity.switchToStreamFragment();
                     break;
                 case R.id.menu_item_playlists:
-//                    activity.switchToPlaylistsFragment();
+                    activity.switchToPlaylistsFragment();
                     break;
             }
             this.switchFragment = false;

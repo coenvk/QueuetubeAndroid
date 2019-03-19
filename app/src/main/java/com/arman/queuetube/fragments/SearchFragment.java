@@ -65,7 +65,7 @@ public class SearchFragment extends Fragment {
         this.layoutManager = new LinearLayoutManager(getActivity());
         this.resultsView.setLayoutManager(this.layoutManager);
 
-        this.resultsAdapter = new VideoItemAdapter(getActivity(), this.onItemClickListener);
+        this.resultsAdapter = new VideoItemAdapter(this.onItemClickListener);
 
         this.resultsView.setAdapter(this.resultsAdapter);
     }

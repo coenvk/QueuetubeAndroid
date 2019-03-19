@@ -6,10 +6,10 @@ import android.os.AsyncTask;
 import com.arman.queuetube.activities.MainActivity;
 import com.arman.queuetube.model.VideoData;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 
 import java.io.BufferedReader;
@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
-public class PlaylistHelper {
+public class GsonPlaylistHelper {
 
     public static final String FAVORITES = "Favorites";
     public static final String HISTORY = "History";
@@ -30,7 +30,6 @@ public class PlaylistHelper {
     private static SavePlaylistsTask savePlaylistsTask;
 
     private static Gson gson;
-    private static JsonParser parser;
 
     private static void executeSave(String string) {
         AsyncTask.Status status = savePlaylistsTask.getStatus();
@@ -50,7 +49,7 @@ public class PlaylistHelper {
         bw.close();
     }
 
-    private static String doRead() throws IOException {
+    private static JsonObject doRead() throws IOException {
         FileInputStream fis = context.openFileInput(STORAGE_FILE_NAME);
         BufferedReader br = new BufferedReader(new InputStreamReader(fis));
         StringBuilder sb = new StringBuilder();
@@ -58,21 +57,21 @@ public class PlaylistHelper {
         while ((line = br.readLine()) != null) {
             sb.append(line);
         }
+        JsonObject root = gson.fromJson(sb.toString(), JsonElement.class).getAsJsonObject();
         br.close();
-        return sb.toString();
+        return root;
     }
 
     public static void onCreate(Context context) {
-        PlaylistHelper.context = context;
+        GsonPlaylistHelper.context = context;
         savePlaylistsTask = new SavePlaylistsTask((MainActivity) context);
-        gson = new Gson();
-        parser = new JsonParser();
+        gson = new GsonBuilder().setPrettyPrinting().create();
         boolean fileExists = doesFileExist();
         if (!fileExists) {
             JsonObject root = new JsonObject();
             JsonArray playlists = new JsonArray();
-            playlists.add(newPlaylist(PlaylistHelper.HISTORY));
-            playlists.add(newPlaylist(PlaylistHelper.FAVORITES));
+            playlists.add(newPlaylist(GsonPlaylistHelper.HISTORY));
+            playlists.add(newPlaylist(GsonPlaylistHelper.FAVORITES));
 
             root.add("playlists", playlists);
             executeSave(root.toString());
@@ -80,11 +79,11 @@ public class PlaylistHelper {
     }
 
     public static JsonArray getFavorites() {
-        return getPlaylist(read(), PlaylistHelper.FAVORITES);
+        return getPlaylist(read(), GsonPlaylistHelper.FAVORITES);
     }
 
     public static JsonArray getHistory() {
-        return getPlaylist(read(), PlaylistHelper.HISTORY);
+        return getPlaylist(read(), GsonPlaylistHelper.HISTORY);
     }
 
     public static boolean isFavorited(VideoData video) {
@@ -118,6 +117,20 @@ public class PlaylistHelper {
         return root.get("playlists").getAsJsonArray();
     }
 
+    public static JsonArray getUserPlaylists() {
+        JsonObject root = read();
+        JsonArray playlists = root.get("playlists").getAsJsonArray();
+        JsonArray userPlaylists = new JsonArray();
+        for (JsonElement playlist : playlists) {
+            JsonObject obj = playlist.getAsJsonObject();
+            String name = obj.get("name").getAsString();
+            if (!name.equals(FAVORITES) && !name.equals(HISTORY)) {
+                userPlaylists.add(playlist);
+            }
+        }
+        return userPlaylists;
+    }
+
     public static JsonArray getPlaylist(String name) {
         JsonObject root = read();
         assert root != null;
@@ -130,10 +143,30 @@ public class PlaylistHelper {
         for (int i = 0; i < playlists.size(); i++) {
             JsonObject obj = playlists.get(i).getAsJsonObject();
             if (obj.get("name").getAsString().equals(name)) {
-                return obj.getAsJsonArray("playlist");
+                return obj.get("playlist").getAsJsonArray();
             }
         }
         return null;
+    }
+
+    public static boolean writeNewIfNotFound(String name) {
+        JsonObject root = read();
+        assert root != null;
+        JsonArray playlists = getPlaylists(root);
+        assert playlists != null;
+
+        for (int i = 0; i < playlists.size(); i++) {
+            JsonObject playlist = playlists.get(i).getAsJsonObject();
+            if (playlist.get("name").getAsString().equals(name)) {
+                return false;
+            }
+        }
+
+        JsonObject obj = newPlaylist(name);
+
+        playlists.add(obj);
+        executeSave(root.toString());
+        return true;
     }
 
     public static boolean writeNew(String name) {
@@ -310,13 +343,23 @@ public class PlaylistHelper {
         return false;
     }
 
+    private static void printInParts(String string) {
+        int max = 1000;
+        for (int i = 0; i <= string.length() / max; i++) {
+            int start = i * max;
+            int end = (i + 1) * max;
+            end = end > string.length() ? string.length() : end;
+            System.out.println(string.substring(start, end));
+        }
+    }
+
     public static JsonObject read() {
         try {
-            return parser.parse(doRead()).getAsJsonObject();
+            return doRead();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
+            return new JsonObject();
         }
-        return null;
     }
 
     private static boolean write(JsonObject obj) {

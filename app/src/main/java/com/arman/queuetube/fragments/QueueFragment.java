@@ -77,7 +77,7 @@ public class QueueFragment extends Fragment {
             };
         }
 
-        this.queueAdapter = new VideoItemAdapter(getActivity(), this.onItemClickListener, this.onItemDragListener);
+        this.queueAdapter = new VideoItemAdapter(this.onItemClickListener, this.onItemDragListener);
         this.queueView.setAdapter(this.queueAdapter);
 
         ItemTouchHelper.Callback callback = new VideoItemTouchHelper.Callback(this.queueAdapter);

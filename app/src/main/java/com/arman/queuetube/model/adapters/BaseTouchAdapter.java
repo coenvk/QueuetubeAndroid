@@ -1,11 +1,8 @@
 package com.arman.queuetube.model.adapters;
 
-import android.content.Context;
-
 import com.arman.queuetube.model.viewholders.BaseTouchViewHolder;
 import com.arman.queuetube.util.itemtouchhelper.adapters.ItemTouchHelperAdapter;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,26 +14,26 @@ public abstract class BaseTouchAdapter<E, VH extends BaseTouchViewHolder<E>> ext
     protected OnItemClickListener clickListener;
     protected OnItemDragListener dragListener;
 
-    public BaseTouchAdapter(Context context) {
-        super(context);
+    public BaseTouchAdapter() {
+        super();
     }
 
-    public BaseTouchAdapter(Context context, OnItemClickListener clickListener) {
-        this(context, clickListener, null);
+    public BaseTouchAdapter(OnItemClickListener clickListener) {
+        this(clickListener, null);
     }
 
-    public BaseTouchAdapter(Context context, OnItemDragListener dragListener) {
-        this(context, null, dragListener);
+    public BaseTouchAdapter(OnItemDragListener dragListener) {
+        this(null, dragListener);
     }
 
-    public BaseTouchAdapter(Context context, OnItemClickListener clickListener, OnItemDragListener dragListener) {
-        super(context);
+    public BaseTouchAdapter(OnItemClickListener clickListener, OnItemDragListener dragListener) {
+        super();
         this.clickListener = clickListener;
         this.dragListener = dragListener;
     }
 
-    public BaseTouchAdapter(Context context, List<E> items, OnItemClickListener clickListener, OnItemDragListener dragListener) {
-        super(context, items);
+    public BaseTouchAdapter(List<E> items, OnItemClickListener clickListener, OnItemDragListener dragListener) {
+        super(items);
         this.clickListener = clickListener;
         this.dragListener = dragListener;
     }

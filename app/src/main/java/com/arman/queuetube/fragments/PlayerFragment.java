@@ -1,6 +1,5 @@
 package com.arman.queuetube.fragments;
 
-import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -12,11 +11,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.arman.queuetube.R;
+import com.arman.queuetube.config.Constants;
 import com.arman.queuetube.fragments.pager.ViewPagerAdapter;
 import com.arman.queuetube.model.VideoData;
 import com.arman.queuetube.model.adapters.VideoItemAdapter;
 import com.arman.queuetube.modules.playlists.GsonPlaylistHelper;
-import com.arman.queuetube.modules.playlists.JSONPlaylistHelper;
 import com.arman.queuetube.modules.search.SearchTask;
 import com.arman.queuetube.modules.search.YouTubeSearcher;
 import com.arman.queuetube.util.VideoSharer;
@@ -35,7 +34,6 @@ import java.util.Collection;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.viewpager.widget.ViewPager;
 
 public class PlayerFragment extends Fragment implements YouTubePlayerInitListener {
@@ -65,8 +63,6 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
 
     private NotificationHelper notificationHelper;
 
-    private AudioManager.OnAudioFocusChangeListener audioFocusChangeListener;
-
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -85,17 +81,9 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
     }
 
     public void showAddToPlaylistDialog() {
-        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         AddToPlaylistFragment dialog = new AddToPlaylistFragment();
         dialog.setVideo(this.currentVideo);
-        dialog.show(fragmentManager, "add_to_playlist_dialog");
-//        if (getResources().getBoolean(R.bool.large_layout)) {
-//            dialog.show(fragmentManager, "add_to_playlist_dialog");
-//        } else {
-//            FragmentTransaction transaction = fragmentManager.beginTransaction();
-//            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//            transaction.add(android.R.id.content, dialog).addToBackStack(null).commit();
-//        }
+        dialog.show(getFragmentManager(), "add_to_playlist_dialog");
     }
 
     @Override
@@ -169,9 +157,9 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
 
     private void favoriteVideo(boolean favorited) {
         if (favorited) {
-            JSONPlaylistHelper.writeTo(JSONPlaylistHelper.FAVORITES, this.currentVideo);
+            GsonPlaylistHelper.writeTo(Constants.Json.Playlist.FAVORITES, this.currentVideo);
         } else {
-            JSONPlaylistHelper.removeFrom(JSONPlaylistHelper.FAVORITES, this.currentVideo);
+            GsonPlaylistHelper.removeFrom(Constants.Json.Playlist.FAVORITES, this.currentVideo);
         }
 
         this.updateVideo(favorited);
@@ -248,32 +236,8 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
         return ret;
     }
 
-    private boolean doTryPlayNext() {
-        return this.doTryPlayNext(true);
-    }
-
-    private boolean doTryPlayNext(boolean autoplayIfEnabled) {
-        if (this.ytPlayerReady && !this.ytPlayerVideoSet) {
-            if (!this.getPlaylistAdapter().isEmpty()) {
-                VideoData nextVideo = this.getPlaylistAdapter().pop();
-                this.currentVideo.setTo(nextVideo);
-                this.ytPlayer.cueVideo(this.currentVideo.getId(), 0);
-                return true;
-            } else if (this.isAutoplayEnabled() && autoplayIfEnabled) {
-                VideoData nextVideo = null;
-                nextVideo = this.ytSearcher.nextAutoplay(this.currentVideo.getId());
-                if (nextVideo != null) {
-                    this.currentVideo.setTo(nextVideo);
-                    this.ytPlayer.cueVideo(this.currentVideo.getId(), 0);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     public void playNext() {
-        if (!doTryPlayNext(!this.ytPlayerStopped)) {
+        if (!tryPlayNext(!this.ytPlayerStopped)) {
             this.fragmentLayout.setVisibility(View.GONE);
             NotificationHelper.destroyNotification(getContext());
         }
@@ -309,7 +273,7 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
 
     private void onEnd() {
         if (this.shouldSaveHistory()) {
-            JSONPlaylistHelper.writeToOrReorder(JSONPlaylistHelper.HISTORY, this.currentVideo, 0);
+            GsonPlaylistHelper.writeToOrReorder(Constants.Json.Playlist.HISTORY, this.currentVideo, 0);
         }
 
         this.ytPlayerVideoSet = false;
@@ -333,9 +297,9 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
     }
 
     private void onVideoCued() {
-        this.currentVideo.setTo(this.ytSearcher.requestDetails(this.currentVideo));
+//        this.currentVideo.setTo(this.ytSearcher.requestDetails(this.currentVideo));
 
-        boolean favorited = JSONPlaylistHelper.isFavorited(this.currentVideo);
+        boolean favorited = GsonPlaylistHelper.isFavorited(this.currentVideo);
         this.currentVideo.setFavorited(favorited);
         this.adjustFavoriteButton(favorited);
         this.videoTitleView.setText(this.currentVideo.getTitle());
@@ -349,9 +313,7 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
 
     @Override
     public void onInitSuccess(com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayer youTubePlayer) {
-        System.out.println("Init success");
         if (youTubePlayer != null) {
-            System.out.println("Player initialized");
             this.ytPlayer = youTubePlayer;
             this.ytPlayerTracker = new YouTubePlayerTracker();
             this.ytPlayer.addListener(this.ytPlayerTracker);
@@ -368,7 +330,6 @@ public class PlayerFragment extends Fragment implements YouTubePlayerInitListene
                         }
                     });
                     PlayerFragment.this.ytPlayerReady = true;
-                    System.out.println("The player is ready!");
                 }
 
                 @Override

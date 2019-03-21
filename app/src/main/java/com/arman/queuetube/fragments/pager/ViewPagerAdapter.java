@@ -3,11 +3,11 @@ package com.arman.queuetube.fragments.pager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import com.arman.queuetube.R;
 import com.arman.queuetube.fragments.PlayerFragment;
 import com.arman.queuetube.fragments.QueueFragment;
-import com.arman.queuetube.R;
 import com.arman.queuetube.fragments.SearchFragment;
-import com.arman.queuetube.model.adapters.VideoItemAdapter;
+import com.arman.queuetube.model.adapters.BaseTouchAdapter;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -41,6 +41,10 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
         this.addFragment(new QueueFragment());
         this.addFragment(new SearchFragment());
 
+        this.setupPlayer(fm);
+    }
+
+    public void setupPlayer(FragmentManager fm) {
         this.playerFragment = new PlayerFragment();
         fm.beginTransaction().replace(R.id.top_player, this.playerFragment).commit();
     }
@@ -96,7 +100,7 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
         this.fragments.add(fragment);
     }
 
-    public class QueueItemClickListener implements VideoItemAdapter.OnItemClickListener {
+    public class QueueItemClickListener implements BaseTouchAdapter.OnItemClickListener {
 
         @Override
         public void onClick(final RecyclerView.ViewHolder viewHolder) {
@@ -130,7 +134,7 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
 
     }
 
-    public class SearchItemClickListener implements VideoItemAdapter.OnItemClickListener {
+    public class SearchItemClickListener implements BaseTouchAdapter.OnItemClickListener {
 
         @Override
         public void onClick(final RecyclerView.ViewHolder viewHolder) {

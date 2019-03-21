@@ -2,6 +2,7 @@ package com.arman.queuetube.model;
 
 import android.text.Html;
 
+import com.arman.queuetube.config.Constants;
 import com.google.api.services.youtube.model.SearchResult;
 import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoStatistics;
@@ -19,10 +20,6 @@ public class VideoData {
     private String id;
     private String publishedOn;
     private String channel;
-    private String description;
-    private int views;
-    private int likes;
-    private int dislikes;
 
     private boolean favorited;
 
@@ -40,7 +37,6 @@ public class VideoData {
         this.id = id;
         this.publishedOn = publishedOn;
         this.channel = channel;
-        this.description = description;
     }
 
     public VideoData(SearchResult result) {
@@ -65,7 +61,6 @@ public class VideoData {
         this.id = result.getId().getVideoId();
         this.publishedOn = result.getSnippet().getPublishedAt().toString();
         this.channel = result.getSnippet().getChannelTitle();
-        this.description = result.getSnippet().getDescription();
     }
 
     public void setTo(Video video) {
@@ -74,48 +69,33 @@ public class VideoData {
         this.id = video.getId();
         this.publishedOn = video.getSnippet().getPublishedAt().toString();
         this.channel = video.getSnippet().getChannelTitle();
-        this.description = video.getSnippet().getDescription();
-        this.setStatistics(video.getStatistics());
     }
 
     public void setTo(JsonObject object) {
-        this.setTitle(object.get("title").getAsString());
-        this.thumbnailUrl = object.get("thumbnailUrl").getAsString();
-        this.id = object.get("id").getAsString();
-        this.publishedOn = object.get("publishedOn").getAsString();
-        this.channel = object.get("channel").getAsString();
-        this.description = object.get("description").getAsString();
-        this.views = object.get("views").getAsInt();
-        this.likes = object.get("likes").getAsInt();
-        this.dislikes = object.get("dislikes").getAsInt();
+        this.setTitle(object.get(Constants.VideoData.TITLE).getAsString());
+        this.thumbnailUrl = object.get(Constants.VideoData.THUMBNAIL_URL).getAsString();
+        this.id = object.get(Constants.VideoData.ID).getAsString();
+        this.publishedOn = object.get(Constants.VideoData.PUBLISHED_ON).getAsString();
+        this.channel = object.get(Constants.VideoData.CHANNEL).getAsString();
     }
 
     public void setTo(JSONObject object) {
         try {
-            this.setTitle(object.getString("title"));
-            this.thumbnailUrl = object.getString("thumbnailUrl");
-            this.id = object.getString("id");
-            this.publishedOn = object.getString("publishedOn");
-            this.channel = object.getString("channel");
-            this.description = object.getString("description");
-            this.views = object.getInt("views");
-            this.likes = object.getInt("likes");
-            this.dislikes = object.getInt("dislikes");
+            this.setTitle(object.getString(Constants.VideoData.TITLE));
+            this.thumbnailUrl = object.getString(Constants.VideoData.THUMBNAIL_URL);
+            this.id = object.getString(Constants.VideoData.ID);
+            this.publishedOn = object.getString(Constants.VideoData.PUBLISHED_ON);
+            this.channel = object.getString(Constants.VideoData.CHANNEL);
         } catch (JSONException e) {
-
         }
     }
 
     public void setTo(VideoData videoData) {
         this.setTitle(videoData.getTitle());
         this.setThumbnailUrl(videoData.getThumbnailUrl());
-        this.setDescription(videoData.getDescription());
         this.setId(videoData.getId());
         this.setChannel(videoData.getChannel());
         this.setPublishedOn(videoData.getPublishedOn());
-        this.setViews(videoData.getViews());
-        this.setLikes(videoData.getLikes());
-        this.setDislikes(videoData.getDislikes());
         this.setFavorited(videoData.isFavorited());
     }
 
@@ -125,14 +105,6 @@ public class VideoData {
 
     public void setFavorited(boolean favorited) {
         this.favorited = favorited;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public String getId() {
@@ -159,30 +131,6 @@ public class VideoData {
         this.thumbnailUrl = thumbnailUrl;
     }
 
-    public int getDislikes() {
-        return dislikes;
-    }
-
-    public void setDislikes(int dislikes) {
-        this.dislikes = dislikes;
-    }
-
-    public int getLikes() {
-        return likes;
-    }
-
-    public void setLikes(int likes) {
-        this.likes = likes;
-    }
-
-    public int getViews() {
-        return views;
-    }
-
-    public void setViews(int views) {
-        this.views = views;
-    }
-
     public String getChannel() {
         return channel;
     }
@@ -206,12 +154,6 @@ public class VideoData {
             return other.getId().equals(this.getId());
         }
         return false;
-    }
-
-    public void setStatistics(VideoStatistics statistics) {
-        this.setViews(statistics.getViewCount().intValue());
-        this.setLikes(statistics.getLikeCount().intValue());
-        this.setDislikes(statistics.getDislikeCount().intValue());
     }
 
     @NonNull

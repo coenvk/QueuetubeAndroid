@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/player_fragment_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:visibility="gone">
+    android:visibility="gone"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     <com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayerView
         android:id="@+id/youtube_player"
@@ -33,25 +35,25 @@
             android:weightSum="3">
 
             <ImageView
-                style="@style/Widget.AppCompat.ActionButton"
                 android:id="@+id/favorite_button"
+                style="@style/Widget.AppCompat.ActionButton"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:src="@drawable/ic_star_outline_black_36dp" />
 
             <ImageView
-                style="@style/Widget.AppCompat.ActionButton"
                 android:id="@+id/add_to_playlist_button"
+                style="@style/Widget.AppCompat.ActionButton"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:visibility="gone"
-                android:src="@drawable/ic_playlist_plus_black_36dp" />
+                android:src="@drawable/ic_playlist_plus_black_36dp"
+                android:visibility="gone" />
 
             <ImageView
-                style="@style/Widget.AppCompat.ActionButton"
                 android:id="@+id/share_button"
+                style="@style/Widget.AppCompat.ActionButton"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -60,6 +62,5 @@
         </LinearLayout>
 
     </LinearLayout>
-
 
 </LinearLayout>

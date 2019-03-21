@@ -1,29 +1,19 @@
 package com.arman.queuetube.activities;
 
-import android.annotation.TargetApi;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
-import android.preference.RingtonePreference;
-import android.text.TextUtils;
 import android.view.MenuItem;
 
 import com.arman.queuetube.R;
 import com.arman.queuetube.util.notifications.NotificationHelper;
-
-import java.util.List;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -64,7 +54,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         Intent intent = new Intent(Intent.ACTION_SENDTO);
         intent.setData(Uri.parse("mailto:"));
         intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"c.m.vankampen@live.nl"});
-        intent.putExtra(Intent.EXTRA_SUBJECT, "Queuetube issue");
+        intent.putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.app_name) + " issue");
         intent.putExtra(Intent.EXTRA_TEXT, body);
         context.startActivity(Intent.createChooser(intent, context.getString(R.string.choose_email_client)));
     }

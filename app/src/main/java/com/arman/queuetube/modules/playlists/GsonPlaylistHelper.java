@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import com.arman.queuetube.activities.MainActivity;
+import com.arman.queuetube.config.Constants;
 import com.arman.queuetube.model.VideoData;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -23,9 +24,9 @@ import java.io.OutputStreamWriter;
 
 public class GsonPlaylistHelper {
 
-    public static final String FAVORITES = "Favorites";
-    public static final String HISTORY = "History";
-    private static final String STORAGE_FILE_NAME = "playlists.json";
+    private static final JsonPrimitive PRIM_FAVORITES = new JsonPrimitive(Constants.Json.Playlist.FAVORITES);
+    private static final JsonPrimitive PRIM_HISTORY = new JsonPrimitive(Constants.Json.Playlist.HISTORY);
+
     private static Context context;
     private static SavePlaylistsTask savePlaylistsTask;
 
@@ -42,7 +43,7 @@ public class GsonPlaylistHelper {
     }
 
     public static void doWrite(String string) throws IOException {
-        FileOutputStream fos = context.openFileOutput(STORAGE_FILE_NAME, Context.MODE_PRIVATE);
+        FileOutputStream fos = context.openFileOutput(Constants.Json.STORAGE_FILE_NAME, Context.MODE_PRIVATE);
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
         bw.write(string);
         bw.flush();
@@ -50,7 +51,7 @@ public class GsonPlaylistHelper {
     }
 
     private static JsonObject doRead() throws IOException {
-        FileInputStream fis = context.openFileInput(STORAGE_FILE_NAME);
+        FileInputStream fis = context.openFileInput(Constants.Json.STORAGE_FILE_NAME);
         BufferedReader br = new BufferedReader(new InputStreamReader(fis));
         StringBuilder sb = new StringBuilder();
         String line;
@@ -70,27 +71,27 @@ public class GsonPlaylistHelper {
         if (!fileExists) {
             JsonObject root = new JsonObject();
             JsonArray playlists = new JsonArray();
-            playlists.add(newPlaylist(GsonPlaylistHelper.HISTORY));
-            playlists.add(newPlaylist(GsonPlaylistHelper.FAVORITES));
+            playlists.add(newPlaylist(GsonPlaylistHelper.PRIM_HISTORY));
+            playlists.add(newPlaylist(GsonPlaylistHelper.PRIM_FAVORITES));
 
-            root.add("playlists", playlists);
+            root.add(Constants.Json.Key.PLAYLISTS, playlists);
             executeSave(root.toString());
         }
     }
 
     public static JsonArray getFavorites() {
-        return getPlaylist(read(), GsonPlaylistHelper.FAVORITES);
+        return getPlaylist(read(), GsonPlaylistHelper.PRIM_FAVORITES);
     }
 
     public static JsonArray getHistory() {
-        return getPlaylist(read(), GsonPlaylistHelper.HISTORY);
+        return getPlaylist(read(), GsonPlaylistHelper.PRIM_HISTORY);
     }
 
     public static boolean isFavorited(VideoData video) {
         JsonArray favorites = getFavorites();
         for (int i = 0; i < favorites.size(); i++) {
             JsonObject obj = favorites.get(i).getAsJsonObject();
-            String id = obj.get("id").getAsString();
+            String id = obj.get(Constants.Json.Key.ID).getAsString();
             if (id.equals(video.getId())) {
                 return true;
             }
@@ -98,10 +99,17 @@ public class GsonPlaylistHelper {
         return false;
     }
 
+    private static JsonObject newPlaylist(JsonPrimitive name) {
+        JsonObject obj = new JsonObject();
+        obj.add(Constants.Json.Key.NAME, name);
+        obj.add(Constants.Json.Key.PLAYLIST, new JsonArray());
+        return obj;
+    }
+
     private static JsonObject newPlaylist(String name) {
         JsonObject obj = new JsonObject();
-        obj.add("name", new JsonPrimitive(name));
-        obj.add("playlist", new JsonArray());
+        obj.addProperty(Constants.Json.Key.NAME, name);
+        obj.add(Constants.Json.Key.PLAYLIST, new JsonArray());
         return obj;
     }
 
@@ -114,50 +122,55 @@ public class GsonPlaylistHelper {
     }
 
     private static JsonArray getPlaylists(JsonObject root) {
-        return root.get("playlists").getAsJsonArray();
+        return root.get(Constants.Json.Key.PLAYLISTS).getAsJsonArray();
     }
 
     public static JsonArray getUserPlaylists() {
         JsonObject root = read();
-        JsonArray playlists = root.get("playlists").getAsJsonArray();
+        JsonArray playlists = root.get(Constants.Json.Key.PLAYLISTS).getAsJsonArray();
         JsonArray userPlaylists = new JsonArray();
         for (JsonElement playlist : playlists) {
             JsonObject obj = playlist.getAsJsonObject();
-            String name = obj.get("name").getAsString();
-            if (!name.equals(FAVORITES) && !name.equals(HISTORY)) {
+            JsonPrimitive name = obj.getAsJsonPrimitive(Constants.Json.Key.NAME);
+            if (!name.equals(PRIM_FAVORITES) && !name.equals(PRIM_HISTORY)) {
                 userPlaylists.add(playlist);
             }
         }
         return userPlaylists;
     }
 
-    public static JsonArray getPlaylist(String name) {
+    public static JsonArray getPlaylist(JsonPrimitive name) {
         JsonObject root = read();
-        assert root != null;
         return getPlaylist(root, name);
     }
 
-    private static JsonArray getPlaylist(JsonObject root, String name) {
+    public static JsonArray getPlaylist(String name) {
+        return getPlaylist(new JsonPrimitive(name));
+    }
+
+    private static JsonArray getPlaylist(JsonObject root, JsonPrimitive name) {
         JsonArray playlists = getPlaylists(root);
         assert playlists != null;
         for (int i = 0; i < playlists.size(); i++) {
             JsonObject obj = playlists.get(i).getAsJsonObject();
-            if (obj.get("name").getAsString().equals(name)) {
-                return obj.get("playlist").getAsJsonArray();
+            if (obj.getAsJsonPrimitive(Constants.Json.Key.NAME).equals(name)) {
+                return obj.get(Constants.Json.Key.PLAYLIST).getAsJsonArray();
             }
         }
         return null;
     }
 
-    public static boolean writeNewIfNotFound(String name) {
+    private static JsonArray getPlaylist(JsonObject root, String name) {
+        return getPlaylist(root, new JsonPrimitive(name));
+    }
+
+    public static boolean writeNewIfNotFound(JsonPrimitive name) {
         JsonObject root = read();
-        assert root != null;
         JsonArray playlists = getPlaylists(root);
-        assert playlists != null;
 
         for (int i = 0; i < playlists.size(); i++) {
             JsonObject playlist = playlists.get(i).getAsJsonObject();
-            if (playlist.get("name").getAsString().equals(name)) {
+            if (playlist.getAsJsonPrimitive(Constants.Json.Key.NAME).equals(name)) {
                 return false;
             }
         }
@@ -169,7 +182,11 @@ public class GsonPlaylistHelper {
         return true;
     }
 
-    public static boolean writeNew(String name) {
+    public static boolean writeNewIfNotFound(String name) {
+        return writeNewIfNotFound(new JsonPrimitive(name));
+    }
+
+    public static boolean writeNew(JsonPrimitive name) {
         JsonObject root = read();
         assert root != null;
         JsonArray playlists = getPlaylists(root);
@@ -182,6 +199,10 @@ public class GsonPlaylistHelper {
         return true;
     }
 
+    public static boolean writeNew(String name) {
+        return writeNew(new JsonPrimitive(name));
+    }
+
     private static boolean insert(JsonArray array, int pos, JsonObject obj) {
         array.add(new JsonObject());
         for (int i = array.size() - 1; i > pos; i--) {
@@ -191,7 +212,7 @@ public class GsonPlaylistHelper {
         return true;
     }
 
-    public static boolean reorder(String name, int fromIndex, int toIndex) {
+    public static boolean reorder(JsonPrimitive name, int fromIndex, int toIndex) {
         JsonObject root = read();
         JsonArray playlist = getPlaylist(root, name);
         if (playlist != null) {
@@ -205,13 +226,17 @@ public class GsonPlaylistHelper {
         return false;
     }
 
-    public static boolean reorder(String name, VideoData video, int toIndex) {
+    public static boolean reorder(String name, int fromIndex, int toIndex) {
+        return reorder(new JsonPrimitive(name), fromIndex, toIndex);
+    }
+
+    public static boolean reorder(JsonPrimitive name, VideoData video, int toIndex) {
         JsonObject root = read();
         JsonArray playlist = getPlaylist(root, name);
         if (playlist != null) {
             for (int i = 0; i < playlist.size(); i++) {
                 JsonObject obj = playlist.get(i).getAsJsonObject();
-                if (obj.get("id").getAsString().equals(video.getId())) {
+                if (obj.get(Constants.Json.Key.ID).getAsString().equals(video.getId())) {
                     playlist.remove(i);
                     if (!insert(playlist, toIndex, obj)) {
                         return false;
@@ -224,13 +249,17 @@ public class GsonPlaylistHelper {
         return false;
     }
 
-    public static boolean removeFrom(String name, VideoData video) {
+    public static boolean reorder(String name, VideoData video, int toIndex) {
+        return reorder(new JsonPrimitive(name), video, toIndex);
+    }
+
+    public static boolean removeFrom(JsonPrimitive name, VideoData video) {
         JsonObject root = read();
         JsonArray playlist = getPlaylist(root, name);
         if (playlist != null) {
             for (int i = 0; i < playlist.size(); i++) {
                 JsonObject obj = playlist.get(i).getAsJsonObject();
-                if (obj.get("id").getAsString().equals(video.getId())) {
+                if (obj.get(Constants.Json.Key.ID).getAsString().equals(video.getId())) {
                     playlist.remove(i);
                     executeSave(root.toString());
                     return true;
@@ -240,16 +269,19 @@ public class GsonPlaylistHelper {
         return false;
     }
 
-    public static boolean writeToNew(String name, VideoData video) {
+    public static boolean removeFrom(String name, VideoData video) {
+        return removeFrom(new JsonPrimitive(name), video);
+    }
+
+    public static boolean writeToNew(JsonPrimitive name, VideoData video) {
         JsonObject root = read();
         JsonArray playlists = getPlaylists(root);
-        assert playlists != null;
 
         JsonArray playlist = getPlaylist(root, name);
         if (playlist == null) {
             JsonObject obj = newPlaylist(name);
             playlists.add(obj);
-            playlist = obj.getAsJsonArray("playlist");
+            playlist = obj.getAsJsonArray(Constants.Json.Key.PLAYLIST);
         }
         if (playlist != null) {
             playlist.add(createVideo(video));
@@ -259,14 +291,17 @@ public class GsonPlaylistHelper {
         return false;
     }
 
-    public static boolean writeToIfNotFound(String name, VideoData video) {
+    public static boolean writeToNew(String name, VideoData video) {
+        return writeToNew(new JsonPrimitive(name), video);
+    }
+
+    public static boolean writeToIfNotFound(JsonPrimitive name, VideoData video) {
         JsonObject root = read();
-        assert root != null;
         JsonArray playlist = getPlaylist(root, name);
         if (playlist != null) {
             for (JsonElement jsonElement : playlist) {
                 JsonObject obj = jsonElement.getAsJsonObject();
-                if (obj.get("id").getAsString().equals(video.getId())) {
+                if (obj.get(Constants.Json.Key.ID).getAsString().equals(video.getId())) {
                     return false;
                 }
             }
@@ -277,14 +312,17 @@ public class GsonPlaylistHelper {
         return false;
     }
 
-    public static boolean writeToIfNotFound(String name, VideoData video, int index) {
+    public static boolean writeToIfNotFound(String name, VideoData video) {
+        return writeToIfNotFound(new JsonPrimitive(name), video);
+    }
+
+    public static boolean writeToIfNotFound(JsonPrimitive name, VideoData video, int index) {
         JsonObject root = read();
-        assert root != null;
         JsonArray playlist = getPlaylist(root, name);
         if (playlist != null) {
             for (JsonElement jsonElement : playlist) {
                 JsonObject obj = jsonElement.getAsJsonObject();
-                if (obj.get("id").getAsString().equals(video.getId())) {
+                if (obj.get(Constants.Json.Key.ID).getAsString().equals(video.getId())) {
                     return false;
                 }
             }
@@ -297,14 +335,17 @@ public class GsonPlaylistHelper {
         return false;
     }
 
-    public static boolean writeToOrReorder(String name, VideoData video, int index) {
+    public static boolean writeToIfNotFound(String name, VideoData video, int index) {
+        return writeToIfNotFound(new JsonPrimitive(name), video, index);
+    }
+
+    public static boolean writeToOrReorder(JsonPrimitive name, VideoData video, int index) {
         JsonObject root = read();
-        assert root != null;
         JsonArray playlist = getPlaylist(root, name);
         if (playlist != null) {
             for (int i = 0; i < playlist.size(); i++) {
                 JsonObject obj = playlist.get(i).getAsJsonObject();
-                if (obj.get("id").getAsString().equals(video.getId())) {
+                if (obj.get(Constants.Json.Key.ID).getAsString().equals(video.getId())) {
                     playlist.remove(i);
                     if (!insert(playlist, index, obj)) {
                         return false;
@@ -317,9 +358,12 @@ public class GsonPlaylistHelper {
         return false;
     }
 
-    public static boolean writeTo(String name, VideoData video, int index) {
+    public static boolean writeToOrReorder(String name, VideoData video, int index) {
+        return writeToOrReorder(new JsonPrimitive(name), video, index);
+    }
+
+    public static boolean writeTo(JsonPrimitive name, VideoData video, int index) {
         JsonObject root = read();
-        assert root != null;
         JsonArray playlist = getPlaylist(root, name);
         if (playlist != null) {
             if (!insert(playlist, index, createVideo(video))) {
@@ -331,9 +375,12 @@ public class GsonPlaylistHelper {
         return false;
     }
 
-    public static boolean writeTo(String name, VideoData video) {
+    public static boolean writeTo(String name, VideoData video, int index) {
+        return writeTo(new JsonPrimitive(name), video, index);
+    }
+
+    public static boolean writeTo(JsonPrimitive name, VideoData video) {
         JsonObject root = read();
-        assert root != null;
         JsonArray playlist = getPlaylist(root, name);
         if (playlist != null) {
             playlist.add(createVideo(video));
@@ -341,6 +388,10 @@ public class GsonPlaylistHelper {
             return true;
         }
         return false;
+    }
+
+    public static boolean writeTo(String name, VideoData video) {
+        return writeTo(new JsonPrimitive(name), video);
     }
 
     private static void printInParts(String string) {
@@ -369,18 +420,37 @@ public class GsonPlaylistHelper {
     }
 
     private static boolean doesFileExist() {
-        String path = context.getFilesDir().getAbsolutePath() + "/" + STORAGE_FILE_NAME;
+        String path = context.getFilesDir().getAbsolutePath() + "/" + Constants.Json.STORAGE_FILE_NAME;
         File file = new File(path);
         return file.exists();
     }
 
-    public static boolean remove(String name) {
+    public static boolean remove(JsonPrimitive name) {
         JsonObject root = read();
         JsonArray playlists = getPlaylists(root);
         for (int i = 0; i < playlists.size(); i++) {
             JsonObject playlist = playlists.get(i).getAsJsonObject();
-            if (playlist.get("name").getAsString().equals(name)) {
+            if (playlist.getAsJsonPrimitive(Constants.Json.Key.NAME).equals(name)) {
                 playlists.remove(i);
+                executeSave(root.toString());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean remove(String name) {
+        return remove(new JsonPrimitive(name));
+    }
+
+    public static boolean clear(JsonPrimitive name) {
+        JsonObject root = read();
+        JsonArray playlists = getPlaylists(root);
+        for (int i = 0; i < playlists.size(); i++) {
+            JsonObject playlist = playlists.get(i).getAsJsonObject();
+            if (playlist.getAsJsonPrimitive(Constants.Json.Key.NAME).equals(name)) {
+                playlists.remove(i);
+                playlists.add(newPlaylist(name));
                 executeSave(root.toString());
                 return true;
             }
@@ -389,18 +459,7 @@ public class GsonPlaylistHelper {
     }
 
     public static boolean clear(String name) {
-        JsonObject root = read();
-        JsonArray playlists = getPlaylists(root);
-        for (int i = 0; i < playlists.size(); i++) {
-            JsonObject playlist = playlists.get(i).getAsJsonObject();
-            if (playlist.get("name").getAsString().equals(name)) {
-                playlists.remove(i);
-                playlists.add(newPlaylist(name));
-                executeSave(root.toString());
-                return true;
-            }
-        }
-        return false;
+        return clear(new JsonPrimitive(name));
     }
 
 }

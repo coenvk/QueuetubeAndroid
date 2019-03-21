@@ -23,6 +23,16 @@ public class LoadPlaylistTask extends AsyncTask<String, Integer, List<VideoData>
         this.playlistFragment = playlistFragment;
     }
 
+    private List<VideoData> createPlaylist(JsonArray array) {
+        List<VideoData> videos = new ArrayList<>();
+        for (int i = 0; i < array.size(); i++) {
+            JsonObject video = array.get(i).getAsJsonObject();
+            VideoData videoData = new VideoData(video);
+            videos.add(videoData);
+        }
+        return videos;
+    }
+
     private List<VideoData> createPlaylist(JSONArray array) {
         List<VideoData> videos = new ArrayList<>();
         try {
@@ -39,7 +49,7 @@ public class LoadPlaylistTask extends AsyncTask<String, Integer, List<VideoData>
 
     @Override
     protected List<VideoData> doInBackground(String... strings) {
-        JSONArray playlist = JSONPlaylistHelper.getPlaylist(strings[0]);
+        JsonArray playlist = GsonPlaylistHelper.getPlaylist(strings[0]);
         return this.createPlaylist(playlist);
     }
 

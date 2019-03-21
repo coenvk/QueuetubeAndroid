@@ -7,14 +7,19 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import com.arman.queuetube.config.Constants;
 import com.arman.queuetube.model.VideoData;
-import com.arman.queuetube.modules.playlists.JSONPlaylistHelper;
+import com.arman.queuetube.modules.playlists.GsonPlaylistHelper;
+import com.arman.queuetube.util.Tuple;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -25,37 +30,56 @@ import androidx.fragment.app.DialogFragment;
 public class AddToPlaylistFragment extends DialogFragment {
 
     private List<Integer> selectedItems;
-    private CharSequence[] playlists;
-    private boolean[] checked;
-
     private VideoData video;
 
     @SuppressLint("StaticFieldLeak")
-    private AsyncTask<Void, Integer, CharSequence[]> loadPlaylistsTask = new AsyncTask<Void, Integer, CharSequence[]>() {
+    private AsyncTask<Void, Integer, Tuple<CharSequence[], boolean[]>> loadPlaylistsTask = new AsyncTask<Void, Integer, Tuple<CharSequence[], boolean[]>>() {
         @Override
-        protected CharSequence[] doInBackground(Void... voids) {
-            JSONArray playlists = JSONPlaylistHelper.getUserPlaylists();
-            CharSequence[] strings = new CharSequence[playlists.length()];
-            checked = new boolean[strings.length];
-            try {
-                for (int i = 0; i < strings.length; i++) {
-                    JSONObject obj = playlists.getJSONObject(i);
-                    strings[i] = obj.getString("name");
-                    JSONArray playlist = obj.getJSONArray("playlist");
-                    for (int j = 0; j < playlist.length(); j++) {
-                        JSONObject vid = playlist.getJSONObject(j);
-                        if (vid.getString("id").equals(video.getId())) {
-                            checked[i] = true;
-                            break;
-                        }
-                    }
-                }
-            } catch (JSONException e) {
-
-            }
-            return strings;
+        protected Tuple<CharSequence[], boolean[]> doInBackground(Void... voids) {
+            JsonArray playlists = GsonPlaylistHelper.getUserPlaylists();
+            return loadPlaylists(playlists);
         }
     };
+
+    private Tuple<CharSequence[], boolean[]> loadPlaylists(JsonArray array) {
+        CharSequence[] strings = new CharSequence[array.size()];
+        boolean[] checked = new boolean[strings.length];
+        for (int i = 0; i < strings.length; i++) {
+            JsonObject obj = array.get(i).getAsJsonObject();
+            strings[i] = obj.getAsJsonPrimitive(Constants.Json.Key.NAME).toString();
+            JsonArray playlist = obj.getAsJsonArray(Constants.Json.Key.PLAYLIST);
+            for (int j = 0; j < playlist.size(); j++) {
+                JsonObject vid = playlist.get(j).getAsJsonObject();
+                if (vid.get(Constants.Json.Key.ID).getAsString().equals(video.getId())) {
+                    checked[i] = true;
+                    break;
+                }
+            }
+        }
+        return new Tuple<>(strings, checked);
+    }
+
+    private Tuple<CharSequence[], boolean[]> loadPlaylists(JSONArray array) {
+        CharSequence[] strings = new CharSequence[array.length()];
+        boolean[] checked = new boolean[strings.length];
+        try {
+            for (int i = 0; i < strings.length; i++) {
+                JSONObject obj = array.getJSONObject(i);
+                strings[i] = obj.getString(Constants.Json.Key.NAME);
+                JSONArray playlist = obj.getJSONArray(Constants.Json.Key.PLAYLIST);
+                for (int j = 0; j < playlist.length(); j++) {
+                    JSONObject vid = playlist.getJSONObject(j);
+                    if (vid.getString(Constants.Json.Key.ID).equals(video.getId())) {
+                        checked[i] = true;
+                        break;
+                    }
+                }
+            }
+        } catch (JSONException e) {
+
+        }
+        return new Tuple<>(strings, checked);
+    }
 
     public void setVideo(VideoData video) {
         this.video = video;
@@ -65,14 +89,15 @@ public class AddToPlaylistFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         this.selectedItems = new ArrayList<>();
+        Tuple<CharSequence[], boolean[]> tuple;
         try {
-            this.playlists = this.loadPlaylistsTask.execute().get();
+            tuple = this.loadPlaylistsTask.execute().get();
         } catch (ExecutionException | InterruptedException e) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder
                     .setTitle("Error")
                     .setMessage("An error occurred while trying to retrieve your playlists")
-                    .setPositiveButton("Dismiss", new DialogInterface.OnClickListener() {
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
 
@@ -81,6 +106,9 @@ public class AddToPlaylistFragment extends DialogFragment {
             return builder.create();
         }
 
+        final CharSequence[] playlists = tuple.getLeft();
+        final boolean[] checked = tuple.getRight();
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder
                 .setTitle("Save video to...")
@@ -88,12 +116,12 @@ public class AddToPlaylistFragment extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         if (video != null) {
-                            for (int j = 0; j < AddToPlaylistFragment.this.playlists.length; j++) {
-                                String name = AddToPlaylistFragment.this.playlists[j].toString();
+                            for (int j = 0; j < playlists.length; j++) {
+                                String name = playlists[j].toString();
                                 if (AddToPlaylistFragment.this.selectedItems.contains(j)) {
-                                    JSONPlaylistHelper.writeTo(name, video);
+                                    GsonPlaylistHelper.writeTo(name, video);
                                 } else {
-                                    JSONPlaylistHelper.removeFrom(name, video);
+                                    GsonPlaylistHelper.removeFrom(name, video);
                                 }
                             }
                         }
@@ -105,7 +133,7 @@ public class AddToPlaylistFragment extends DialogFragment {
 
                     }
                 })
-                .setMultiChoiceItems(this.playlists, this.checked, new DialogInterface.OnMultiChoiceClickListener() {
+                .setMultiChoiceItems(playlists, checked, new DialogInterface.OnMultiChoiceClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i, boolean b) {
                         if (b) {
@@ -116,6 +144,14 @@ public class AddToPlaylistFragment extends DialogFragment {
                     }
                 });
         return builder.create();
+    }
+
+    public interface OnDialogDismissListener {
+
+        public void onDialogAccept(CharSequence[] playlists, Collection<Integer> selectedItems);
+
+        public void onDialogCancel();
+
     }
 
 }

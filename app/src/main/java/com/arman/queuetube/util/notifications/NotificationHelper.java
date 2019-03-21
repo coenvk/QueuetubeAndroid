@@ -11,17 +11,13 @@ import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import com.arman.queuetube.config.Constants;
-import com.arman.queuetube.activities.MainActivity;
 import com.arman.queuetube.R;
+import com.arman.queuetube.activities.MainActivity;
+import com.arman.queuetube.config.Constants;
 
 import androidx.core.app.NotificationCompat;
 
 public class NotificationHelper {
-
-    public static final String NOTIFICATION_CHANNEL_NAME = "Queuetube notifications";
-    public static final String NOTIFICATION_CHANNEL_ID = "49210233949201482942101";
-    public static final int NOTIFICATION_ID = 666;
 
     private Context context;
     private NotificationManager notificationManager;
@@ -39,6 +35,11 @@ public class NotificationHelper {
 
     private static boolean currentVersionSupportExpandedNotification() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
+    }
+
+    public static void destroyNotification(Context context) {
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(Constants.Notification.ID);
     }
 
     private void setListeners() {
@@ -75,7 +76,7 @@ public class NotificationHelper {
         views = new RemoteViews(context.getPackageName(), R.layout.status_bar);
         expandedViews = new RemoteViews(context.getPackageName(), R.layout.status_bar_expanded);
 
-        this.builder = new NotificationCompat.Builder(context.getApplicationContext(), NOTIFICATION_CHANNEL_ID);
+        this.builder = new NotificationCompat.Builder(context.getApplicationContext(), Constants.Notification.CHANNEL_ID);
 
         Intent intent = new Intent(context, MainActivity.class);
         intent.setAction(Constants.Action.MAIN_ACTION);
@@ -104,7 +105,7 @@ public class NotificationHelper {
         this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationChannel channel = new NotificationChannel(Constants.Notification.CHANNEL_ID, Constants.Notification.CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
             channel.enableVibration(false);
             channel.enableLights(false);
             channel.setSound(null, null);
@@ -131,7 +132,7 @@ public class NotificationHelper {
         notification.flags |= NotificationCompat.FLAG_NO_CLEAR;
 
         assert this.notificationManager != null;
-        this.notificationManager.notify(NOTIFICATION_ID, notification);
+        this.notificationManager.notify(Constants.Notification.ID, notification);
     }
 
     public void updateNotification(String title) {
@@ -142,7 +143,7 @@ public class NotificationHelper {
         notification.flags |= NotificationCompat.FLAG_NO_CLEAR;
 
         assert this.notificationManager != null;
-        this.notificationManager.notify(NOTIFICATION_ID, notification);
+        this.notificationManager.notify(Constants.Notification.ID, notification);
     }
 
     public void updateNotification(String title, boolean playing) {
@@ -167,7 +168,7 @@ public class NotificationHelper {
         notification.flags |= NotificationCompat.FLAG_NO_CLEAR;
 
         assert this.notificationManager != null;
-        this.notificationManager.notify(NOTIFICATION_ID, notification);
+        this.notificationManager.notify(Constants.Notification.ID, notification);
     }
 
     private void buildNotification(boolean playing) {
@@ -216,11 +217,6 @@ public class NotificationHelper {
                 buildNotification(title, playing);
             }
         }
-    }
-
-    public static void destroyNotification(Context context) {
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(NotificationHelper.NOTIFICATION_ID);
     }
 
 }

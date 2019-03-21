@@ -12,10 +12,12 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.arman.queuetube.R;
+import com.arman.queuetube.config.Constants;
 import com.arman.queuetube.model.VideoData;
 import com.arman.queuetube.model.adapters.PlaylistItemAdapter;
 import com.arman.queuetube.model.adapters.VideoItemAdapter;
 import com.arman.queuetube.model.viewholders.BaseViewHolder;
+import com.arman.queuetube.modules.playlists.GsonPlaylistHelper;
 import com.arman.queuetube.modules.playlists.JSONPlaylistHelper;
 import com.arman.queuetube.modules.playlists.LoadPlaylistTask;
 import com.arman.queuetube.util.VideoSharer;
@@ -86,9 +88,9 @@ public class PlaylistFragment extends Fragment implements PlaylistItemAdapter.On
         super.onCreate(savedInstanceState);
         Bundle arguments = getArguments();
         if (arguments != null) {
-            this.playlistName = arguments.getString("playlistName");
-            this.isClickable = arguments.getBoolean("isClickable", true);
-            this.isSortable = arguments.getBoolean("isSortable", true);
+            this.playlistName = arguments.getString(Constants.Fragment.Argument.PLAYLIST_NAME);
+            this.isClickable = arguments.getBoolean(Constants.Fragment.Argument.IS_CLICKABLE, true);
+            this.isSortable = arguments.getBoolean(Constants.Fragment.Argument.IS_SORTABLE, true);
         }
     }
 
@@ -142,7 +144,7 @@ public class PlaylistFragment extends Fragment implements PlaylistItemAdapter.On
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                JSONPlaylistHelper.clear(PlaylistFragment.this.playlistName);
+                GsonPlaylistHelper.clear(PlaylistFragment.this.playlistName);
             }
         });
 
@@ -188,7 +190,7 @@ public class PlaylistFragment extends Fragment implements PlaylistItemAdapter.On
                         break;
                     case R.id.playlist_item_option_remove:
                         playlistAdapter.remove(item);
-                        JSONPlaylistHelper.removeFrom(playlistName, item);
+                        GsonPlaylistHelper.removeFrom(playlistName, item);
                         break;
                     case R.id.playlist_item_option_share:
                         VideoSharer.share(context, item);

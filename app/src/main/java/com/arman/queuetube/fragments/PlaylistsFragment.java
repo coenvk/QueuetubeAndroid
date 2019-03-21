@@ -11,9 +11,10 @@ import android.widget.LinearLayout;
 
 import com.arman.queuetube.R;
 import com.arman.queuetube.activities.PlaylistActivity;
+import com.arman.queuetube.config.Constants;
 import com.arman.queuetube.model.adapters.BaseTouchAdapter;
 import com.arman.queuetube.model.adapters.PlaylistsAdapter;
-import com.arman.queuetube.modules.playlists.JSONPlaylistHelper;
+import com.arman.queuetube.modules.playlists.GsonPlaylistHelper;
 import com.arman.queuetube.modules.playlists.LoadPlaylistsTask;
 
 import androidx.annotation.NonNull;
@@ -56,7 +57,7 @@ public class PlaylistsFragment extends Fragment {
 
     private void loadActivity(String name) {
         Intent intent = new Intent(getActivity(), PlaylistActivity.class);
-        intent.putExtra("playlistName", name);
+        intent.putExtra(Constants.Fragment.Argument.PLAYLIST_NAME, name);
         this.startActivity(intent);
     }
 
@@ -75,7 +76,7 @@ public class PlaylistsFragment extends Fragment {
         favoritesItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadActivity(JSONPlaylistHelper.FAVORITES);
+                loadActivity(Constants.Json.Playlist.FAVORITES);
             }
         });
 
@@ -83,7 +84,7 @@ public class PlaylistsFragment extends Fragment {
         historyItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadActivity(JSONPlaylistHelper.HISTORY);
+                loadActivity(Constants.Json.Playlist.HISTORY);
             }
         });
 
@@ -108,7 +109,7 @@ public class PlaylistsFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 DialogFragment dialog = new CreatePlaylistFragment();
-                dialog.show(getActivity().getSupportFragmentManager(), "create_playlist_dialog");
+                dialog.show(getFragmentManager(), "create_playlist_dialog");
             }
         });
 

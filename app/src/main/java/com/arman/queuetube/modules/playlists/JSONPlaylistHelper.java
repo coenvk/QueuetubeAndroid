@@ -4,8 +4,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import com.arman.queuetube.activities.MainActivity;
+import com.arman.queuetube.config.Constants;
 import com.arman.queuetube.model.VideoData;
-import com.google.gson.JsonPrimitive;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,10 +22,6 @@ import java.io.OutputStreamWriter;
 
 public class JSONPlaylistHelper {
 
-    public static final String FAVORITES = "Favorites";
-    public static final String HISTORY = "History";
-    private static final String STORAGE_FILE_NAME = "playlists.json";
-
     private static Context context;
     private static SavePlaylistsTask savePlaylistsTask;
 
@@ -40,7 +36,7 @@ public class JSONPlaylistHelper {
     }
 
     public static void doWrite(String string) throws IOException {
-        FileOutputStream fos = context.openFileOutput(STORAGE_FILE_NAME, Context.MODE_PRIVATE);
+        FileOutputStream fos = context.openFileOutput(Constants.Json.STORAGE_FILE_NAME, Context.MODE_PRIVATE);
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
         bw.write(string);
         bw.flush();
@@ -48,7 +44,7 @@ public class JSONPlaylistHelper {
     }
 
     private static String doRead() throws IOException {
-        FileInputStream fis = context.openFileInput(STORAGE_FILE_NAME);
+        FileInputStream fis = context.openFileInput(Constants.Json.STORAGE_FILE_NAME);
         BufferedReader br = new BufferedReader(new InputStreamReader(fis));
         StringBuilder sb = new StringBuilder();
         String line;
@@ -67,10 +63,10 @@ public class JSONPlaylistHelper {
             if (!fileExists) {
                 JSONObject root = new JSONObject();
                 JSONArray playlists = new JSONArray();
-                playlists.put(newPlaylist(JSONPlaylistHelper.HISTORY));
-                playlists.put(newPlaylist(JSONPlaylistHelper.FAVORITES));
+                playlists.put(newPlaylist(Constants.Json.Playlist.HISTORY));
+                playlists.put(newPlaylist(Constants.Json.Playlist.FAVORITES));
 
-                root.put("playlists", playlists);
+                root.put(Constants.Json.Key.PLAYLISTS, playlists);
                 executeSave(root.toString());
             }
         } catch (JSONException e) {
@@ -79,11 +75,11 @@ public class JSONPlaylistHelper {
     }
 
     public static JSONArray getFavorites() {
-        return getPlaylist(read(), JSONPlaylistHelper.FAVORITES);
+        return getPlaylist(read(), Constants.Json.Playlist.FAVORITES);
     }
 
     public static JSONArray getHistory() {
-        return getPlaylist(read(), JSONPlaylistHelper.HISTORY);
+        return getPlaylist(read(), Constants.Json.Playlist.HISTORY);
     }
 
     public static boolean isFavorited(VideoData video) {
@@ -91,7 +87,7 @@ public class JSONPlaylistHelper {
         try {
             for (int i = 0; i < favorites.length(); i++) {
                 JSONObject obj = favorites.getJSONObject(i);
-                String id = obj.getString("id");
+                String id = obj.getString(Constants.Json.Key.ID);
                 if (id.equals(video.getId())) {
                     return true;
                 }
@@ -105,8 +101,8 @@ public class JSONPlaylistHelper {
     private static JSONObject newPlaylist(String name) {
         JSONObject obj = new JSONObject();
         try {
-            obj.put("name", new JsonPrimitive(name));
-            obj.put("playlist", new JSONArray());
+            obj.put(Constants.Json.Key.NAME, name);
+            obj.put(Constants.Json.Key.PLAYLIST, new JSONArray());
         } catch (JSONException e) {
 
         }
@@ -116,15 +112,11 @@ public class JSONPlaylistHelper {
     private static JSONObject createVideo(VideoData video) {
         JSONObject obj = new JSONObject();
         try {
-            obj.put("id", video.getId());
-            obj.put("title", video.getTitle());
-            obj.put("thumbnailUrl", video.getThumbnailUrl());
-            obj.put("likes", video.getLikes());
-            obj.put("dislikes", video.getDislikes());
-            obj.put("channel", video.getChannel());
-            obj.put("description", video.getDescription());
-            obj.put("publishedOn", video.getPublishedOn());
-            obj.put("views", video.getViews());
+            obj.put(Constants.Json.Key.ID, video.getId());
+            obj.put(Constants.VideoData.TITLE, video.getTitle());
+            obj.put(Constants.VideoData.THUMBNAIL_URL, video.getThumbnailUrl());
+            obj.put(Constants.VideoData.CHANNEL, video.getChannel());
+            obj.put(Constants.VideoData.PUBLISHED_ON, video.getPublishedOn());
         } catch (JSONException e) {
 
         }
@@ -137,7 +129,7 @@ public class JSONPlaylistHelper {
 
     private static JSONArray getPlaylists(JSONObject root) {
         try {
-            return root.getJSONArray("playlists");
+            return root.getJSONArray(Constants.Json.Key.PLAYLISTS);
         } catch (JSONException e) {
             return new JSONArray();
         }
@@ -150,8 +142,8 @@ public class JSONPlaylistHelper {
         try {
             for (int i = 0; i < playlists.length(); i++) {
                 JSONObject obj = playlists.getJSONObject(i);
-                String name = obj.getString("name");
-                if (!name.equals(FAVORITES) && !name.equals(HISTORY)) {
+                String name = obj.getString(Constants.Json.Key.NAME);
+                if (!name.equals(Constants.Json.Playlist.FAVORITES) && !name.equals(Constants.Json.Playlist.HISTORY)) {
                     userPlaylists.put(obj);
                 }
             }
@@ -171,8 +163,8 @@ public class JSONPlaylistHelper {
         try {
             for (int i = 0; i < playlists.length(); i++) {
                 JSONObject obj = playlists.getJSONObject(i);
-                if (obj.getString("name").equals(name)) {
-                    return obj.getJSONArray("playlist");
+                if (obj.getString(Constants.Json.Key.NAME).equals(name)) {
+                    return obj.getJSONArray(Constants.Json.Key.PLAYLIST);
                 }
             }
         } catch (JSONException e) {
@@ -188,7 +180,7 @@ public class JSONPlaylistHelper {
         try {
             for (int i = 0; i < playlists.length(); i++) {
                 JSONObject playlist = playlists.getJSONObject(i);
-                if (playlist.getString("name").equals(name)) {
+                if (playlist.getString(Constants.Json.Key.NAME).equals(name)) {
                     return false;
                 }
             }
@@ -247,7 +239,7 @@ public class JSONPlaylistHelper {
             try {
                 for (int i = 0; i < playlist.length(); i++) {
                     JSONObject obj = playlist.getJSONObject(i);
-                    if (obj.getString("id").equals(video.getId())) {
+                    if (obj.getString(Constants.Json.Key.ID).equals(video.getId())) {
                         playlist.remove(i);
                         if (!insert(playlist, toIndex, obj)) {
                             return false;
@@ -270,7 +262,7 @@ public class JSONPlaylistHelper {
             try {
                 for (int i = 0; i < playlist.length(); i++) {
                     JSONObject obj = playlist.getJSONObject(i);
-                    if (obj.getString("id").equals(video.getId())) {
+                    if (obj.getString(Constants.Json.Key.ID).equals(video.getId())) {
                         playlist.remove(i);
                         executeSave(root.toString());
                         return true;
@@ -292,7 +284,7 @@ public class JSONPlaylistHelper {
             try {
                 JSONObject obj = newPlaylist(name);
                 playlists.put(obj);
-                playlist = obj.getJSONArray("playlist");
+                playlist = obj.getJSONArray(Constants.Json.Key.PLAYLIST);
             } catch (JSONException e) {
                 return false;
             }
@@ -312,7 +304,7 @@ public class JSONPlaylistHelper {
             try {
                 for (int i = 0; i < playlist.length(); i++) {
                     JSONObject obj = playlist.getJSONObject(i);
-                    if (obj.getString("id").equals(video.getId())) {
+                    if (obj.getString(Constants.Json.Key.ID).equals(video.getId())) {
                         return false;
                     }
                 }
@@ -333,7 +325,7 @@ public class JSONPlaylistHelper {
             try {
                 for (int i = 0; i < playlist.length(); i++) {
                     JSONObject obj = playlist.getJSONObject(i);
-                    if (obj.getString("id").equals(video.getId())) {
+                    if (obj.getString(Constants.Json.Key.ID).equals(video.getId())) {
                         return false;
                     }
                 }
@@ -356,7 +348,7 @@ public class JSONPlaylistHelper {
             try {
                 for (int i = 0; i < playlist.length(); i++) {
                     JSONObject obj = playlist.getJSONObject(i);
-                    if (obj.getString("id").equals(video.getId())) {
+                    if (obj.getString(Constants.Json.Key.ID).equals(video.getId())) {
                         playlist.remove(i);
                         if (!insert(playlist, index, obj)) {
                             return false;
@@ -421,7 +413,7 @@ public class JSONPlaylistHelper {
     }
 
     private static boolean doesFileExist() {
-        String path = context.getFilesDir().getAbsolutePath() + "/" + STORAGE_FILE_NAME;
+        String path = context.getFilesDir().getAbsolutePath() + "/" + Constants.Json.STORAGE_FILE_NAME;
         File file = new File(path);
         return file.exists();
     }
@@ -432,7 +424,7 @@ public class JSONPlaylistHelper {
         try {
             for (int i = 0; i < playlists.length(); i++) {
                 JSONObject playlist = playlists.getJSONObject(i);
-                if (playlist.getString("name").equals(name)) {
+                if (playlist.getString(Constants.Json.Key.NAME).equals(name)) {
                     playlists.remove(i);
                     executeSave(root.toString());
                     return true;
@@ -450,7 +442,7 @@ public class JSONPlaylistHelper {
         try {
             for (int i = 0; i < playlists.length(); i++) {
                 JSONObject playlist = playlists.getJSONObject(i);
-                if (playlist.getString("name").equals(name)) {
+                if (playlist.getString(Constants.Json.Key.NAME).equals(name)) {
                     playlists.remove(i);
                     playlists.put(newPlaylist(name));
                     executeSave(root.toString());

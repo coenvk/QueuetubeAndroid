@@ -3,6 +3,7 @@ package com.arman.queuetube.activities;
 import android.os.Bundle;
 import android.view.MenuItem;
 
+import com.arman.queuetube.config.Constants;
 import com.arman.queuetube.fragments.PlaylistFragment;
 
 import androidx.annotation.Nullable;
@@ -16,9 +17,9 @@ public class PlaylistActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         this.setupActionBar();
 
-        String playlistName = getIntent().getStringExtra("playlistName");
+        String playlistName = getIntent().getStringExtra(Constants.Fragment.Argument.PLAYLIST_NAME);
         Bundle bundle = new Bundle();
-        bundle.putString("playlistName", playlistName);
+        bundle.putString(Constants.Fragment.Argument.PLAYLIST_NAME, playlistName);
         PlaylistFragment fragment = new PlaylistFragment();
         fragment.setArguments(bundle);
 

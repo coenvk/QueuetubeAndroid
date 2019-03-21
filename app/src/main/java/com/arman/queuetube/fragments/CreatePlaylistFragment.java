@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.arman.queuetube.R;
+import com.arman.queuetube.modules.playlists.GsonPlaylistHelper;
 import com.arman.queuetube.modules.playlists.JSONPlaylistHelper;
 
 import androidx.annotation.NonNull;
@@ -56,7 +57,7 @@ public class CreatePlaylistFragment extends DialogFragment {
                         if (text.isEmpty()) {
                             errorText.setVisibility(View.VISIBLE);
                         } else {
-                            if (!JSONPlaylistHelper.writeNewIfNotFound(text)) {
+                            if (!GsonPlaylistHelper.writeNewIfNotFound(text)) {
                                 errorText.setVisibility(View.VISIBLE);
                             } else {
                                 errorText.setVisibility(View.GONE);

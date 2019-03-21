@@ -5,9 +5,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.arman.queuetube.R;
+import com.arman.queuetube.config.Constants;
 import com.arman.queuetube.model.adapters.BaseTouchAdapter;
 import com.arman.queuetube.modules.playlists.GsonPlaylistHelper;
-import com.arman.queuetube.modules.playlists.JSONPlaylistHelper;
 
 import androidx.annotation.NonNull;
 
@@ -25,13 +25,13 @@ public class PlaylistsViewHolder extends BaseTouchViewHolder<String> {
     @Override
     public void bind(String item, BaseTouchAdapter.OnItemClickListener clickListener, BaseTouchAdapter.OnItemDragListener dragListener) {
         super.bind(item, clickListener, dragListener);
-        if (item.equals(JSONPlaylistHelper.FAVORITES) || item.equals(JSONPlaylistHelper.HISTORY)) {
+        if (item.equals(Constants.Json.Playlist.FAVORITES) || item.equals(Constants.Json.Playlist.HISTORY)) {
             this.deleteButton.setVisibility(View.GONE);
         } else {
             this.deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    JSONPlaylistHelper.remove(PlaylistsViewHolder.this.titleView.getText().toString());
+                    GsonPlaylistHelper.remove(PlaylistsViewHolder.this.titleView.getText().toString());
                 }
             });
         }

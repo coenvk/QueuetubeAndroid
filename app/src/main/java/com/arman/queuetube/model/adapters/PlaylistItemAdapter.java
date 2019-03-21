@@ -9,6 +9,7 @@ import com.arman.queuetube.model.VideoData;
 import com.arman.queuetube.model.viewholders.BaseViewHolder;
 import com.arman.queuetube.model.viewholders.PlaylistItemViewHolder;
 import com.arman.queuetube.model.viewholders.VideoViewHolder;
+import com.arman.queuetube.modules.playlists.GsonPlaylistHelper;
 import com.arman.queuetube.modules.playlists.JSONPlaylistHelper;
 
 import androidx.annotation.NonNull;
@@ -68,7 +69,7 @@ public class PlaylistItemAdapter extends VideoItemAdapter {
     @Override
     public boolean onItemDragged(int fromIndex, int toIndex, boolean dragFinished) {
         if (dragFinished) {
-            JSONPlaylistHelper.reorder(this.playlistName, fromIndex, toIndex);
+            GsonPlaylistHelper.reorder(this.playlistName, fromIndex, toIndex);
             return true;
         } else {
             return super.onItemDragged(fromIndex, toIndex, false);

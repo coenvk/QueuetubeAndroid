@@ -6,23 +6,13 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 
-import com.arman.queuetube.util.notifications.NotificationHelper;
+import com.arman.queuetube.config.Constants;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.JobIntentService;
 
 public class KillNotificationService extends JobIntentService {
-
-    public class KillBinder extends Binder {
-
-        public Service service;
-
-        public KillBinder(Service service) {
-            this.service = service;
-        }
-
-    }
 
     private KillBinder binder;
 
@@ -48,13 +38,23 @@ public class KillNotificationService extends JobIntentService {
 
     private void clearNotification() {
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.cancel(NotificationHelper.NOTIFICATION_ID);
+        notificationManager.cancel(Constants.Notification.ID);
     }
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
         clearNotification();
+    }
+
+    public class KillBinder extends Binder {
+
+        public Service service;
+
+        public KillBinder(Service service) {
+            this.service = service;
+        }
+
     }
 
 }

@@ -1,5 +1,7 @@
 package com.arman.queuetube.config
 
+import com.arman.queuetube.model.Category
+
 class Constants {
 
     interface Action {
@@ -31,25 +33,28 @@ class Constants {
             interface Music {
                 companion object {
 
-                    const val CHRISTIAN = "/m/02mscn"
-                    const val CLASSICAL = "/m/0ggq0m"
-                    const val COUNTRY = "/m/01lyv"
-                    const val ELECTRONIC = "/m/02lkt"
-                    const val HIP_HOP = "/m/0glt670"
-                    const val INDEPENDENT = "/m/05rwpb"
-                    const val JAZZ = "/m/03_d0"
-                    const val ASIAN = "/m/028sqc"
-                    const val LATIN_AMERICAN = "/m/0g293"
-                    const val POP = "/m/064t9"
-                    const val REGGAE = "/m/06cqb"
-                    const val RHYTHM_AND_BLUES = "/m/06j6l"
-                    const val ROCK = "/m/06by7"
-                    const val SOUL = "/m/0gywn"
+                    val CHRISTIAN = Category("/m/02mscn", "Christian")
+                    val CLASSICAL = Category("/m/0ggq0m", "Classical")
+                    val COUNTRY = Category("/m/01lyv", "Country")
+                    val ELECTRONIC = Category("/m/02lkt", "Electronic")
+                    val HIP_HOP = Category("/m/0glt670", "Hip Hop")
+                    val INDEPENDENT = Category("/m/05rwpb", "Independent")
+                    val JAZZ = Category("/m/03_d0", "Jazz")
+                    val ASIAN = Category("/m/028sqc", "Asian")
+                    val LATIN_AMERICAN = Category("/m/0g293", "Latin American")
+                    val POP = Category("/m/064t9", "Pop")
+                    val REGGAE = Category("/m/06cqb", "Reggae")
+                    val RHYTHM_AND_BLUES = Category("/m/06j6l", "Rhythm and Blues")
+                    val ROCK = Category("/m/06by7", "Rock")
+                    val SOUL = Category("/m/0gywn", "Soul")
+
+                    val ALL = mutableListOf(CHRISTIAN, CLASSICAL, COUNTRY, ELECTRONIC, HIP_HOP, INDEPENDENT, JAZZ, ASIAN, LATIN_AMERICAN, POP, REGGAE, RHYTHM_AND_BLUES, ROCK, SOUL)
                 }
 
             }
 
             interface Gaming {
+
                 companion object {
 
                     const val ACTION = "/m/025zzc"
@@ -62,6 +67,8 @@ class Constants {
                     const val SIMULATION = "/m/021bp2"
                     const val SPORTS = "/m/022dc6"
                     const val STRATEGY = "/m/03hf_rm"
+
+                    val ALL = mutableListOf(ACTION, ACTION_ADVENTURE, CASUAL, MUSIC, PUZZLE, RACING, ROLE_PLAYING, SIMULATION, SPORTS, STRATEGY)
                 }
 
             }
@@ -77,10 +84,12 @@ class Constants {
                     const val FOOTBALL = "/m/02vx4"
                     const val GOLF = "/m/037hz"
                     const val ICE_HOCKEY = "/m/03tmr"
-                    const val MIXEL_MARTIAL_ARTS = "/m/01h7lh"
+                    const val MIXED_MARTIAL_ARTS = "/m/01h7lh"
                     const val MOTORSPORT = "/m/0410tth"
                     const val TENNIS = "/m/07bs0"
                     const val VOLLEYBALL = "/m/07_53"
+
+                    val ALL = mutableListOf(AMERICAN_FOOTBALL, BASEBALL, BASKETBALL, BOXING, CRICKET, FOOTBALL, GOLF, ICE_HOCKEY, MIXED_MARTIAL_ARTS, MOTORSPORT, TENNIS, VOLLEYBALL)
                 }
 
             }
@@ -93,6 +102,8 @@ class Constants {
                     const val PERFORMING_ARTS = "/m/05qjc"
                     const val PROFESSIONAL_WRESTLING = "/m/066wd"
                     const val TV_SHOWS = "/m/0f2f9"
+
+                    val ALL = mutableListOf(HUMOR, MOVIES, PERFORMING_ARTS, PROFESSIONAL_WRESTLING, TV_SHOWS)
                 }
 
             }
@@ -109,6 +120,8 @@ class Constants {
                     const val TECHNOLOGY = "/m/07c1v"
                     const val TOURISM = "/m/07bxq"
                     const val VEHICLES = "/m/07yv9"
+
+                    val ALL = mutableListOf(FASHION, FITNESS, FOOD, HOBBY, PETS, BEAUTY, TECHNOLOGY, TOURISM, VEHICLES)
                 }
 
             }
@@ -121,20 +134,24 @@ class Constants {
                     const val MILITARY = "/m/01h6rj"
                     const val POLITICS = "/m/05qt0"
                     const val RELIGION = "/m/06bvp"
+
+                    val ALL = mutableListOf(BUSINESS, HEALTH, MILITARY, POLITICS, RELIGION)
                 }
 
             }
 
             companion object {
 
-                const val MUSIC = "/m/04rlf"
-                const val GAMING = "/m/0bzvm2"
-                const val SPORTS = "/m/06ntj"
-                const val ENTERTAINMENT = "/m/02jjt"
-                const val LIFESTYLE = "/m/019_rr"
-                const val SOCIETY = "/m/098wr"
+                val MUSIC = Category("/m/04rlf", "Music")
+                val GAMING = Category("/m/0bzvm2", "Gaming")
+                val SPORTS = Category("/m/06ntj", "Sports")
+                val ENTERTAINMENT = Category("/m/02jjt", "Entertainment")
+                val LIFESTYLE = Category("/m/019_rr", "Lifestyle")
+                val SOCIETY = Category("/m/098wr", "Society")
 
-                const val KNOWLEDGE = "/m/01k8wb"
+                val KNOWLEDGE = Category("/m/01k8wb", "Knowledge")
+
+                val ALL = mutableListOf(MUSIC, GAMING, SPORTS, ENTERTAINMENT, LIFESTYLE, SOCIETY, KNOWLEDGE)
             }
 
         }
@@ -157,18 +174,24 @@ class Constants {
             companion object {
 
                 const val PLAYLIST_NAME = "playlistName"
-                const val IS_CLICKABLE = "isClickable"
+                const val IS_DRAGGABLE = "isDraggable"
+                const val IS_SHUFFLABLE = "isShufflable"
                 const val IS_SORTABLE = "isSortable"
+                const val IS_EDITABLE = "isEditable"
+                const val IS_REFRESHABLE = "isRefreshable"
+                const val LOAD_ON_START = "loadOnStart"
+                const val TOPIC = "topic"
+                const val CATEGORY = "category"
+
             }
 
         }
 
         companion object {
 
-            const val MAIN = 0
-            const val TRENDING = 1
-            const val DISCOVER = 2
-            const val LIBRARY = 3
+            const val HOME = 0
+            const val SEARCH = 1
+            const val LIBRARY = 2
         }
 
     }

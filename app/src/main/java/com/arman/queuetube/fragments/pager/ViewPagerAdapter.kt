@@ -8,9 +8,9 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.arman.queuetube.R
-import com.arman.queuetube.fragments.PlayerFragment
-import com.arman.queuetube.fragments.QueueFragment
-import com.arman.queuetube.fragments.SearchFragment
+import com.arman.queuetube.fragments.main.PlayerFragment
+import com.arman.queuetube.fragments.main.QueueFragment
+import com.arman.queuetube.fragments.main.SearchFragment
 import com.arman.queuetube.model.adapters.BaseTouchAdapter
 import java.util.*
 
@@ -72,18 +72,17 @@ class ViewPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
     private fun addFragment(fragment: Fragment) {
         if (fragment is QueueFragment) {
             this.fragmentTitles.add(PAGE_TITLES[QUEUE_INDEX])
-            fragment.setOnItemClickListener(QueueItemClickListener())
+            fragment.onItemClickListener = QueueItemClickListener()
         } else if (fragment is SearchFragment) {
             this.fragmentTitles.add(PAGE_TITLES[SEARCH_INDEX])
-            fragment.setOnItemClickListener(SearchItemClickListener())
         }
         this.fragments.add(fragment)
     }
 
     inner class QueueItemClickListener : BaseTouchAdapter.OnItemClickListener {
 
-        override fun onClick(viewHolder: RecyclerView.ViewHolder) {
-            viewHolder.itemView.isClickable = false
+        override fun onItemClick(holder: RecyclerView.ViewHolder) {
+            holder.itemView.isClickable = false
             val queueFragment = this@ViewPagerAdapter.getFragmentByIndex(QUEUE_INDEX) as QueueFragment
 
             val animation = AnimationUtils.loadAnimation(queueFragment.activity, R.anim.remove_from_queue)
@@ -94,7 +93,7 @@ class ViewPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
                 }
 
                 override fun onAnimationEnd(animation: Animation) {
-                    queueFragment.queueAdapter?.remove(viewHolder.adapterPosition)
+                    queueFragment.queueAdapter?.remove(holder.adapterPosition)
                     if (queueFragment.queueAdapter?.isEmpty!!) {
                         queueFragment.showEmptyText()
                     }
@@ -105,21 +104,21 @@ class ViewPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
                 }
             })
 
-            viewHolder.itemView.startAnimation(animation)
+            holder.itemView.startAnimation(animation)
         }
 
     }
 
     inner class SearchItemClickListener : BaseTouchAdapter.OnItemClickListener {
 
-        override fun onClick(viewHolder: RecyclerView.ViewHolder) {
+        override fun onItemClick(holder: RecyclerView.ViewHolder) {
             val queueFragment = this@ViewPagerAdapter.getFragmentByIndex(QUEUE_INDEX) as QueueFragment
             val searchFragment = this@ViewPagerAdapter.getFragmentByIndex(SEARCH_INDEX) as SearchFragment
 
-            val animation = AnimationUtils.loadAnimation(viewHolder.itemView.context, R.anim.add_from_search_results)
-            viewHolder.itemView.startAnimation(animation)
+            val animation = AnimationUtils.loadAnimation(holder.itemView.context, R.anim.add_from_search_results)
+            holder.itemView.startAnimation(animation)
 
-            queueFragment.queueAdapter?.add(searchFragment.resultsAdapter?.get(viewHolder.adapterPosition))
+            queueFragment.queueAdapter?.add(searchFragment.listAdapter?.get(holder.adapterPosition)!!)
             (this@ViewPagerAdapter.playerFragment as PlayerFragment).tryPlayNext()
         }
 

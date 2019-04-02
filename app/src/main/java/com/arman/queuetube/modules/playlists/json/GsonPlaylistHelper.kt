@@ -3,53 +3,76 @@ package com.arman.queuetube.modules.playlists.json
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.AsyncTask
-import com.arman.queuetube.activities.MainActivity
 import com.arman.queuetube.config.Constants
+import com.arman.queuetube.listeners.OnSaveFinishedListener
+import com.arman.queuetube.listeners.OnTaskFinishedListener
 import com.arman.queuetube.model.VideoData
-import com.arman.queuetube.modules.playlists.SavePlaylistsTask
+import com.arman.queuetube.modules.BaseTask
 import com.google.gson.*
 import java.io.*
 
 @SuppressLint("StaticFieldLeak")
 object GsonPlaylistHelper {
 
-    private val PRIM_FAVORITES = JsonPrimitive(Constants.Json.Playlist.FAVORITES)
-    private val PRIM_HISTORY = JsonPrimitive(Constants.Json.Playlist.HISTORY)
-
     private var context: Context? = null
-    private var savePlaylistsTask: SavePlaylistsTask? = null
+    private val onSaveFinishedListeners: MutableList<OnSaveFinishedListener> = ArrayList()
+    private var savePlaylistsTask: BaseTask<String, Unit>? = null
 
     private var gson: Gson? = null
 
     val favorites: JsonArray?
-        get() = getPlaylist(read(), GsonPlaylistHelper.PRIM_FAVORITES)
+        get() = getPlaylist(read(), Constants.Json.Playlist.FAVORITES)
 
     val history: JsonArray?
-        get() = getPlaylist(read(), GsonPlaylistHelper.PRIM_HISTORY)
+        get() = getPlaylist(read(), Constants.Json.Playlist.HISTORY)
 
     val playlists: JsonArray?
-        get() = getPlaylists(read()!!)
+        get() = getPlaylists(read())
 
     val userPlaylists: JsonArray
         get() {
             val root = read()
-            val playlists = root!!.get(Constants.Json.Key.PLAYLISTS).asJsonArray
+            val playlists = root.get(Constants.Json.Key.PLAYLISTS).asJsonArray
             val userPlaylists = JsonArray()
             for (playlist in playlists) {
                 val obj = playlist.asJsonObject
-                val name = obj.getAsJsonPrimitive(Constants.Json.Key.NAME)
-                if (name != PRIM_FAVORITES && name != PRIM_HISTORY) {
+                val name = obj.getAsJsonPrimitive(Constants.Json.Key.NAME).asString
+                if (name != Constants.Json.Playlist.FAVORITES && name != Constants.Json.Playlist.HISTORY) {
                     userPlaylists.add(playlist)
                 }
             }
             return userPlaylists
         }
 
+    fun addOnSaveFinishedListener(onSaveFinishedListener: OnSaveFinishedListener) {
+        this.onSaveFinishedListeners.add(onSaveFinishedListener)
+    }
+
+    fun removeOnSaveFinishedListener(onSaveFinishedListener: OnSaveFinishedListener) {
+        this.onSaveFinishedListeners.remove(onSaveFinishedListener)
+    }
+
+    private fun doExecuteSave(vararg strings: String?): Unit {
+        try {
+            doWrite(strings[0]!!)
+        } catch (e: IOException) {
+        }
+    }
+
     private fun executeSave(string: String) {
+        if (savePlaylistsTask == null) {
+            savePlaylistsTask = BaseTask(::doExecuteSave)
+            savePlaylistsTask?.onTaskFinishedListener = OnTaskFinishedListener {
+                onSaveFinishedListeners.forEach { it.onSaveFinished() }
+            }
+        }
         val status = savePlaylistsTask!!.status
         if (status != AsyncTask.Status.RUNNING) {
             if (status == AsyncTask.Status.FINISHED) {
-                savePlaylistsTask = SavePlaylistsTask(context as MainActivity?)
+                savePlaylistsTask = BaseTask(::doExecuteSave)
+                savePlaylistsTask?.onTaskFinishedListener = OnTaskFinishedListener {
+                    onSaveFinishedListeners.forEach { it.onSaveFinished() }
+                }
             }
             savePlaylistsTask!!.execute(string)
         }
@@ -82,14 +105,13 @@ object GsonPlaylistHelper {
 
     fun onCreate(context: Context) {
         GsonPlaylistHelper.context = context
-        savePlaylistsTask = SavePlaylistsTask(context as MainActivity)
         gson = GsonBuilder().setPrettyPrinting().create()
         val fileExists = doesFileExist()
         if (!fileExists) {
             val root = JsonObject()
             val playlists = JsonArray()
-            playlists.add(newPlaylist(GsonPlaylistHelper.PRIM_HISTORY))
-            playlists.add(newPlaylist(GsonPlaylistHelper.PRIM_FAVORITES))
+            playlists.add(newPlaylist(Constants.Json.Playlist.HISTORY))
+            playlists.add(newPlaylist(Constants.Json.Playlist.FAVORITES))
 
             root.add(Constants.Json.Key.PLAYLISTS, playlists)
             executeSave(root.toString())
@@ -108,11 +130,23 @@ object GsonPlaylistHelper {
         return false
     }
 
-    private fun newPlaylist(name: JsonPrimitive?): JsonObject {
-        val obj = JsonObject()
-        obj.add(Constants.Json.Key.NAME, name)
-        obj.add(Constants.Json.Key.PLAYLIST, JsonArray())
-        return obj
+    fun playlistNames(array: JsonArray): MutableList<String> {
+        val strings = java.util.ArrayList<String>()
+        for (i in 0 until array.size()) {
+            val playlist = array.get(i).asJsonObject
+            strings.add(playlist.getAsJsonPrimitive(Constants.Json.Key.NAME).asString)
+        }
+        return strings
+    }
+
+    fun asPlaylist(array: JsonArray): MutableList<VideoData> {
+        val videos = ArrayList<VideoData>()
+        for (i in 0 until array.size()) {
+            val video = array.get(i).asJsonObject
+            val videoData = VideoData(video)
+            videos.add(videoData)
+        }
+        return videos
     }
 
     private fun newPlaylist(name: String): JsonObject {
@@ -122,45 +156,56 @@ object GsonPlaylistHelper {
         return obj
     }
 
+    fun editName(fromName: String, toName: String): Boolean {
+        val root = read()
+        val playlists = getPlaylists(root)!!
+        for (i in 0 until playlists.size()) {
+            val obj = playlists.get(i).asJsonObject
+            if (obj.getAsJsonPrimitive(Constants.Json.Key.NAME).asString == fromName) {
+                obj.addProperty(Constants.Json.Key.NAME, toName)
+                executeSave(root.toString())
+                return true
+            }
+        }
+        return false
+    }
+
     private fun createVideo(video: VideoData): JsonObject {
-        return gson!!.toJsonTree(video).asJsonObject
+        val obj = JsonObject()
+        obj.addProperty(Constants.Json.Key.ID, video.id)
+        obj.addProperty(Constants.VideoData.TITLE, video.title)
+        obj.addProperty(Constants.VideoData.CHANNEL, video.channel)
+        obj.addProperty(Constants.VideoData.PUBLISHED_ON, video.publishedOn)
+        return obj
     }
 
     private fun getPlaylists(root: JsonObject): JsonArray? {
         return root.get(Constants.Json.Key.PLAYLISTS).asJsonArray
     }
 
-    fun getPlaylist(name: JsonPrimitive): JsonArray? {
+    fun getPlaylist(name: String): JsonArray? {
         val root = read()
         return getPlaylist(root, name)
     }
 
-    fun getPlaylist(name: String): JsonArray? {
-        return getPlaylist(JsonPrimitive(name))
-    }
-
-    private fun getPlaylist(root: JsonObject?, name: JsonPrimitive): JsonArray? {
-        val playlists = getPlaylists(root!!)!!
+    private fun getPlaylist(root: JsonObject, name: String): JsonArray? {
+        val playlists = getPlaylists(root)!!
         for (i in 0 until playlists.size()) {
             val obj = playlists.get(i).asJsonObject
-            if (obj.getAsJsonPrimitive(Constants.Json.Key.NAME) == name) {
+            if (obj.getAsJsonPrimitive(Constants.Json.Key.NAME).asString == name) {
                 return obj.get(Constants.Json.Key.PLAYLIST).asJsonArray
             }
         }
         return null
     }
 
-    private fun getPlaylist(root: JsonObject, name: String): JsonArray? {
-        return getPlaylist(root, JsonPrimitive(name))
-    }
-
-    fun writeNewIfNotFound(name: JsonPrimitive): Boolean {
+    fun writeNewIfNotFound(name: String): Boolean {
         val root = read()
-        val playlists = getPlaylists(root!!)
+        val playlists = getPlaylists(root)
 
         for (i in 0 until playlists!!.size()) {
             val playlist = playlists.get(i).asJsonObject
-            if (playlist.getAsJsonPrimitive(Constants.Json.Key.NAME) == name) {
+            if (playlist.getAsJsonPrimitive(Constants.Json.Key.NAME).asString == name) {
                 return false
             }
         }
@@ -172,12 +217,8 @@ object GsonPlaylistHelper {
         return true
     }
 
-    fun writeNewIfNotFound(name: String): Boolean {
-        return writeNewIfNotFound(JsonPrimitive(name))
-    }
-
-    fun writeNew(name: JsonPrimitive): Boolean {
-        val root = read()!!
+    fun writeNew(name: String): Boolean {
+        val root = read()
         val playlists = getPlaylists(root)!!
 
         val obj = newPlaylist(name)
@@ -185,10 +226,6 @@ object GsonPlaylistHelper {
         playlists.add(obj)
         executeSave(root.toString())
         return true
-    }
-
-    fun writeNew(name: String): Boolean {
-        return writeNew(JsonPrimitive(name))
     }
 
     private fun insert(array: JsonArray, pos: Int, obj: JsonObject): Boolean {
@@ -200,7 +237,7 @@ object GsonPlaylistHelper {
         return true
     }
 
-    fun reorder(name: JsonPrimitive, fromIndex: Int, toIndex: Int): Boolean {
+    fun reorder(name: String, fromIndex: Int, toIndex: Int): Boolean {
         val root = read()
         val playlist = getPlaylist(root, name)
         if (playlist != null) {
@@ -208,17 +245,13 @@ object GsonPlaylistHelper {
             if (!insert(playlist, toIndex, video)) {
                 return false
             }
-            executeSave(root!!.toString())
+            executeSave(root.toString())
             return true
         }
         return false
     }
 
-    fun reorder(name: String, fromIndex: Int, toIndex: Int): Boolean {
-        return reorder(JsonPrimitive(name), fromIndex, toIndex)
-    }
-
-    fun reorder(name: JsonPrimitive, video: VideoData, toIndex: Int): Boolean {
+    fun reorder(name: String, video: VideoData, toIndex: Int): Boolean {
         val root = read()
         val playlist = getPlaylist(root, name)
         if (playlist != null) {
@@ -229,27 +262,7 @@ object GsonPlaylistHelper {
                     if (!insert(playlist, toIndex, obj)) {
                         return false
                     }
-                    executeSave(root!!.toString())
-                    return true
-                }
-            }
-        }
-        return false
-    }
-
-    fun reorder(name: String, video: VideoData, toIndex: Int): Boolean {
-        return reorder(JsonPrimitive(name), video, toIndex)
-    }
-
-    fun removeFrom(name: JsonPrimitive, video: VideoData): Boolean {
-        val root = read()
-        val playlist = getPlaylist(root, name)
-        if (playlist != null) {
-            for (i in 0 until playlist.size()) {
-                val obj = playlist.get(i).asJsonObject
-                if (obj.get(Constants.Json.Key.ID).asString == video.id) {
-                    playlist.remove(i)
-                    executeSave(root!!.toString())
+                    executeSave(root.toString())
                     return true
                 }
             }
@@ -258,12 +271,24 @@ object GsonPlaylistHelper {
     }
 
     fun removeFrom(name: String, video: VideoData): Boolean {
-        return removeFrom(JsonPrimitive(name), video)
+        val root = read()
+        val playlist = getPlaylist(root, name)
+        if (playlist != null) {
+            for (i in 0 until playlist.size()) {
+                val obj = playlist.get(i).asJsonObject
+                if (obj.get(Constants.Json.Key.ID).asString == video.id) {
+                    playlist.remove(i)
+                    executeSave(root.toString())
+                    return true
+                }
+            }
+        }
+        return false
     }
 
-    fun writeToNew(name: JsonPrimitive, video: VideoData): Boolean {
+    fun writeToNew(name: String, video: VideoData): Boolean {
         val root = read()
-        val playlists = getPlaylists(root!!)
+        val playlists = getPlaylists(root)
 
         var playlist = getPlaylist(root, name)
         if (playlist == null) {
@@ -279,11 +304,7 @@ object GsonPlaylistHelper {
         return false
     }
 
-    fun writeToNew(name: String, video: VideoData): Boolean {
-        return writeToNew(JsonPrimitive(name), video)
-    }
-
-    fun writeToIfNotFound(name: JsonPrimitive, video: VideoData): Boolean {
+    fun writeToIfNotFound(name: String, video: VideoData): Boolean {
         val root = read()
         val playlist = getPlaylist(root, name)
         if (playlist != null) {
@@ -294,17 +315,13 @@ object GsonPlaylistHelper {
                 }
             }
             playlist.add(createVideo(video))
-            executeSave(root!!.toString())
+            executeSave(root.toString())
             return true
         }
         return false
     }
 
-    fun writeToIfNotFound(name: String, video: VideoData): Boolean {
-        return writeToIfNotFound(JsonPrimitive(name), video)
-    }
-
-    fun writeToIfNotFound(name: JsonPrimitive, video: VideoData, index: Int): Boolean {
+    fun writeToIfNotFound(name: String, video: VideoData, index: Int): Boolean {
         val root = read()
         val playlist = getPlaylist(root, name)
         if (playlist != null) {
@@ -317,17 +334,13 @@ object GsonPlaylistHelper {
             if (!insert(playlist, index, createVideo(video))) {
                 return false
             }
-            executeSave(root!!.toString())
+            executeSave(root.toString())
             return true
         }
         return false
     }
 
-    fun writeToIfNotFound(name: String, video: VideoData, index: Int): Boolean {
-        return writeToIfNotFound(JsonPrimitive(name), video, index)
-    }
-
-    fun writeToOrReorder(name: JsonPrimitive, video: VideoData, index: Int): Boolean {
+    fun writeToOrReorder(name: String, video: VideoData, index: Int): Boolean {
         val root = read()
         val playlist = getPlaylist(root, name)
         if (playlist != null) {
@@ -338,48 +351,41 @@ object GsonPlaylistHelper {
                     if (!insert(playlist, index, obj)) {
                         return false
                     }
-                    executeSave(root!!.toString())
+                    executeSave(root.toString())
                     return true
                 }
             }
-        }
-        return false
-    }
-
-    fun writeToOrReorder(name: String, video: VideoData, index: Int): Boolean {
-        return writeToOrReorder(JsonPrimitive(name), video, index)
-    }
-
-    fun writeTo(name: JsonPrimitive, video: VideoData, index: Int): Boolean {
-        val root = read()
-        val playlist = getPlaylist(root, name)
-        if (playlist != null) {
             if (!insert(playlist, index, createVideo(video))) {
                 return false
             }
-            executeSave(root!!.toString())
+            executeSave(root.toString())
             return true
         }
         return false
     }
 
     fun writeTo(name: String, video: VideoData, index: Int): Boolean {
-        return writeTo(JsonPrimitive(name), video, index)
-    }
-
-    fun writeTo(name: JsonPrimitive, video: VideoData): Boolean {
         val root = read()
         val playlist = getPlaylist(root, name)
         if (playlist != null) {
-            playlist.add(createVideo(video))
-            executeSave(root!!.toString())
+            if (!insert(playlist, index, createVideo(video))) {
+                return false
+            }
+            executeSave(root.toString())
             return true
         }
         return false
     }
 
     fun writeTo(name: String, video: VideoData): Boolean {
-        return writeTo(JsonPrimitive(name), video)
+        val root = read()
+        val playlist = getPlaylist(root, name)
+        if (playlist != null) {
+            playlist.add(createVideo(video))
+            executeSave(root.toString())
+            return true
+        }
+        return false
     }
 
     private fun printInParts(string: String) {
@@ -392,12 +398,11 @@ object GsonPlaylistHelper {
         }
     }
 
-    fun read(): JsonObject? {
-        try {
-            return doRead()
+    fun read(): JsonObject {
+        return try {
+            doRead()
         } catch (e: IOException) {
-            System.err.println(e.message)
-            return JsonObject()
+            JsonObject()
         }
 
     }
@@ -414,32 +419,13 @@ object GsonPlaylistHelper {
         return file.exists()
     }
 
-    fun remove(name: JsonPrimitive): Boolean {
-        val root = read()
-        val playlists = getPlaylists(root!!)
-        for (i in 0 until playlists!!.size()) {
-            val playlist = playlists.get(i).asJsonObject
-            if (playlist.getAsJsonPrimitive(Constants.Json.Key.NAME) == name) {
-                playlists.remove(i)
-                executeSave(root.toString())
-                return true
-            }
-        }
-        return false
-    }
-
     fun remove(name: String): Boolean {
-        return remove(JsonPrimitive(name))
-    }
-
-    fun clear(name: JsonPrimitive): Boolean {
         val root = read()
-        val playlists = getPlaylists(root!!)
+        val playlists = getPlaylists(root)
         for (i in 0 until playlists!!.size()) {
             val playlist = playlists.get(i).asJsonObject
-            if (playlist.getAsJsonPrimitive(Constants.Json.Key.NAME) == name) {
+            if (playlist.getAsJsonPrimitive(Constants.Json.Key.NAME).asString == name) {
                 playlists.remove(i)
-                playlists.add(newPlaylist(name))
                 executeSave(root.toString())
                 return true
             }
@@ -448,7 +434,20 @@ object GsonPlaylistHelper {
     }
 
     fun clear(name: String): Boolean {
-        return clear(JsonPrimitive(name))
+        val root = read()
+        val playlists = getPlaylists(root)
+        for (i in 0 until playlists!!.size()) {
+            val playlist = playlists.get(i).asJsonObject
+            if (playlist.getAsJsonPrimitive(Constants.Json.Key.NAME).asString == name) {
+                playlists.remove(i)
+                if (!insert(playlists, i, newPlaylist(name))) {
+                    return false
+                }
+                executeSave(root.toString())
+                return true
+            }
+        }
+        return false
     }
 
 }

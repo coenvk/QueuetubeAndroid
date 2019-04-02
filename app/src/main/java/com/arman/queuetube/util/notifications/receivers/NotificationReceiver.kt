@@ -6,7 +6,7 @@ import android.content.Intent
 import android.util.Log
 
 import com.arman.queuetube.config.Constants
-import com.arman.queuetube.fragments.PlayerFragment
+import com.arman.queuetube.fragments.main.PlayerFragment
 
 class NotificationReceiver(private val playerFragment: PlayerFragment) : BroadcastReceiver() {
 
@@ -24,7 +24,8 @@ class NotificationReceiver(private val playerFragment: PlayerFragment) : Broadca
 
     companion object {
 
-        val TAG = "NotificationReceiver"
+        const val TAG = "NotificationReceiver"
+
     }
 
 }

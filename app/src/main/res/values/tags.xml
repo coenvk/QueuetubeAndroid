@@ -2,5 +2,6 @@
 <resources>
     <item name="initialize" type="id" />
     <item name="videoId" type="id" />
+    <item name="url" type="id" />
     <item name="thumbnailloader" type="id" />
 </resources>

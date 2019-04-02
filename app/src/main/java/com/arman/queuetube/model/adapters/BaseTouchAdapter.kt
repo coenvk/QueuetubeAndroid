@@ -1,29 +1,32 @@
 package com.arman.queuetube.model.adapters
 
+import androidx.recyclerview.widget.RecyclerView
 import com.arman.queuetube.model.viewholders.BaseTouchViewHolder
 import com.arman.queuetube.util.itemtouchhelper.adapters.ItemTouchHelperAdapter
-
-import java.util.Collections
-import androidx.recyclerview.widget.RecyclerView
+import java.util.*
 
 abstract class BaseTouchAdapter<E, VH : BaseTouchViewHolder<E>> : BaseAdapter<E, VH>, ItemTouchHelperAdapter {
 
-    protected var clickListener: OnItemClickListener? = null
-    protected var dragListener: OnItemDragListener? = null
+    var onItemClickListener: OnItemClickListener? = null
+    var onItemDragListener: OnItemDragListener? = null
 
-    constructor() : super() {}
+    constructor() : super()
 
-    constructor(dragListener: OnItemDragListener) : this(null, dragListener) {}
+    constructor(dragListener: OnItemDragListener?) : this(null, dragListener) {}
 
     @JvmOverloads
     constructor(clickListener: OnItemClickListener?, dragListener: OnItemDragListener? = null) : super() {
-        this.clickListener = clickListener
-        this.dragListener = dragListener
+        this.onItemClickListener = clickListener
+        this.onItemDragListener = dragListener
     }
 
-    constructor(items: MutableList<E>, clickListener: OnItemClickListener, dragListener: OnItemDragListener) : super(items) {
-        this.clickListener = clickListener
-        this.dragListener = dragListener
+    constructor(items: MutableList<E>, clickListener: OnItemClickListener?, dragListener: OnItemDragListener?) : super(items) {
+        this.onItemClickListener = clickListener
+        this.onItemDragListener = dragListener
+    }
+
+    constructor(items: MutableList<E>, clickListener: OnItemClickListener?) : super(items) {
+        this.onItemClickListener = clickListener
     }
 
     override fun onItemDragged(fromIndex: Int, toIndex: Int, dragFinished: Boolean): Boolean {
@@ -33,19 +36,39 @@ abstract class BaseTouchAdapter<E, VH : BaseTouchViewHolder<E>> : BaseAdapter<E,
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
-        holder.bind(this.items[position], this.clickListener, this.dragListener)
+        holder.bind(this.items[position], this.onItemClickListener, this.onItemDragListener)
     }
 
     override fun onItemSwiped(index: Int) {
 
     }
 
+    inline fun OnItemClickListener(
+            crossinline onItemClick: (RecyclerView.ViewHolder) -> Unit = {}
+    ): OnItemClickListener {
+        return object : OnItemClickListener {
+            override fun onItemClick(holder: RecyclerView.ViewHolder) {
+                onItemClick(holder)
+            }
+        }
+    }
+
     interface OnItemClickListener {
-        fun onClick(viewHolder: RecyclerView.ViewHolder)
+        fun onItemClick(holder: RecyclerView.ViewHolder)
+    }
+
+    inline fun OnItemDragListener(
+            crossinline onItemDrag: (RecyclerView.ViewHolder) -> Unit = {}
+    ): OnItemDragListener {
+        return object : OnItemDragListener {
+            override fun onItemDrag(holder: RecyclerView.ViewHolder) {
+                onItemDrag(holder)
+            }
+        }
     }
 
     interface OnItemDragListener {
-        fun onDrag(viewHolder: RecyclerView.ViewHolder)
+        fun onItemDrag(holder: RecyclerView.ViewHolder)
     }
 
 }

@@ -1,42 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     <LinearLayout
         android:id="@+id/queue_empty_text_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_marginBottom="100dp"
-        android:gravity="center">
+        android:gravity="center"
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textColor="@color/textColorPrimary"
-            android:textSize="20sp"
-            android:drawableTop="@drawable/ic_playlist_play_black_36dp"
-            android:text="@string/queue_empty_text"/>
-
-        <TextView
-            android:id="@+id/add_videos_hint_text_view"
-            android:layout_marginTop="15dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textColor="@color/textColorPrimary"
-            android:textSize="16sp"
-            android:maxLines="2"
-            android:drawableEnd="@drawable/ic_chevron_right_black_24dp"
-            android:text="@string/add_videos_text"/>
+            android:drawableTop="@drawable/ic_playlist_play_grey600_36dp"
+            android:text="@string/queue_empty_text" />
 
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/playlist_view"
+        android:id="@+id/list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="vertical"

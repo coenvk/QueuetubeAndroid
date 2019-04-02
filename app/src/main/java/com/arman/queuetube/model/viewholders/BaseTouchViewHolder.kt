@@ -12,11 +12,11 @@ abstract class BaseTouchViewHolder<E>(itemView: View) : BaseViewHolder<E>(itemVi
     open fun bind(item: E, clickListener: BaseTouchAdapter.OnItemClickListener?, dragListener: BaseTouchAdapter.OnItemDragListener?) {
         this.item = item
         this.itemView.setOnClickListener {
-            clickListener?.onClick(this@BaseTouchViewHolder)
+            clickListener?.onItemClick(this@BaseTouchViewHolder)
         }
         this.itemView.setOnDragListener(View.OnDragListener { view, dragEvent ->
             if (dragListener != null && DragEvent.ACTION_DRAG_STARTED == dragEvent.action) {
-                dragListener.onDrag(this@BaseTouchViewHolder)
+                dragListener.onItemDrag(this@BaseTouchViewHolder)
                 return@OnDragListener true
             }
             false

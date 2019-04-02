@@ -8,19 +8,69 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
         <item name="android:textColorPrimaryInverse">@color/textColorPrimaryInverse</item>
-        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:actionBarStyle">@style/AppTheme.ActionBar</item>
+        <item name="actionBarStyle">@style/AppTheme.ActionBar</item>
+        <item name="android:actionBarTheme">@style/AppTheme.ThemeOverlay.ActionBar</item>
+        <item name="actionBarTheme">@style/AppTheme.ThemeOverlay.ActionBar</item>
+        <item name="android:actionBarPopupTheme">@style/AppTheme.ThemeOverlay</item>
+        <item name="actionBarPopupTheme">@style/AppTheme.ThemeOverlay</item>
+        <item name="android:searchViewStyle">@style/AppTheme.SearchBar</item>
+        <item name="searchViewStyle">@style/AppTheme.SearchBar</item>
     </style>
 
     <style name="AppTheme" parent="BaseAppTheme" />
 
-    <style name="AppTheme.BackScreen" parent="Theme.AppCompat.Light">
+    <style name="AppTheme.ThemeOverlay.ActionBar" parent="ThemeOverlay.AppCompat.ActionBar">
+        <item name="android:colorControlNormal">@android:color/white</item>
+        <item name="colorControlNormal">@android:color/white</item>
+    </style>
+
+    <style name="AppTheme.ActionBar" parent="Widget.AppCompat.Light.ActionBar">
+        <item name="android:titleTextStyle">@style/AppTheme.ActionBar.Title</item>
+        <item name="titleTextStyle">@style/AppTheme.ActionBar.Title</item>
+        <item name="android:titleTextColor">@android:color/white</item>
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:textColorSecondary">@android:color/white</item>
+        <item name="android:background">@color/colorPrimary</item>
+        <item name="background">@color/colorPrimary</item>
+        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
+    </style>
+
+    <style name="AppTheme.ActionBar.Title" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="AppTheme.SearchBar" parent="Widget.AppCompat.SearchView">
+        <item name="android:iconifiedByDefault">false</item>
+        <item name="android:queryHint">Search...</item>
+        <item name="searchHintIcon">@null</item>
+        <item name="android:queryBackground">@android:color/transparent</item>
+        <item name="android:closeIcon">@drawable/ic_close_black_24dp</item>
+    </style>
+
+    <style name="AppTheme.ThemeOverlay" parent="Base.ThemeOverlay.AppCompat.Light">
+        <item name="android:background">@android:color/white</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="BaseAppTheme.BackScreen" parent="Theme.AppCompat.Light">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
         <item name="android:textColorPrimaryInverse">@color/textColorPrimaryInverse</item>
+        <item name="android:actionBarStyle">@style/AppTheme.ActionBar</item>
+        <item name="actionBarStyle">@style/AppTheme.ActionBar</item>
+        <item name="android:actionBarTheme">@style/AppTheme.ThemeOverlay.ActionBar</item>
+        <item name="actionBarTheme">@style/AppTheme.ThemeOverlay.ActionBar</item>
+        <item name="android:actionBarPopupTheme">@style/AppTheme.ThemeOverlay</item>
+        <item name="actionBarPopupTheme">@style/AppTheme.ThemeOverlay</item>
+        <item name="android:searchViewStyle">@style/AppTheme.SearchBar</item>
+        <item name="searchViewStyle">@style/AppTheme.SearchBar</item>
     </style>
+
+    <style name="AppTheme.BackScreen" parent="BaseAppTheme.BackScreen" />
 
     <style name="AppTheme.Launcher" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowBackground">@drawable/splash_background</item>

@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="48dp"
     android:layout_gravity="end"
-    android:backgroundTint="@android:color/white"
     android:drawableStart="@drawable/ic_playlist_plus_black_24dp"
     android:text="Create a new playlist"
     android:textSize="16sp" />

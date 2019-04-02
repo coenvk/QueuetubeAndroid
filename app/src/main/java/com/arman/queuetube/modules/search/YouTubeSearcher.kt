@@ -3,6 +3,7 @@ package com.arman.queuetube.modules.search
 import android.annotation.SuppressLint
 import android.os.AsyncTask
 import com.arman.queuetube.config.Constants
+import com.arman.queuetube.model.Category
 import com.arman.queuetube.model.VideoData
 import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.client.http.javanet.NetHttpTransport
@@ -10,26 +11,32 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.SearchResult
 import com.google.api.services.youtube.model.Video
-import com.google.api.services.youtube.model.VideoCategory
 import java.io.IOException
-import java.util.*
 import java.util.concurrent.ExecutionException
 
-class YouTubeSearcher {
+object YouTubeSearcher {
 
-    private val youTube: YouTube
+    private const val SEARCH_MAX_RESULTS = 25L
+
+    private const val SEARCH_FIELDS = "items(id/videoId,snippet/title,snippet/channelTitle,snippet/publishedAt)"
+    private const val VIDEOS_FIELDS = "items(id,snippet/title,snippet/channelTitle,snippet/publishedAt)"
+    private const val VIDEO_CATEGORIES_FIELDS = "items(id,snippet/title)"
+
+    private const val SEARCH_PART = "id,snippet"
+    private const val VIDEOS_PART = "id,snippet"
+    private const val VIDEO_CATEGORIES_PART = "id,snippet"
+
+    private const val TYPE_VIDEO = "video"
+
+    private val youTube: YouTube = YouTube.Builder(NetHttpTransport(),
+            JacksonFactory(), HttpRequestInitializer { }).setApplicationName("Queuetube").build()
 
     private var searchListQuery: YouTube.Search.List? = null
     private var videosListQuery: YouTube.Videos.List? = null
     private var videoCategoriesListQuery: YouTube.VideoCategories.List? = null
 
     private var tmpVideoList: MutableList<VideoData>? = null
-
-    init {
-        this.tmpVideoList = ArrayList()
-        this.youTube = YouTube.Builder(NetHttpTransport(),
-                JacksonFactory(), HttpRequestInitializer { }).setApplicationName("Queuetube").build()
-    }
+    private var tmpCategoryList: MutableList<Category>? = null
 
     @Throws(IOException::class)
     fun searchList(): YouTube.Search.List {
@@ -53,13 +60,11 @@ class YouTubeSearcher {
 
     @Throws(IOException::class)
     fun searchList(part: String, type: String, maxResults: Long, fields: String): YouTube.Search.List {
-        if (this.searchListQuery == null) {
-            this.searchListQuery = this.youTube.search().list(part)
-                    .setKey(Constants.Key.API_KEY)
-        }
-        this.searchListQuery!!
+        this.searchListQuery = this.youTube.search().list(part)
+                .setKey(Constants.Key.API_KEY)
                 .setType(type)
-                .setMaxResults(maxResults).fields = fields
+                .setMaxResults(maxResults)
+                .setFields(fields)
         return this.searchListQuery!!
     }
 
@@ -80,11 +85,9 @@ class YouTubeSearcher {
 
     @Throws(IOException::class)
     fun videosList(part: String?, maxResults: Long): YouTube.Videos.List {
-        if (this.videosListQuery == null) {
-            this.videosListQuery = this.youTube.videos().list(part!!)
-                    .setKey(Constants.Key.API_KEY)
-        }
-        this.videosListQuery!!.maxResults = maxResults
+        this.videosListQuery = this.youTube.videos().list(part!!)
+                .setKey(Constants.Key.API_KEY)
+                .setMaxResults(maxResults)
         return this.videosListQuery!!
     }
 
@@ -105,13 +108,11 @@ class YouTubeSearcher {
 
     @Throws(IOException::class)
     fun videosList(part: String, id: String, maxResults: Long, fields: String): YouTube.Videos.List {
-        if (this.videosListQuery == null) {
-            this.videosListQuery = this.youTube.videos().list(part)
-                    .setKey(Constants.Key.API_KEY)
-        }
-        this.videosListQuery!!
+        this.videosListQuery = this.youTube.videos().list(part)
+                .setKey(Constants.Key.API_KEY)
                 .setId(id)
-                .setMaxResults(maxResults).fields = fields
+                .setMaxResults(maxResults)
+                .setFields(fields)
         return this.videosListQuery!!
     }
 
@@ -127,15 +128,13 @@ class YouTubeSearcher {
 
     @Throws(IOException::class)
     fun videosList(part: String, chart: String, videoCategoryId: String, regionCode: String, maxResults: Long, fields: String): YouTube.Videos.List {
-        if (this.videosListQuery == null) {
-            this.videosListQuery = this.youTube.videos().list(part)
-                    .setKey(Constants.Key.API_KEY)
-        }
-        this.videosListQuery!!
+        this.videosListQuery = this.youTube.videos().list(part)
+                .setKey(Constants.Key.API_KEY)
                 .setChart(chart)
                 .setVideoCategoryId(videoCategoryId)
                 .setRegionCode(regionCode)
-                .setMaxResults(maxResults).fields = fields
+                .setMaxResults(maxResults)
+                .setFields(fields)
         return this.videosListQuery!!
     }
 
@@ -146,14 +145,12 @@ class YouTubeSearcher {
 
     @Throws(IOException::class)
     fun videosList(part: String, chart: String, videoCategoryId: String, maxResults: Long, fields: String): YouTube.Videos.List {
-        if (this.videosListQuery == null) {
-            this.videosListQuery = this.youTube.videos().list(part)
-                    .setKey(Constants.Key.API_KEY)
-        }
-        this.videosListQuery!!
+        this.videosListQuery = this.youTube.videos().list(part)
+                .setKey(Constants.Key.API_KEY)
                 .setChart(chart)
                 .setVideoCategoryId(videoCategoryId)
-                .setMaxResults(maxResults).fields = fields
+                .setMaxResults(maxResults)
+                .setFields(fields)
         return this.videosListQuery!!
     }
 
@@ -169,22 +166,18 @@ class YouTubeSearcher {
 
     @Throws(IOException::class)
     fun videoCategoriesList(part: String, fields: String): YouTube.VideoCategories.List {
-        if (this.videoCategoriesListQuery == null) {
-            this.videoCategoriesListQuery = this.youTube.videoCategories().list(part)
-                    .setKey(Constants.Key.API_KEY)
-        }
-        this.videoCategoriesListQuery!!.fields = fields
+        this.videoCategoriesListQuery = this.youTube.videoCategories().list(part)
+                .setKey(Constants.Key.API_KEY)
+                .setFields(fields)
         return this.videoCategoriesListQuery!!
     }
 
     @Throws(IOException::class)
     fun videoCategoriesList(part: String, id: String, fields: String): YouTube.VideoCategories.List {
-        if (this.videoCategoriesListQuery == null) {
-            this.videoCategoriesListQuery = this.youTube.videoCategories().list(part)
-                    .setKey(Constants.Key.API_KEY)
-        }
-        this.videoCategoriesListQuery!!
-                .setId(id).fields = fields
+        this.videoCategoriesListQuery = this.youTube.videoCategories().list(part)
+                .setKey(Constants.Key.API_KEY)
+                .setId(id)
+                .setFields(fields)
         return this.videoCategoriesListQuery!!
     }
 
@@ -195,8 +188,8 @@ class YouTubeSearcher {
             return videoData
         }
 
-        @SuppressLint("StaticFieldLeak") val task = object : AsyncTask<Void, Void, MutableList<Video>>() {
-            override fun doInBackground(vararg params: Void): MutableList<Video> {
+        @SuppressLint("StaticFieldLeak") val task = object : AsyncTask<Unit, Unit, MutableList<Video>>() {
+            override fun doInBackground(vararg params: Unit): MutableList<Video> {
                 val videoList = ArrayList<Video>()
                 try {
                     val response = videosListQuery!!.execute()
@@ -228,8 +221,8 @@ class YouTubeSearcher {
             return VideoData()
         }
 
-        @SuppressLint("StaticFieldLeak") val task = object : AsyncTask<Void, Void, MutableList<SearchResult>>() {
-            override fun doInBackground(vararg params: Void): MutableList<SearchResult> {
+        @SuppressLint("StaticFieldLeak") val task = object : AsyncTask<Unit, Unit, MutableList<SearchResult>>() {
+            override fun doInBackground(vararg params: Unit): MutableList<SearchResult> {
                 val results = ArrayList<SearchResult>()
                 try {
                     val response = searchListQuery!!.execute()
@@ -257,14 +250,24 @@ class YouTubeSearcher {
         return null
     }
 
-    fun videoCategories(): MutableList<VideoCategory> {
+    fun videoCategories(regionCode: String): MutableList<Category> {
+        this.tmpCategoryList = ArrayList()
         try {
-            this.videoCategoriesList()
-            return this.videoCategoriesListQuery!!.execute().items
+            this.videoCategoriesList().regionCode = regionCode
         } catch (e: IOException) {
-            return ArrayList()
+            return this.tmpCategoryList as ArrayList<Category>
         }
 
+        try {
+            this.videoCategoriesList().regionCode = regionCode
+            val results = this.videoCategoriesListQuery!!.execute().items
+            for (i in results.indices) {
+                this.tmpCategoryList!!.add(Category(results[i]))
+            }
+        } catch (e: IOException) {
+        }
+
+        return this.tmpCategoryList as ArrayList<Category>
     }
 
     fun topCharts(): MutableList<VideoData> {
@@ -276,7 +279,58 @@ class YouTubeSearcher {
         }
 
         try {
+            val results = this.videosListQuery!!.execute().items
+            for (i in results.indices) {
+                this.tmpVideoList!!.add(VideoData(results[i]))
+            }
+        } catch (e: IOException) {
+        }
+
+        return this.tmpVideoList as ArrayList<VideoData>
+    }
+
+    fun searchLiveMusic(): MutableList<VideoData> {
+        return searchLiveByCategory("10")
+    }
+
+    fun searchLiveByCategory(videoCategoryId: String): MutableList<VideoData> {
+        this.tmpVideoList = ArrayList()
+        try {
+            this.searchList().setEventType("live").videoCategoryId = videoCategoryId
+        } catch (e: IOException) {
+            return this.tmpVideoList as ArrayList<VideoData>
+        }
+
+        try {
             val results = this.searchListQuery!!.execute().items
+            for (i in results.indices) {
+                this.tmpVideoList!!.add(VideoData(results[i]))
+            }
+        } catch (e: IOException) {
+        }
+
+        return this.tmpVideoList as ArrayList<VideoData>
+    }
+
+    fun topMusicCharts(): MutableList<VideoData> {
+        return topChartsByCategory("10")
+    }
+
+    fun topChartsByCategory(videoCategoryId: String?): MutableList<VideoData> {
+        this.tmpVideoList = ArrayList()
+        try {
+            this.videosList().chart = "mostPopular"
+            if (videoCategoryId != null) {
+                this.videosListQuery!!.videoCategoryId = videoCategoryId
+            } else {
+                this.videosListQuery!!.videoCategoryId = "0"
+            }
+        } catch (e: IOException) {
+            return this.tmpVideoList as ArrayList<VideoData>
+        }
+
+        try {
+            val results = this.videosListQuery!!.execute().items
             for (i in results.indices) {
                 this.tmpVideoList!!.add(VideoData(results[i]))
             }
@@ -341,21 +395,6 @@ class YouTubeSearcher {
         }
 
         return this.tmpVideoList as ArrayList<VideoData>
-    }
-
-    companion object {
-
-        private const val SEARCH_MAX_RESULTS = 25L
-
-        private const val SEARCH_FIELDS = "items(id/videoId,snippet/title,snippet/channelTitle,snippet/publishedAt,snippet/thumbnails/default/url)"
-        private const val VIDEOS_FIELDS = "items(id,snippet/title,snippet/channelTitle,snippet/publishedAt,snippet/thumbnails/default/url)"
-        private const val VIDEO_CATEGORIES_FIELDS = "items(id,snippet/title)"
-
-        private const val SEARCH_PART = "id,snippet"
-        private const val VIDEOS_PART = "id,snippet"
-        private const val VIDEO_CATEGORIES_PART = "id,snippet"
-
-        private const val TYPE_VIDEO = "video"
     }
 
     //    public enum ActionCode {

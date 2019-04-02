@@ -4,34 +4,58 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.arman.queuetube.R
 import com.arman.queuetube.config.Constants
-import com.arman.queuetube.fragments.*
+import com.arman.queuetube.fragments.main.HomeFragment
+import com.arman.queuetube.fragments.main.LibraryFragment
+import com.arman.queuetube.fragments.main.PlayerFragment
+import com.arman.queuetube.fragments.main.SearchFragment
+import com.arman.queuetube.fragments.playlist.PlaylistFragment
+import com.arman.queuetube.listeners.NavigationItemListener
+import com.arman.queuetube.listeners.OnPlayItemsListener
 import com.arman.queuetube.model.VideoData
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
 import com.arman.queuetube.util.notifications.receivers.WifiReceiver
 import com.arman.queuetube.util.services.KillNotificationService
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-class MainActivity : AppCompatActivity(), PlaylistFragment.OnPlayItemsListener {
-
-    private var extendedToolbar: LinearLayout? = null
+class MainActivity : AppCompatActivity(), OnPlayItemsListener {
 
     private var navigationView: BottomNavigationView? = null
 
-    private var mainFragment: MainFragment? = null
-    private var trendingFragment: TrendingFragment? = null
-    private var discoverFragment: DiscoverFragment? = null
+    private var appBarLayout: AppBarLayout? = null
+    private var toolbar: Toolbar? = null
+
+    private var playerFragment: PlayerFragment? = null
+
+    private var homeFragment: HomeFragment? = null
+    private var searchFragment: SearchFragment? = null
     private var libraryFragment: LibraryFragment? = null
 
     private var wifiReceiver: WifiReceiver? = null
 
     private var currentFragment: Int = 0
+
+    private fun enableScroll() {
+        val params = this.toolbar!!.layoutParams as AppBarLayout.LayoutParams
+        params.scrollFlags =
+                AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL or
+                        AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or
+                        AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP
+        this.toolbar!!.layoutParams = params
+    }
+
+    private fun disableScroll() {
+        val params = this.toolbar!!.layoutParams as AppBarLayout.LayoutParams
+        params.scrollFlags = 0
+        this.toolbar!!.layoutParams = params
+        this.appBarLayout!!.setExpanded(true, false)
+    }
 
     private fun setupWifiReceiver() {
         this.wifiReceiver = WifiReceiver()
@@ -41,12 +65,26 @@ class MainActivity : AppCompatActivity(), PlaylistFragment.OnPlayItemsListener {
     }
 
     private fun setupActionBar() {
-        val toolbar = this.findViewById<View>(R.id.toolbar) as Toolbar
+        this.appBarLayout = findViewById(R.id.appbar)
+        this.toolbar = this.appBarLayout!!.findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
     }
 
     private fun setupNavigationView() {
-        this.navigationView = this.findViewById<View>(R.id.bottom_nav_bar) as BottomNavigationView
+        this.navigationView = findViewById(R.id.bottom_nav_bar)
+        this.navigationView!!.setOnNavigationItemSelectedListener(NavigationItemListener(this))
+    }
+
+    private fun setupPlayerFragment() {
+        val transaction = supportFragmentManager.beginTransaction()
+        if (this.playerFragment != null) {
+            transaction.show(this.playerFragment!!)
+            this.refreshVideoFavorited()
+        } else {
+            this.playerFragment = PlayerFragment()
+            transaction.replace(R.id.player_container, this.playerFragment!!)
+        }
+        transaction.commitNow()
     }
 
     private fun setupPlaylistFragment(playlistName: String): PlaylistFragment {
@@ -54,64 +92,43 @@ class MainActivity : AppCompatActivity(), PlaylistFragment.OnPlayItemsListener {
         bundle.putString(Constants.Fragment.Argument.PLAYLIST_NAME, playlistName)
         val playlistFragment = PlaylistFragment()
         playlistFragment.arguments = bundle
-        playlistFragment.setOnPlayItemsListener(this)
+        playlistFragment.onPlayItemsListener = this
         return playlistFragment
     }
 
-    fun switchToMainFragment() {
-        if (this.currentFragment != Constants.Fragment.MAIN) {
+    fun switchToHomeFragment() {
+        if (this.currentFragment != Constants.Fragment.HOME) {
             val transaction = supportFragmentManager.beginTransaction()
-            if (this.mainFragment != null) {
-                transaction.show(this.mainFragment!!)
-                this.refreshVideoFavorited()
+            if (this.homeFragment != null) {
+                transaction.show(this.homeFragment!!)
             } else {
-                this.mainFragment = MainFragment()
-                transaction.add(R.id.content_frame, this.mainFragment!!)
+                this.homeFragment = HomeFragment()
+                this.homeFragment!!.onPlayItemsListener = this
+                transaction.add(R.id.content_frame, this.homeFragment!!)
             }
-            this.trendingFragment?.let { transaction.hide(this.trendingFragment!!) }
-            this.discoverFragment?.let { transaction.hide(this.discoverFragment!!) }
+            this.searchFragment?.let { transaction.hide(this.searchFragment!!) }
             this.libraryFragment?.let { transaction.hide(this.libraryFragment!!) }
-            this.extendedToolbar?.visibility = View.VISIBLE
             transaction.commitNow()
-            this.currentFragment = Constants.Fragment.MAIN
+            this.currentFragment = Constants.Fragment.HOME
+            this.enableScroll()
         }
     }
 
-    fun switchToTrendingFragment() {
-        if (this.currentFragment != Constants.Fragment.TRENDING) {
+    fun switchToSearchFragment() {
+        if (this.currentFragment != Constants.Fragment.SEARCH) {
             val transaction = supportFragmentManager.beginTransaction()
-            if (this.trendingFragment != null) {
-                transaction.show(this.trendingFragment!!)
-                this.refreshVideoFavorited()
+            if (this.searchFragment != null) {
+                transaction.show(this.searchFragment!!)
             } else {
-                this.trendingFragment = TrendingFragment()
-                transaction.add(R.id.content_frame, this.trendingFragment!!)
+                this.searchFragment = SearchFragment()
+                this.searchFragment!!.onPlayItemsListener = this
+                transaction.add(R.id.content_frame, this.searchFragment!!)
             }
-            this.mainFragment?.let { transaction.hide(this.mainFragment!!) }
-            this.discoverFragment?.let { transaction.hide(this.discoverFragment!!) }
+            this.homeFragment?.let { transaction.hide(this.homeFragment!!) }
             this.libraryFragment?.let { transaction.hide(this.libraryFragment!!) }
-            this.extendedToolbar?.visibility = View.VISIBLE
             transaction.commitNow()
-            this.currentFragment = Constants.Fragment.TRENDING
-        }
-    }
-
-    fun switchToDiscoverFragment() {
-        if (this.currentFragment != Constants.Fragment.DISCOVER) {
-            val transaction = supportFragmentManager.beginTransaction()
-            if (this.discoverFragment != null) {
-                transaction.show(this.discoverFragment!!)
-                this.refreshVideoFavorited()
-            } else {
-                this.discoverFragment = DiscoverFragment()
-                transaction.add(R.id.content_frame, this.discoverFragment!!)
-            }
-            this.mainFragment?.let { transaction.hide(this.mainFragment!!) }
-            this.trendingFragment?.let { transaction.hide(this.trendingFragment!!) }
-            this.libraryFragment?.let { transaction.hide(this.libraryFragment!!) }
-            this.extendedToolbar?.visibility = View.VISIBLE
-            transaction.commitNow()
-            this.currentFragment = Constants.Fragment.DISCOVER
+            this.currentFragment = Constants.Fragment.SEARCH
+            this.disableScroll()
         }
     }
 
@@ -120,24 +137,24 @@ class MainActivity : AppCompatActivity(), PlaylistFragment.OnPlayItemsListener {
             val transaction = supportFragmentManager.beginTransaction()
             if (this.libraryFragment != null) {
                 transaction.show(this.libraryFragment!!)
-                this.refreshVideoFavorited()
             } else {
                 this.libraryFragment = LibraryFragment()
+                this.libraryFragment!!.onPlayItemsListener = this
                 transaction.add(R.id.content_frame, this.libraryFragment!!)
             }
-            this.mainFragment?.let { transaction.hide(this.mainFragment!!) }
-            this.trendingFragment?.let { transaction.hide(this.trendingFragment!!) }
-            this.discoverFragment?.let { transaction.hide(this.discoverFragment!!) }
-            this.extendedToolbar?.visibility = View.VISIBLE
+            this.homeFragment?.let { transaction.hide(this.homeFragment!!) }
+            this.searchFragment?.let { transaction.hide(this.searchFragment!!) }
             transaction.commitNow()
             this.currentFragment = Constants.Fragment.LIBRARY
+            this.enableScroll()
         }
     }
 
     private fun refreshVideoFavorited() {
-        val playerFragment = this.mainFragment!!.pagerAdapter?.playerFragment as PlayerFragment
-        val currentVideo = playerFragment.currentVideo
-        playerFragment.updateVideo(GsonPlaylistHelper.isFavorited(currentVideo))
+        this.playerFragment?.let {
+            val currentVideo = playerFragment!!.currentVideo
+            currentVideo?.let { playerFragment!!.updateVideo(GsonPlaylistHelper.isFavorited(currentVideo)) }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -151,12 +168,11 @@ class MainActivity : AppCompatActivity(), PlaylistFragment.OnPlayItemsListener {
 
         startService(Intent(this, KillNotificationService::class.java))
 
-        this.extendedToolbar = findViewById<View>(R.id.main_extended_toolbar) as LinearLayout
-
         setupWifiReceiver()
         setupActionBar()
         setupNavigationView()
-        switchToMainFragment()
+        switchToHomeFragment()
+        setupPlayerFragment()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -166,18 +182,32 @@ class MainActivity : AppCompatActivity(), PlaylistFragment.OnPlayItemsListener {
         }
     }
 
+    fun openSettings(item: MenuItem) {
+        startActivity(Intent(this, SettingsActivity::class.java))
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_toolbar, menu)
+        return true
+    }
+
+//    override fun onBackPressed() {
+//        if (this.currentFragment == Constants.Fragment.HOME) {
+//            val viewPager = this.mainFragment!!.viewPager
+//            if (viewPager?.currentItem == 0) {
+//                super.onBackPressed()
+//            } else {
+//                viewPager?.currentItem = viewPager?.currentItem!! - 1
+//            }
+//        } else {
+//            this.navigationView!!.menu.findItem(R.id.nav_item_home).isChecked = true
+//            this.switchToHomeFragment()
+//        }
+//    }
+
     override fun onBackPressed() {
-        if (this.currentFragment == Constants.Fragment.MAIN) {
-            val viewPager = this.mainFragment!!.viewPager
-            if (viewPager?.currentItem == 0) {
-                super.onBackPressed()
-            } else {
-                viewPager?.currentItem = viewPager?.currentItem!! - 1
-            }
-        } else {
-            this.navigationView!!.menu.findItem(R.id.nav_item_home).isChecked = true
-            this.switchToMainFragment()
-        }
+        this.navigationView!!.menu.findItem(R.id.nav_item_home).isChecked = true
+        this.switchToHomeFragment()
     }
 
     override fun onDestroy() {
@@ -185,27 +215,37 @@ class MainActivity : AppCompatActivity(), PlaylistFragment.OnPlayItemsListener {
         unregisterReceiver(this.wifiReceiver)
     }
 
-    fun refreshPlaylists() {
-
-    }
-
     override fun onPlayAll(videos: Collection<VideoData>) {
-        val playerFragment = this.mainFragment!!.pagerAdapter?.playerFragment as PlayerFragment
-        if (playerFragment.setQueueTo(videos)) {
-            playerFragment.forcePlayNext()
+        if (playerFragment != null && videos.isNotEmpty() && playerFragment!!.setQueueTo(videos)) {
+            playerFragment!!.forcePlayNext()
         }
     }
 
     override fun onPlay(video: VideoData) {
-        val playerFragment = this.mainFragment!!.pagerAdapter?.playerFragment as PlayerFragment
-        if (playerFragment.addToQueue(video)) {
-            playerFragment.tryPlayNext()
+        if (playerFragment != null && playerFragment!!.addToQueue(video)) {
+            playerFragment!!.tryPlayNext()
+        }
+    }
+
+    override fun onShuffle(videos: Collection<VideoData>) {
+        onPlayAll(videos.shuffled())
+    }
+
+    override fun onPlayNext(video: VideoData) {
+        if (playerFragment != null && playerFragment!!.addToQueue(0, video)) {
+            playerFragment!!.tryPlayNext()
+        }
+    }
+
+    override fun onPlayNow(video: VideoData) {
+        if (playerFragment != null && playerFragment!!.addToQueue(0, video)) {
+            playerFragment!!.forcePlayNext()
         }
     }
 
     companion object {
 
-        val TAG = "MainActivity"
+        const val TAG = "MainActivity"
 
     }
 

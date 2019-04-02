@@ -25,6 +25,12 @@ abstract class BaseAdapter<E, VH : BaseViewHolder<E>> @JvmOverloads constructor(
         return res
     }
 
+    fun add(index: Int, item: E): Boolean {
+        this.items.add(index, item)
+        this.notifyItemInserted(index)
+        return true
+    }
+
     fun addAll(items: Collection<E>): Boolean {
         val startRange = this.items.size
         val res = this.items.addAll(items)

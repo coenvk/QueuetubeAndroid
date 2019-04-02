@@ -7,14 +7,9 @@
         android:title="Home" />
 
     <item
-        android:id="@+id/nav_item_trending"
-        android:icon="@drawable/ic_fire_black_24dp"
-        android:title="Trending" />
-
-    <item
-        android:id="@+id/nav_item_discover"
-        android:icon="@drawable/ic_earth_black_24dp"
-        android:title="Discover" />
+        android:id="@+id/nav_item_search"
+        android:icon="@drawable/ic_magnify_black_24dp"
+        android:title="Search" />
 
     <item
         android:id="@+id/nav_item_library"

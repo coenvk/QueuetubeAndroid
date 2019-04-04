@@ -3,7 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="?attr/actionBarSize"
-    android:layout_marginBottom="?attr/actionBarSize"
     android:animateLayoutChanges="true"
     android:clickable="true">
 
@@ -11,7 +10,7 @@
         android:id="@+id/player_bar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/bootstrap_gray_dark"
+        android:background="#323232"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 

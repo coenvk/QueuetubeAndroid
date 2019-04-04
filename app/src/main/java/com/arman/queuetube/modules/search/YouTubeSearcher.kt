@@ -312,19 +312,15 @@ object YouTubeSearcher {
         return this.tmpVideoList as ArrayList<VideoData>
     }
 
-    fun topMusicCharts(): MutableList<VideoData> {
-        return topChartsByCategory("10")
+    fun topMusicCharts(regionCode: String = "US"): MutableList<VideoData> {
+        return topChartsByCategory(regionCode, "10")
     }
 
-    fun topChartsByCategory(videoCategoryId: String?): MutableList<VideoData> {
+    fun topChartsByCategory(regionCode: String = "US", videoCategoryId: String = "0"): MutableList<VideoData> {
         this.tmpVideoList = ArrayList()
         try {
-            this.videosList().chart = "mostPopular"
-            if (videoCategoryId != null) {
-                this.videosListQuery!!.videoCategoryId = videoCategoryId
-            } else {
-                this.videosListQuery!!.videoCategoryId = "0"
-            }
+            this.videosList().setRegionCode(regionCode).chart = "mostPopular"
+            this.videosListQuery!!.videoCategoryId = videoCategoryId
         } catch (e: IOException) {
             return this.tmpVideoList as ArrayList<VideoData>
         }

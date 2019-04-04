@@ -67,7 +67,7 @@ class AddToPlaylistFragment : DialogFragment() {
 
         }
 
-        return Tuple<Array<CharSequence?>, BooleanArray>(strings, checked)
+        return Tuple(strings, checked)
     }
 
     fun setVideo(video: VideoData) {
@@ -118,6 +118,9 @@ class AddToPlaylistFragment : DialogFragment() {
                         this@AddToPlaylistFragment.selectedItems!!.remove(Integer.valueOf(i))
                     }
                 }
+        if (playlists.isEmpty()) {
+            builder.setMessage("There are no playlists yet!")
+        }
         return builder.create()
     }
 

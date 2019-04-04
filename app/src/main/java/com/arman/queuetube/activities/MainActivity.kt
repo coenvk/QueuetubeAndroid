@@ -24,6 +24,7 @@ import com.arman.queuetube.util.services.KillNotificationService
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
+
 class MainActivity : AppCompatActivity(), OnPlayItemsListener {
 
     private var navigationView: BottomNavigationView? = null
@@ -82,7 +83,7 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener {
             this.refreshVideoFavorited()
         } else {
             this.playerFragment = PlayerFragment()
-            transaction.replace(R.id.player_container, this.playerFragment!!)
+            transaction.add(R.id.player_container, this.playerFragment!!)
         }
         transaction.commitNow()
     }
@@ -111,6 +112,7 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener {
             transaction.commitNow()
             this.currentFragment = Constants.Fragment.HOME
             this.enableScroll()
+            this.playerFragment?.swipeDown()
         }
     }
 
@@ -129,6 +131,7 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener {
             transaction.commitNow()
             this.currentFragment = Constants.Fragment.SEARCH
             this.disableScroll()
+            this.playerFragment?.swipeDown()
         }
     }
 
@@ -147,6 +150,7 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener {
             transaction.commitNow()
             this.currentFragment = Constants.Fragment.LIBRARY
             this.enableScroll()
+            this.playerFragment?.swipeDown()
         }
     }
 
@@ -173,6 +177,19 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener {
         setupNavigationView()
         switchToHomeFragment()
         setupPlayerFragment()
+
+        onNewIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        if (intent != null) {
+            val action = intent.action
+            if (action == Intent.ACTION_SEND) {
+                val text = intent.getStringExtra(Intent.EXTRA_TEXT)
+                println(text)
+            }
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

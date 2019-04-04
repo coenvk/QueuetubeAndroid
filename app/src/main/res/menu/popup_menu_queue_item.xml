@@ -6,6 +6,15 @@
         android:title="Remove from queue" />
 
     <item
+        android:id="@+id/list_item_option_add_to_favorites"
+        android:title="Add to favorites"
+        android:visible="false" />
+
+    <item
+        android:id="@+id/list_item_option_add_to_playlist"
+        android:title="Add to playlist" />
+
+    <item
         android:id="@+id/list_item_option_share"
         android:title="Share" />
 

@@ -26,12 +26,12 @@ class SearchBar : SearchView {
         val searchEditFrameId = resources.getIdentifier("android:id/search_edit_frame", null, null)
         val searchEditFrame = findViewById<View>(searchEditFrameId)
         searchEditFrame?.setBackgroundColor(Color.WHITE)
-        val searchPlateId = resources.getIdentifier("android:id/search_src_text", null, null)
-        val searchPlate = findViewById<EditText>(searchPlateId)
-        searchPlate?.let {
-            searchPlate.setBackgroundResource(android.R.color.transparent)
-            searchPlate.setTextColor(Color.BLACK)
-            searchPlate.setHintTextColor(Color.GRAY)
+        val searchSrcTextId = resources.getIdentifier("android:id/search_src_text", null, null)
+        val searchSrcText = findViewById<EditText>(searchSrcTextId)
+        searchSrcText?.let {
+            it.setBackgroundResource(android.R.color.transparent)
+            it.setTextColor(Color.BLACK)
+            it.setHintTextColor(Color.GRAY)
         }
     }
 

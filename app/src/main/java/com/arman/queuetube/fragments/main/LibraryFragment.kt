@@ -85,7 +85,7 @@ class LibraryFragment : VideoItemFragment() {
         }
     }
 
-    private fun loadActivity(name: String) {
+    private fun loadPlaylistActivity(name: String) {
         val intent = Intent(activity, PlaylistActivity::class.java)
         intent.putExtra(Constants.Fragment.Argument.PLAYLIST_NAME, name)
         if (name == Constants.Json.Playlist.FAVORITES) {
@@ -107,18 +107,6 @@ class LibraryFragment : VideoItemFragment() {
 
         this.emptyTextView = view.findViewById(R.id.recently_watched_empty_text) as TextView
 
-        this.playlistsView = view.findViewById(R.id.playlists_view) as RecyclerView
-        this.playlistsView!!.setHasFixedSize(true)
-
-        this.playlistsAdapter = PlaylistsAdapter(object : BaseTouchAdapter.OnItemClickListener {
-            override fun onItemClick(holder: RecyclerView.ViewHolder) {
-                val name = this@LibraryFragment.playlistsAdapter!![holder.adapterPosition]
-                loadActivity(name)
-            }
-        })
-
-        this.playlistsView!!.adapter = this.playlistsAdapter
-
         this.historyView = view.findViewById(R.id.recently_watched_view) as RecyclerView
         this.historyView!!.setHasFixedSize(true)
 
@@ -127,6 +115,21 @@ class LibraryFragment : VideoItemFragment() {
         this.historyAdapter!!.onShowPopupMenuListener = this
 
         this.historyView!!.adapter = this.historyAdapter
+
+        val moreButton = view.findViewById(R.id.recently_watched_more_button) as Button
+        moreButton.setOnClickListener { loadPlaylistActivity(Constants.Json.Playlist.HISTORY) }
+
+        this.playlistsView = view.findViewById(R.id.playlists_view) as RecyclerView
+        this.playlistsView!!.setHasFixedSize(true)
+
+        this.playlistsAdapter = PlaylistsAdapter(object : BaseTouchAdapter.OnItemClickListener {
+            override fun onItemClick(holder: RecyclerView.ViewHolder) {
+                val name = this@LibraryFragment.playlistsAdapter!![holder.adapterPosition]
+                loadPlaylistActivity(name)
+            }
+        })
+
+        this.playlistsView!!.adapter = this.playlistsAdapter
 
         val createPlaylistButton = view.findViewById(R.id.playlists_create_playlist_button) as Button
         createPlaylistButton.setOnClickListener {

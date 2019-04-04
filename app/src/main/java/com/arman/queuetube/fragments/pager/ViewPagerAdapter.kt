@@ -72,7 +72,6 @@ class ViewPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
     private fun addFragment(fragment: Fragment) {
         if (fragment is QueueFragment) {
             this.fragmentTitles.add(PAGE_TITLES[QUEUE_INDEX])
-            fragment.onItemClickListener = QueueItemClickListener()
         } else if (fragment is SearchFragment) {
             this.fragmentTitles.add(PAGE_TITLES[SEARCH_INDEX])
         }
@@ -93,8 +92,8 @@ class ViewPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
                 }
 
                 override fun onAnimationEnd(animation: Animation) {
-                    queueFragment.queueAdapter?.remove(holder.adapterPosition)
-                    if (queueFragment.queueAdapter?.isEmpty!!) {
+                    queueFragment.listAdapter?.remove(holder.adapterPosition)
+                    if (queueFragment.listAdapter?.isEmpty!!) {
                         queueFragment.showEmptyText()
                     }
                 }
@@ -118,7 +117,7 @@ class ViewPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
             val animation = AnimationUtils.loadAnimation(holder.itemView.context, R.anim.add_from_search_results)
             holder.itemView.startAnimation(animation)
 
-            queueFragment.queueAdapter?.add(searchFragment.listAdapter?.get(holder.adapterPosition)!!)
+            queueFragment.listAdapter?.add(searchFragment.listAdapter?.get(holder.adapterPosition)!!)
             (this@ViewPagerAdapter.playerFragment as PlayerFragment).tryPlayNext()
         }
 

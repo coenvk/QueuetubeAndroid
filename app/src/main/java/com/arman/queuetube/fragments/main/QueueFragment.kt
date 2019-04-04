@@ -4,38 +4,49 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
-import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arman.queuetube.R
+import com.arman.queuetube.fragments.VideoListFragment
+import com.arman.queuetube.model.VideoData
 import com.arman.queuetube.model.adapters.BaseTouchAdapter
-import com.arman.queuetube.model.adapters.VideoItemAdapter
-import com.arman.queuetube.util.itemtouchhelper.VideoItemTouchHelper
+import com.arman.queuetube.model.viewholders.BaseViewHolder
 
-class QueueFragment : Fragment() {
+class QueueFragment : VideoListFragment(), BaseTouchAdapter.OnItemDragListener {
+
+    override var isRefreshable: Boolean = false
+    override var loadOnStart: Boolean = false
+    override var popupMenuResId: Int = R.menu.popup_menu_queue_item
+
+    override fun onSaveFinished() = Unit
+    override fun onTaskFinished(result: MutableList<VideoData>) = Unit
+    override fun doInBackground(params: Array<out String>): MutableList<VideoData> {
+        return mutableListOf()
+    }
 
     private var emptyTextLayout: LinearLayout? = null
 
-    private var queueView: RecyclerView? = null
-    var queueAdapter: VideoItemAdapter? = null
-        private set
-    private var layoutManager: RecyclerView.LayoutManager? = null
-
-    var onItemClickListener: BaseTouchAdapter.OnItemClickListener? = null
-    var onItemDragListener: BaseTouchAdapter.OnItemDragListener? = null
-
-    private var itemTouchHelper: ItemTouchHelper? = null
-
     fun showEmptyText() {
-        this.queueView!!.visibility = View.GONE
         this.emptyTextLayout!!.visibility = View.VISIBLE
     }
 
     fun showQueue() {
         this.emptyTextLayout!!.visibility = View.GONE
-        this.queueView!!.visibility = View.VISIBLE
+    }
+
+    override fun onRemoveFromPlaylist(holder: BaseViewHolder<VideoData>) {
+        this.onItemClick(holder)
+    }
+
+    override fun finishRefresh() {
+        super.finishRefresh()
+        if (this.listAdapter!!.isEmpty) {
+            this.showEmptyText()
+        } else {
+            this.showQueue()
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -45,27 +56,36 @@ class QueueFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         this.emptyTextLayout = view.findViewById(R.id.queue_empty_text_layout) as LinearLayout
+        this.listAdapter!!.onItemDragListener = this
+    }
 
-        this.queueView = view.findViewById(R.id.list_view) as RecyclerView
-        this.queueView!!.setHasFixedSize(true)
-        this.layoutManager = LinearLayoutManager(activity)
-        this.queueView!!.layoutManager = this.layoutManager
+    override fun onItemClick(holder: RecyclerView.ViewHolder) {
+        holder.itemView.isClickable = false
 
-        if (this.onItemDragListener == null) {
-            this.onItemDragListener = object : BaseTouchAdapter.OnItemDragListener {
-                override fun onItemDrag(holder: RecyclerView.ViewHolder) {
-                    this@QueueFragment.itemTouchHelper!!.startDrag(holder)
+        val animation = AnimationUtils.loadAnimation(this@QueueFragment.activity, R.anim.remove_from_queue)
+
+        animation.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation) {
+
+            }
+
+            override fun onAnimationEnd(animation: Animation) {
+                this@QueueFragment.listAdapter?.remove(holder.adapterPosition)
+                if (this@QueueFragment.listAdapter?.isEmpty!!) {
+                    this@QueueFragment.showEmptyText()
                 }
             }
-        }
 
-        this.queueAdapter = VideoItemAdapter(this.onItemClickListener, this.onItemDragListener)
-        this.queueView!!.adapter = this.queueAdapter
+            override fun onAnimationRepeat(animation: Animation) {
 
-        val callback = VideoItemTouchHelper.Callback(this.queueAdapter!!)
-        this.itemTouchHelper = ItemTouchHelper(callback)
-        this.itemTouchHelper!!.attachToRecyclerView(this.queueView)
+            }
+        })
 
+        holder.itemView.startAnimation(animation)
+    }
+
+    override fun onItemDrag(holder: RecyclerView.ViewHolder) {
+        this.itemTouchHelper!!.startDrag(holder)
     }
 
 }

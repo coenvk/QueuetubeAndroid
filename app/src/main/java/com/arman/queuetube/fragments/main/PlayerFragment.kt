@@ -1,7 +1,5 @@
 package com.arman.queuetube.fragments.main
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.content.BroadcastReceiver
 import android.content.IntentFilter
 import android.os.Bundle
@@ -9,17 +7,13 @@ import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
 import com.arman.queuetube.R
 import com.arman.queuetube.config.Constants
 import com.arman.queuetube.fragments.dialogs.AddToPlaylistFragment
 import com.arman.queuetube.model.VideoData
-import com.arman.queuetube.model.adapters.BaseTouchAdapter
 import com.arman.queuetube.model.adapters.VideoItemAdapter
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
 import com.arman.queuetube.modules.search.YouTubeSearcher
@@ -36,10 +30,21 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.utils.YouTubePlayerTracke
 
 class PlayerFragment : Fragment(), YouTubePlayerInitListener {
 
+    companion object {
+
+        const val SWIPE_DURATION = 420L
+
+    }
+
     private var broadcastReceiver: BroadcastReceiver? = null
 
     private var contentFrame: View? = null
+
     private var playerFrame: View? = null
+    private var openButton: ImageView? = null
+    private var isUp: Boolean = false
+    private var swipeHeight: Float = 0f
+
     private var videoTitleView: TextView? = null
 
     private var favoriteButton: ImageView? = null
@@ -65,7 +70,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         get() = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(getString(R.string.enable_autoplay_key), false)
 
     private val playlistAdapter: VideoItemAdapter
-        get() = this.queueFragment?.queueAdapter!!
+        get() = this.queueFragment?.listAdapter!!
 
     private fun setupReceiver() {
         this.broadcastReceiver = NotificationReceiver(this)
@@ -79,49 +84,31 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
     }
 
     fun swipeUp() {
+        if (!isUp) {
+            this.contentFrame!!.visibility = View.VISIBLE
+            view!!.translationY = 0f
+            openButton!!.setImageResource(R.drawable.ic_chevron_down_white_36dp)
+            isUp = true
+        }
+    }
 
+    fun swipeDown() {
+        if (isUp) {
+            view!!.translationY = swipeHeight
+            contentFrame!!.visibility = View.GONE
+            openButton!!.setImageResource(R.drawable.ic_chevron_up_white_36dp)
+            isUp = false
+        }
     }
 
     private fun setupPlayerFrame() {
-        val openBtn = view!!.findViewById(R.id.player_bar_open_button) as ImageView
+        this.openButton = view!!.findViewById(R.id.player_bar_open_button) as ImageView
         this.contentFrame = view!!.findViewById(R.id.player_content_frame) as View
 
-        var isUp = false
-        val swipeHeight = this.contentFrame!!.height.toFloat()
-        val swipeDuration = 420L
-
+        this.swipeHeight = this.contentFrame!!.height.toFloat()
         this.contentFrame!!.visibility = View.GONE
 
-        fun swipeDown() {
-            view!!.animate()
-                    .setDuration(swipeDuration)
-                    .translationY(swipeHeight)
-                    .setListener(object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator?) {
-                            super.onAnimationEnd(animation)
-                            contentFrame!!.visibility = View.GONE
-                            openBtn.setImageResource(R.drawable.ic_chevron_up_white_36dp)
-                            isUp = false
-                        }
-                    })
-        }
-
-        fun swipeUp() {
-            this.contentFrame!!.visibility = View.VISIBLE
-
-            view!!.animate()
-                    .setDuration(swipeDuration)
-                    .translationY(0f)
-                    .setListener(object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator?) {
-                            super.onAnimationEnd(animation)
-                            openBtn.setImageResource(R.drawable.ic_chevron_down_white_36dp)
-                            isUp = true
-                        }
-                    })
-        }
-
-        openBtn.setOnClickListener {
+        this.openButton!!.setOnClickListener {
             if (isUp) {
                 swipeDown()
             } else {
@@ -187,33 +174,12 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
 
         this.shareButton!!.setOnClickListener { VideoSharer.share(context!!, this@PlayerFragment.currentVideo!!) }
 
+        val bundle = Bundle()
+        bundle.putBoolean(Constants.Fragment.Argument.IS_DRAGGABLE, true)
+        bundle.putBoolean(Constants.Fragment.Argument.IS_SORTABLE, false)
+        bundle.putBoolean(Constants.Fragment.Argument.IS_SHUFFLABLE, false)
         this.queueFragment = QueueFragment()
-        this.queueFragment!!.onItemClickListener = object : BaseTouchAdapter.OnItemClickListener {
-            override fun onItemClick(holder: RecyclerView.ViewHolder) {
-                holder.itemView.isClickable = false
-
-                val animation = AnimationUtils.loadAnimation(this@PlayerFragment.activity, R.anim.remove_from_queue)
-
-                animation.setAnimationListener(object : Animation.AnimationListener {
-                    override fun onAnimationStart(animation: Animation) {
-
-                    }
-
-                    override fun onAnimationEnd(animation: Animation) {
-                        this@PlayerFragment.queueFragment!!.queueAdapter?.remove(holder.adapterPosition)
-                        if (this@PlayerFragment.queueFragment!!.queueAdapter?.isEmpty!!) {
-                            this@PlayerFragment.queueFragment!!.showEmptyText()
-                        }
-                    }
-
-                    override fun onAnimationRepeat(animation: Animation) {
-
-                    }
-                })
-
-                holder.itemView.startAnimation(animation)
-            }
-        }
+        this.queueFragment!!.arguments = bundle
         fragmentManager?.beginTransaction()?.add(R.id.queue_content_frame, this.queueFragment!!)?.commit()
 
         setupPlayerFrame()
@@ -296,12 +262,8 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         }
     }
 
-    fun stop() {
-        this.stop(false)
-    }
-
-    fun stop(autoplayIfEnabled: Boolean) {
-        this.queueFragment?.queueAdapter?.clear()
+    fun stop(autoplayIfEnabled: Boolean = false) {
+        this.queueFragment?.listAdapter?.clear()
         this.ytPlayerStopped = !autoplayIfEnabled
         this.ytPlayer?.seekTo(this.ytPlayerTracker!!.videoDuration)
     }

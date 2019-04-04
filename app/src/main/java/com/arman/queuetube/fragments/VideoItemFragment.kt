@@ -6,6 +6,8 @@ import android.widget.PopupMenu
 import androidx.annotation.MenuRes
 import androidx.recyclerview.widget.RecyclerView
 import com.arman.queuetube.R
+import com.arman.queuetube.config.Constants
+import com.arman.queuetube.fragments.dialogs.AddToPlaylistFragment
 import com.arman.queuetube.listeners.OnPlayItemsListener
 import com.arman.queuetube.listeners.OnSaveFinishedListener
 import com.arman.queuetube.listeners.OnShowPopupMenuListener
@@ -19,7 +21,7 @@ import com.arman.queuetube.util.VideoSharer
 abstract class VideoItemFragment : AsyncFragment<String, MutableList<VideoData>>(), OnShowPopupMenuListener, BaseTouchAdapter.OnItemClickListener {
 
     var onPlayItemsListener: OnPlayItemsListener? = null
-    var onSaveFinishedListener: OnSaveFinishedListener = OnSaveFinishedListener { onSaveFinished() }
+    private val onSaveFinishedListener: OnSaveFinishedListener = OnSaveFinishedListener { onSaveFinished() }
 
     @MenuRes
     protected open var popupMenuResId: Int = R.menu.popup_menu_list_item
@@ -46,24 +48,34 @@ abstract class VideoItemFragment : AsyncFragment<String, MutableList<VideoData>>
         }
     }
 
-    open fun onAddToQueue(item: VideoData) {
-        onPlayItemsListener?.onPlay(item)
+    open fun onAddToQueue(holder: BaseViewHolder<VideoData>) {
+        onPlayItemsListener?.onPlay(holder.item!!)
     }
 
-    open fun onPlayNext(item: VideoData) {
-        onPlayItemsListener?.onPlayNext(item)
+    open fun onPlayNext(holder: BaseViewHolder<VideoData>) {
+        onPlayItemsListener?.onPlayNext(holder.item!!)
     }
 
-    open fun onPlayNow(item: VideoData) {
-        onPlayItemsListener?.onPlayNow(item)
+    open fun onPlayNow(holder: BaseViewHolder<VideoData>) {
+        onPlayItemsListener?.onPlayNow(holder.item!!)
     }
 
-    open fun onRemoveFromPlaylist(item: VideoData) {
+    open fun onRemoveFromPlaylist(holder: BaseViewHolder<VideoData>) {
 
     }
 
-    open fun onShare(item: VideoData) {
-        VideoSharer.share(context, item)
+    open fun onAddToFavorites(holder: BaseViewHolder<VideoData>) {
+        GsonPlaylistHelper.writeToIfNotFound(Constants.Json.Playlist.FAVORITES, holder.item!!)
+    }
+
+    open fun onAddToPlaylist(holder: BaseViewHolder<VideoData>) {
+        val dialog = AddToPlaylistFragment()
+        dialog.setVideo(holder.item!!)
+        dialog.show(fragmentManager!!, "add_to_playlist_dialog")
+    }
+
+    open fun onShare(holder: BaseViewHolder<VideoData>) {
+        VideoSharer.share(context, holder.item!!)
     }
 
     final override fun onShowPopupMenu(holder: BaseViewHolder<VideoData>, anchorView: View) {
@@ -71,19 +83,17 @@ abstract class VideoItemFragment : AsyncFragment<String, MutableList<VideoData>>
         optionsPopup.menuInflater.inflate(this.popupMenuResId, optionsPopup.menu)
 
         optionsPopup.setOnMenuItemClickListener(PopupMenu.OnMenuItemClickListener { menuItem ->
-            val item = holder.item
-            item?.let {
-                when (menuItem.itemId) {
-                    R.id.list_item_option_add_to_queue -> onAddToQueue(item)
-                    R.id.list_item_option_remove -> onRemoveFromPlaylist(item)
-                    R.id.list_item_option_play_next -> onPlayNext(item)
-                    R.id.list_item_option_play_now -> onPlayNow(item)
-                    R.id.list_item_option_share -> onShare(item)
-                    else -> return@OnMenuItemClickListener false
-                }
-                return@OnMenuItemClickListener true
+            when (menuItem.itemId) {
+                R.id.list_item_option_add_to_queue -> onAddToQueue(holder)
+                R.id.list_item_option_remove -> onRemoveFromPlaylist(holder)
+                R.id.list_item_option_play_next -> onPlayNext(holder)
+                R.id.list_item_option_play_now -> onPlayNow(holder)
+                R.id.list_item_option_add_to_favorites -> onAddToFavorites(holder)
+                R.id.list_item_option_add_to_playlist -> onAddToPlaylist(holder)
+                R.id.list_item_option_share -> onShare(holder)
+                else -> return@OnMenuItemClickListener false
             }
-            false
+            return@OnMenuItemClickListener true
         })
         optionsPopup.show()
     }

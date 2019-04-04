@@ -13,6 +13,13 @@
             android:key="@string/save_history_key"
             android:title="@string/save_history_title" />
 
+        <ListPreference
+            android:defaultValue="US"
+            android:entries="@array/list_preference_entries"
+            android:entryValues="@array/list_preference_entry_values"
+            android:key="@string/select_region_key"
+            android:title="@string/select_region_title" />
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Notifications">

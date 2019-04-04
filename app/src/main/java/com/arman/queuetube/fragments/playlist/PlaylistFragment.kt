@@ -10,7 +10,9 @@ import com.arman.queuetube.R
 import com.arman.queuetube.config.Constants
 import com.arman.queuetube.fragments.VideoListFragment
 import com.arman.queuetube.fragments.dialogs.EditPlaylistNameFragment
+import com.arman.queuetube.listeners.OnDismissDialogListener
 import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.viewholders.BaseViewHolder
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
 
 class PlaylistFragment : VideoListFragment() {
@@ -42,10 +44,13 @@ class PlaylistFragment : VideoListFragment() {
     }
 
     fun onEdit() {
-        val dialog = EditPlaylistNameFragment()
         val bundle = Bundle()
         bundle.putString(Constants.Fragment.Argument.PLAYLIST_NAME, this.playlistName)
+        val dialog = EditPlaylistNameFragment()
         dialog.arguments = bundle
+        dialog.onDismissDialogListener = OnDismissDialogListener {
+            this.setTitle(it.getString(Constants.Fragment.Argument.PLAYLIST_NAME, this.playlistName))
+        }
         dialog.show(fragmentManager!!, "edit_playlist_dialog")
     }
 
@@ -104,7 +109,7 @@ class PlaylistFragment : VideoListFragment() {
         super.finishRefresh()
         val videoCount = this.listAdapter!!.itemCount
         val subtitle = "$videoCount videos"
-        this.headerSubtitleView!!.text = subtitle
+        this.setSubtitle(subtitle)
         if (videoCount <= 0) {
             this.emptyTextView!!.visibility = View.VISIBLE
         } else {
@@ -112,7 +117,8 @@ class PlaylistFragment : VideoListFragment() {
         }
     }
 
-    override fun onRemoveFromPlaylist(item: VideoData) {
+    override fun onRemoveFromPlaylist(holder: BaseViewHolder<VideoData>) {
+        val item = holder.item!!
         listAdapter!!.remove(item)
         GsonPlaylistHelper.removeFrom(this@PlaylistFragment.playlistName, item)
     }

@@ -68,6 +68,8 @@ class SearchFragment : VideoListFragment() {
         }
     }
 
+    override fun onSaveFinished() = Unit
+
     override fun doInBackground(params: Array<out String>): MutableList<VideoData> {
         return YouTubeSearcher.search(params[0])
     }

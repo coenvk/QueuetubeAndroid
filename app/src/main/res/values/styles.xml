@@ -31,9 +31,18 @@
         <item name="android:titleTextColor">@android:color/white</item>
         <item name="android:textColorPrimary">@android:color/white</item>
         <item name="android:textColorSecondary">@android:color/white</item>
+        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
+    </style>
+
+    <style name="AppTheme.BackScreen.ActionBar" parent="Widget.AppCompat.Light.ActionBar">
+        <item name="android:titleTextStyle">@style/AppTheme.ActionBar.Title</item>
+        <item name="titleTextStyle">@style/AppTheme.ActionBar.Title</item>
+        <item name="android:titleTextColor">@android:color/white</item>
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:textColorSecondary">@android:color/white</item>
+        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
         <item name="android:background">@color/colorPrimary</item>
         <item name="background">@color/colorPrimary</item>
-        <item name="android:statusBarColor">@color/colorPrimaryDark</item>
     </style>
 
     <style name="AppTheme.ActionBar.Title" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
@@ -60,8 +69,8 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
         <item name="android:textColorPrimaryInverse">@color/textColorPrimaryInverse</item>
-        <item name="android:actionBarStyle">@style/AppTheme.ActionBar</item>
-        <item name="actionBarStyle">@style/AppTheme.ActionBar</item>
+        <item name="android:actionBarStyle">@style/AppTheme.BackScreen.ActionBar</item>
+        <item name="actionBarStyle">@style/AppTheme.BackScreen.ActionBar</item>
         <item name="android:actionBarTheme">@style/AppTheme.ThemeOverlay.ActionBar</item>
         <item name="actionBarTheme">@style/AppTheme.ThemeOverlay.ActionBar</item>
         <item name="android:actionBarPopupTheme">@style/AppTheme.ThemeOverlay</item>

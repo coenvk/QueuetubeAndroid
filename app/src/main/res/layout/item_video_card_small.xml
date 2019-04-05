@@ -5,8 +5,6 @@
     android:layout_height="150dp"
     android:layout_margin="4dp"
     android:background="@color/bootstrap_gray_lightest"
-    android:clickable="true"
-    android:focusable="true"
     android:foreground="?selectableItemBackground"
     android:orientation="vertical"
     app:cardCornerRadius="8dp">
@@ -17,15 +15,7 @@
         android:orientation="vertical"
         android:weightSum="2">
 
-        <com.google.android.youtube.player.YouTubeThumbnailView
-            android:id="@+id/youtube_thumbnail"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:adjustViewBounds="true"
-            android:background="@android:color/darker_gray"
-            android:scaleType="centerCrop"
-            android:visibility="visible" />
+        <include layout="@layout/item_thumbnail_small" />
 
         <LinearLayout
             android:layout_width="match_parent"

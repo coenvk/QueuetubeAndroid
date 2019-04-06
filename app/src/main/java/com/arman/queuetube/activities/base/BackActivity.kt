@@ -1,4 +1,4 @@
-package com.arman.queuetube.activities
+package com.arman.queuetube.activities.base
 
 import android.os.Bundle
 import android.view.MenuItem

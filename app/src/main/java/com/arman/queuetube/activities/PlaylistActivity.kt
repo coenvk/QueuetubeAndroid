@@ -1,6 +1,7 @@
 package com.arman.queuetube.activities
 
 import android.os.Bundle
+import com.arman.queuetube.activities.base.BackActivity
 import com.arman.queuetube.config.Constants
 import com.arman.queuetube.fragments.playlist.PlaylistFragment
 

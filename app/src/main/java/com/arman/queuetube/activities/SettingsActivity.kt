@@ -12,6 +12,7 @@ import android.preference.PreferenceActivity
 import android.preference.PreferenceFragment
 import android.view.MenuItem
 import com.arman.queuetube.R
+import com.arman.queuetube.activities.base.AppCompatPreferenceActivity
 import com.arman.queuetube.util.notifications.NotificationHelper
 
 /**

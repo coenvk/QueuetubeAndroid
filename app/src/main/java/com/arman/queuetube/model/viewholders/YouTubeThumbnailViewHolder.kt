@@ -77,9 +77,12 @@ open class YouTubeThumbnailViewHolder(view: View) : BaseTouchViewHolder<VideoDat
         when (state) {
             UNINITIALIZED -> this.initialize()
             INITIALIZED -> {
-                // TODO
+                // TODO deal with leaking service connection
                 try {
                     this.thumbnailLoader?.setVideo(item.id)
+                } catch (e: IllegalStateException) {
+                    this.thumbnailLoader = null
+                    this.initialize()
                 } catch (e: DeadObjectException) {
                     this.thumbnailLoader = null
                     this.initialize()

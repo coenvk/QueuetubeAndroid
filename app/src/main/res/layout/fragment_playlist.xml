@@ -57,7 +57,7 @@
                 android:layout_marginTop="5dp">
 
                 <ImageView
-                    android:id="@+id/playlist_shuffle_button"
+                    android:id="@+id/list_shuffle_button"
                     style="@style/Widget.AppCompat.ActionButton"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
@@ -81,13 +81,21 @@
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/playlist_empty_text"
+        <LinearLayout
+            android:id="@+id/list_empty_text_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="This playlist is empty"
-            android:visibility="gone" />
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableTop="@drawable/ic_playlist_play_grey600_36dp"
+                android:text="This playlist is empty" />
+
+        </LinearLayout>
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipe_refresh_layout"

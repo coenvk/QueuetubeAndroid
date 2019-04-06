@@ -15,17 +15,16 @@ import com.arman.queuetube.fragments.main.LibraryFragment
 import com.arman.queuetube.fragments.main.PlayerFragment
 import com.arman.queuetube.fragments.main.SearchFragment
 import com.arman.queuetube.fragments.playlist.PlaylistFragment
-import com.arman.queuetube.listeners.NavigationItemListener
 import com.arman.queuetube.listeners.OnPlayItemsListener
 import com.arman.queuetube.model.VideoData
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
-import com.arman.queuetube.util.notifications.receivers.WifiReceiver
-import com.arman.queuetube.util.services.KillNotificationService
+import com.arman.queuetube.receivers.WifiReceiver
+import com.arman.queuetube.services.KillNotificationService
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
-class MainActivity : AppCompatActivity(), OnPlayItemsListener {
+class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationView.OnNavigationItemSelectedListener {
 
     private var navigationView: BottomNavigationView? = null
 
@@ -73,7 +72,7 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener {
 
     private fun setupNavigationView() {
         this.navigationView = findViewById(R.id.bottom_nav_bar)
-        this.navigationView!!.setOnNavigationItemSelectedListener(NavigationItemListener(this))
+        this.navigationView!!.setOnNavigationItemSelectedListener(this)
     }
 
     private fun setupPlayerFragment() {
@@ -112,7 +111,6 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener {
             transaction.commitNow()
             this.currentFragment = Constants.Fragment.HOME
             this.enableScroll()
-            this.playerFragment?.swipeDown()
         }
     }
 
@@ -131,7 +129,6 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener {
             transaction.commitNow()
             this.currentFragment = Constants.Fragment.SEARCH
             this.disableScroll()
-            this.playerFragment?.swipeDown()
         }
     }
 
@@ -150,7 +147,6 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener {
             transaction.commitNow()
             this.currentFragment = Constants.Fragment.LIBRARY
             this.enableScroll()
-            this.playerFragment?.swipeDown()
         }
     }
 
@@ -257,6 +253,25 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener {
     override fun onPlayNow(video: VideoData) {
         if (playerFragment != null && playerFragment!!.addToQueue(0, video)) {
             playerFragment!!.forcePlayNext()
+        }
+    }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        this.playerFragment?.swipeDown()
+        return when (item.itemId) {
+            R.id.nav_item_home -> {
+                switchToHomeFragment()
+                true
+            }
+            R.id.nav_item_search -> {
+                switchToSearchFragment()
+                true
+            }
+            R.id.nav_item_library -> {
+                switchToLibraryFragment()
+                true
+            }
+            else -> false
         }
     }
 

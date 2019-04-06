@@ -23,6 +23,7 @@
         android:gravity="center|end"
         android:padding="5dp"
         android:text="3:27"
-        android:textColor="@android:color/white" />
+        android:textColor="@android:color/white"
+        android:visibility="gone" />
 
 </RelativeLayout>

@@ -3,7 +3,6 @@ package com.arman.queuetube.modules.search
 import android.annotation.SuppressLint
 import android.os.AsyncTask
 import com.arman.queuetube.config.Constants
-import com.arman.queuetube.model.Category
 import com.arman.queuetube.model.VideoData
 import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.client.http.javanet.NetHttpTransport
@@ -33,10 +32,8 @@ object YouTubeSearcher {
 
     private var searchListQuery: YouTube.Search.List? = null
     private var videosListQuery: YouTube.Videos.List? = null
-    private var videoCategoriesListQuery: YouTube.VideoCategories.List? = null
 
     private var tmpVideoList: MutableList<VideoData>? = null
-    private var tmpCategoryList: MutableList<Category>? = null
 
     @Throws(IOException::class)
     fun searchList(): YouTube.Search.List {
@@ -154,33 +151,6 @@ object YouTubeSearcher {
         return this.videosListQuery!!
     }
 
-    @Throws(IOException::class)
-    fun videoCategoriesList(): YouTube.VideoCategories.List {
-        return this.videoCategoriesList(VIDEO_CATEGORIES_PART)
-    }
-
-    @Throws(IOException::class)
-    fun videoCategoriesList(part: String): YouTube.VideoCategories.List {
-        return this.videoCategoriesList(part, VIDEO_CATEGORIES_FIELDS)
-    }
-
-    @Throws(IOException::class)
-    fun videoCategoriesList(part: String, fields: String): YouTube.VideoCategories.List {
-        this.videoCategoriesListQuery = this.youTube.videoCategories().list(part)
-                .setKey(Constants.Key.API_KEY)
-                .setFields(fields)
-        return this.videoCategoriesListQuery!!
-    }
-
-    @Throws(IOException::class)
-    fun videoCategoriesList(part: String, id: String, fields: String): YouTube.VideoCategories.List {
-        this.videoCategoriesListQuery = this.youTube.videoCategories().list(part)
-                .setKey(Constants.Key.API_KEY)
-                .setId(id)
-                .setFields(fields)
-        return this.videoCategoriesListQuery!!
-    }
-
     fun requestDetails(videoData: VideoData): VideoData {
         try {
             this.videosList(videoData.id)
@@ -248,26 +218,6 @@ object YouTubeSearcher {
         }
 
         return null
-    }
-
-    fun videoCategories(regionCode: String): MutableList<Category> {
-        this.tmpCategoryList = ArrayList()
-        try {
-            this.videoCategoriesList().regionCode = regionCode
-        } catch (e: IOException) {
-            return this.tmpCategoryList as ArrayList<Category>
-        }
-
-        try {
-            this.videoCategoriesList().regionCode = regionCode
-            val results = this.videoCategoriesListQuery!!.execute().items
-            for (i in results.indices) {
-                this.tmpCategoryList!!.add(Category(results[i]))
-            }
-        } catch (e: IOException) {
-        }
-
-        return this.tmpCategoryList as ArrayList<Category>
     }
 
     fun topCharts(): MutableList<VideoData> {

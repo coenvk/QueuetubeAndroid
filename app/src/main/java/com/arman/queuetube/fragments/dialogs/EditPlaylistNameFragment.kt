@@ -11,7 +11,7 @@ import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import com.arman.queuetube.R
 import com.arman.queuetube.config.Constants
-import com.arman.queuetube.listeners.OnDismissDialogListener
+import com.arman.queuetube.listeners.OnDialogDismissListener
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
 
 class EditPlaylistNameFragment : DialogFragment() {
@@ -20,7 +20,7 @@ class EditPlaylistNameFragment : DialogFragment() {
     private var errorText: TextView? = null
 
     private var currentName: String? = null
-    var onDismissDialogListener: OnDismissDialogListener? = null
+    var onDialogDismissListener: OnDialogDismissListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,13 +53,13 @@ class EditPlaylistNameFragment : DialogFragment() {
                 } else {
                     val bundle = Bundle()
                     bundle.putString(Constants.Fragment.Argument.PLAYLIST_NAME, text)
-                    this.onDismissDialogListener!!.onDismissDialog(bundle)
+                    this.onDialogDismissListener!!.onDialogDismiss(bundle)
 
                     if (!GsonPlaylistHelper.editName(this.currentName!!, text)) {
                         errorText!!.visibility = View.VISIBLE
 
                         bundle.putString(Constants.Fragment.Argument.PLAYLIST_NAME, this.currentName!!)
-                        this.onDismissDialogListener!!.onDismissDialog(bundle)
+                        this.onDialogDismissListener!!.onDialogDismiss(bundle)
                     } else {
                         errorText!!.visibility = View.GONE
                         dialog.dismiss()

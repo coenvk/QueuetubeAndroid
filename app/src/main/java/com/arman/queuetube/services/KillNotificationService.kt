@@ -1,4 +1,4 @@
-package com.arman.queuetube.util.services
+package com.arman.queuetube.services
 
 import android.app.NotificationManager
 import android.app.Service

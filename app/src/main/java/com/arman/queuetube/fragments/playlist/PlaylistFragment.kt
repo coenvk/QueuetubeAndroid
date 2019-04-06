@@ -8,14 +8,15 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.arman.queuetube.R
 import com.arman.queuetube.config.Constants
-import com.arman.queuetube.fragments.VideoListFragment
+import com.arman.queuetube.fragments.RefreshVideoListFragment
 import com.arman.queuetube.fragments.dialogs.EditPlaylistNameFragment
-import com.arman.queuetube.listeners.OnDismissDialogListener
+import com.arman.queuetube.listeners.OnDialogDismissListener
+import com.arman.queuetube.listeners.OnSaveFinishedListener
 import com.arman.queuetube.model.VideoData
 import com.arman.queuetube.model.viewholders.BaseViewHolder
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
 
-class PlaylistFragment : VideoListFragment() {
+class PlaylistFragment : RefreshVideoListFragment() {
 
     override var isDraggable: Boolean = true
 
@@ -24,11 +25,17 @@ class PlaylistFragment : VideoListFragment() {
 
     private var isEditable: Boolean = true
 
-    private var emptyTextView: TextView? = null
     private var headerTitleView: TextView? = null
     private var headerSubtitleView: TextView? = null
 
+    private val onSaveFinishedListener: OnSaveFinishedListener = OnSaveFinishedListener { load() }
+
     override var popupMenuResId: Int = R.menu.popup_menu_playlist_item
+
+    override fun onDestroy() {
+        super.onDestroy()
+        GsonPlaylistHelper.removeOnSaveFinishedListener(onSaveFinishedListener)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_playlist, container, false) as ViewGroup
@@ -48,7 +55,7 @@ class PlaylistFragment : VideoListFragment() {
         bundle.putString(Constants.Fragment.Argument.PLAYLIST_NAME, this.playlistName)
         val dialog = EditPlaylistNameFragment()
         dialog.arguments = bundle
-        dialog.onDismissDialogListener = OnDismissDialogListener {
+        dialog.onDialogDismissListener = OnDialogDismissListener {
             this.setTitle(it.getString(Constants.Fragment.Argument.PLAYLIST_NAME, this.playlistName))
         }
         dialog.show(fragmentManager!!, "edit_playlist_dialog")
@@ -65,16 +72,12 @@ class PlaylistFragment : VideoListFragment() {
             this.playlistName = arguments.getString(Constants.Fragment.Argument.PLAYLIST_NAME, "")
             this.isEditable = arguments.getBoolean(Constants.Fragment.Argument.IS_EDITABLE, true)
         }
+        GsonPlaylistHelper.addOnSaveFinishedListener(onSaveFinishedListener)
     }
 
     override fun doInBackground(vararg params: String): MutableList<VideoData> {
         val playlist = GsonPlaylistHelper.getPlaylist(this.playlistName)
         return GsonPlaylistHelper.asPlaylist(playlist!!)
-    }
-
-    override fun onTaskFinished(result: MutableList<VideoData>) {
-        this.listAdapter!!.setAll(result)
-        super.onTaskFinished(result)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -85,9 +88,7 @@ class PlaylistFragment : VideoListFragment() {
 
         this.headerSubtitleView = view.findViewById(R.id.playlist_header_subtitle) as TextView
 
-        this.emptyTextView = view.findViewById(R.id.playlist_empty_text) as TextView
-
-        val shuffleButton = view.findViewById(R.id.playlist_shuffle_button) as ImageView
+        val shuffleButton = view.findViewById(R.id.list_shuffle_button) as ImageView
         if (this.isShufflable) {
             shuffleButton.setOnClickListener { onShuffle() }
         } else {
@@ -105,16 +106,10 @@ class PlaylistFragment : VideoListFragment() {
         }
     }
 
-    override fun finishRefresh() {
-        super.finishRefresh()
+    override fun finishLoad() {
+        super.finishLoad()
         val videoCount = this.listAdapter!!.itemCount
-        val subtitle = "$videoCount videos"
-        this.setSubtitle(subtitle)
-        if (videoCount <= 0) {
-            this.emptyTextView!!.visibility = View.VISIBLE
-        } else {
-            this.emptyTextView!!.visibility = View.GONE
-        }
+        this.setSubtitle("$videoCount videos")
     }
 
     override fun onRemoveFromPlaylist(holder: BaseViewHolder<VideoData>) {

@@ -10,6 +10,7 @@ import com.arman.queuetube.model.VideoData
 import com.arman.queuetube.modules.BaseTask
 import com.google.gson.*
 import java.io.*
+import kotlin.math.min
 
 @SuppressLint("StaticFieldLeak")
 object GsonPlaylistHelper {
@@ -21,10 +22,10 @@ object GsonPlaylistHelper {
     private var gson: Gson? = null
 
     val favorites: JsonArray?
-        get() = getPlaylist(read(), Constants.Json.Playlist.FAVORITES)
+        get() = getPlaylist(Constants.Json.Playlist.FAVORITES)
 
     val history: JsonArray?
-        get() = getPlaylist(read(), Constants.Json.Playlist.HISTORY)
+        get() = getPlaylist(Constants.Json.Playlist.HISTORY)
 
     val playlists: JsonArray?
         get() = getPlaylists(read())
@@ -142,6 +143,16 @@ object GsonPlaylistHelper {
     fun asPlaylist(array: JsonArray): MutableList<VideoData> {
         val videos = ArrayList<VideoData>()
         for (i in 0 until array.size()) {
+            val video = array.get(i).asJsonObject
+            val videoData = VideoData(video)
+            videos.add(videoData)
+        }
+        return videos
+    }
+
+    fun asPlaylist(array: JsonArray, size: Int): MutableList<VideoData> {
+        val videos = ArrayList<VideoData>()
+        for (i in 0 until min(size, array.size())) {
             val video = array.get(i).asJsonObject
             val videoData = VideoData(video)
             videos.add(videoData)

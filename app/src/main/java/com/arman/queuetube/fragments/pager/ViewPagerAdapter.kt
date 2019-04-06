@@ -16,6 +16,17 @@ import java.util.*
 
 class ViewPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
+//    private fun setupPager(view: View) {
+//        this.viewPager = view.findViewById(R.id.view_pager) as ViewPager
+//
+//        val tabLayout = activity!!.findViewById(R.id.tabs) as TabLayout
+//        tabLayout.setupWithViewPager(this.viewPager)
+//
+//        this.pagerAdapter = ViewPagerAdapter(fragmentManager!!)
+//        this.viewPager!!.adapter = this.pagerAdapter
+//        this.viewPager!!.setPageTransformer(true, DepthPageTransformer())
+//    }
+
     var playerFragment: Fragment? = null
         private set
 

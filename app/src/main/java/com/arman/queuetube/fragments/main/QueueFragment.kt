@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.arman.queuetube.R
 import com.arman.queuetube.fragments.VideoListFragment
@@ -16,37 +15,10 @@ import com.arman.queuetube.model.viewholders.BaseViewHolder
 
 class QueueFragment : VideoListFragment(), BaseTouchAdapter.OnItemDragListener {
 
-    override var isRefreshable: Boolean = false
-    override var loadOnStart: Boolean = false
     override var popupMenuResId: Int = R.menu.popup_menu_queue_item
-
-    override fun onSaveFinished() = Unit
-    override fun onTaskFinished(result: MutableList<VideoData>) = Unit
-    override fun doInBackground(params: Array<out String>): MutableList<VideoData> {
-        return mutableListOf()
-    }
-
-    private var emptyTextLayout: LinearLayout? = null
-
-    fun showEmptyText() {
-        this.emptyTextLayout!!.visibility = View.VISIBLE
-    }
-
-    fun showQueue() {
-        this.emptyTextLayout!!.visibility = View.GONE
-    }
 
     override fun onRemoveFromPlaylist(holder: BaseViewHolder<VideoData>) {
         this.onItemClick(holder)
-    }
-
-    override fun finishRefresh() {
-        super.finishRefresh()
-        if (this.listAdapter!!.isEmpty) {
-            this.showEmptyText()
-        } else {
-            this.showQueue()
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -55,7 +27,6 @@ class QueueFragment : VideoListFragment(), BaseTouchAdapter.OnItemDragListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        this.emptyTextLayout = view.findViewById(R.id.queue_empty_text_layout) as LinearLayout
         this.listAdapter!!.onItemDragListener = this
     }
 

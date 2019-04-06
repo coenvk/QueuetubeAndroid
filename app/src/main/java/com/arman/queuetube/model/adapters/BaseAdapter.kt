@@ -10,6 +10,12 @@ abstract class BaseAdapter<E, VH : BaseViewHolder<E>> @JvmOverloads constructor(
     val isEmpty: Boolean
         get() = this.items.isEmpty()
 
+    val isNotEmpty: Boolean
+        get() = this.items.isNotEmpty()
+
+    val isNullOrEmpty: Boolean
+        get() = this.items.isNullOrEmpty()
+
     val all: List<E>
         get() = this.items
 

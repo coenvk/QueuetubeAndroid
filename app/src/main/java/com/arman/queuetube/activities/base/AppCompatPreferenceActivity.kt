@@ -1,4 +1,4 @@
-package com.arman.queuetube.activities
+package com.arman.queuetube.activities.base
 
 import android.content.res.Configuration
 import android.os.Bundle

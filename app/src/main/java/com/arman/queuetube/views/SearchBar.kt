@@ -1,4 +1,4 @@
-package com.arman.queuetube.util
+package com.arman.queuetube.views
 
 import android.content.Context
 import android.graphics.Color

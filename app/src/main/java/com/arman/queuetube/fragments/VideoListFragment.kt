@@ -5,11 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arman.queuetube.R
 import com.arman.queuetube.config.Constants
-import com.arman.queuetube.model.VideoData
 import com.arman.queuetube.model.adapters.VideoItemAdapter
 import com.arman.queuetube.util.itemtouchhelper.VideoItemTouchHelper
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -19,6 +17,8 @@ abstract class VideoListFragment : VideoItemFragment() {
     protected open var isDraggable: Boolean = false
     protected var isSortable: Boolean = true
     protected var isShufflable: Boolean = true
+
+    protected var emptyTextLayout: View? = null
 
     protected var listView: RecyclerView? = null
     var listAdapter: VideoItemAdapter? = null
@@ -55,10 +55,10 @@ abstract class VideoListFragment : VideoItemFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        this.emptyTextLayout = view.findViewById(R.id.list_empty_text_layout)
+
         this.listView = view.findViewById(R.id.list_view)
         this.listView!!.setHasFixedSize(true)
-        this.layoutManager = LinearLayoutManager(activity)
-        this.listView!!.layoutManager = this.layoutManager
 
         this.listAdapter = VideoItemAdapter(this, this)
         this.listView!!.adapter = this.listAdapter
@@ -77,25 +77,18 @@ abstract class VideoListFragment : VideoItemFragment() {
         }
     }
 
-    override fun onTaskFinished(result: MutableList<VideoData>) {
-        this.listAdapter!!.setAll(result)
-        super.onTaskFinished(result)
-    }
-
-    override fun finishRefresh() {
-        super.finishRefresh()
-        val videoCount = this.listAdapter!!.itemCount
-        if (videoCount <= 0) {
-            this.playAllButton?.visibility = View.GONE
-        } else {
-            this.playAllButton?.visibility = View.VISIBLE
-        }
-    }
-
     fun scrollToTop() {
         if (this.listView != null && this.layoutManager != null) {
             this.layoutManager!!.smoothScrollToPosition(this.listView, null, 0)
         }
+    }
+
+    fun showEmptyText() {
+        this.emptyTextLayout?.visibility = View.VISIBLE
+    }
+
+    fun showList() {
+        this.emptyTextLayout?.visibility = View.GONE
     }
 
     companion object {

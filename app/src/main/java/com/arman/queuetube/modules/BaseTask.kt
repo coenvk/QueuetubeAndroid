@@ -2,14 +2,15 @@ package com.arman.queuetube.modules
 
 import android.os.AsyncTask
 import com.arman.queuetube.listeners.OnTaskFinishedListener
-import kotlin.reflect.KFunction1
+
+typealias InBackground<Params, Result> = ((Array<out Params>) -> Result)
 
 class BaseTask<Params, Result>() : AsyncTask<Params, Int, Result>() {
 
     var onTaskFinishedListener: OnTaskFinishedListener<Result>? = null
-    private var doInBackground: ((Array<out Params>) -> Result)? = null
+    private var doInBackground: InBackground<Params, Result>? = null
 
-    constructor(doInBackground: (Array<out Params>) -> Result) : this() {
+    constructor(doInBackground: InBackground<Params, Result>) : this() {
         this.doInBackground = doInBackground
     }
 

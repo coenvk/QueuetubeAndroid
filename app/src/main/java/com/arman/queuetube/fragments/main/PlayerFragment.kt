@@ -17,9 +17,9 @@ import com.arman.queuetube.model.VideoData
 import com.arman.queuetube.model.adapters.VideoItemAdapter
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
 import com.arman.queuetube.modules.search.YouTubeSearcher
+import com.arman.queuetube.receivers.NotificationReceiver
 import com.arman.queuetube.util.VideoSharer
 import com.arman.queuetube.util.notifications.NotificationHelper
-import com.arman.queuetube.util.notifications.receivers.NotificationReceiver
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayer
@@ -29,12 +29,6 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.player.listeners.YouTubeP
 import com.pierfrancescosoffritti.androidyoutubeplayer.utils.YouTubePlayerTracker
 
 class PlayerFragment : Fragment(), YouTubePlayerInitListener {
-
-    companion object {
-
-        const val SWIPE_DURATION = 420L
-
-    }
 
     private var broadcastReceiver: BroadcastReceiver? = null
 
@@ -137,7 +131,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
 
     fun showAddToPlaylistDialog() {
         val dialog = AddToPlaylistFragment()
-        dialog.setVideo(this.currentVideo!!)
+        dialog.video = this.currentVideo!!
         dialog.show(fragmentManager!!, "add_to_playlist_dialog")
     }
 
@@ -219,8 +213,8 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         var ret = false
         if (this.ytPlayerReady && this.ytPlayerVideoSet) {
             this.skip()
-            if (!this.playlistAdapter.isEmpty) {
-                this.queueFragment?.showQueue()
+            if (this.playlistAdapter.isNotEmpty) {
+                this.queueFragment?.showList()
             }
         } else {
             ret = this.tryPlayNext()
@@ -249,8 +243,8 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
                 }
             }
         }
-        if (!this.playlistAdapter.isEmpty) {
-            this.queueFragment?.showQueue()
+        if (this.playlistAdapter.isNotEmpty) {
+            this.queueFragment?.showList()
         }
         return ret
     }

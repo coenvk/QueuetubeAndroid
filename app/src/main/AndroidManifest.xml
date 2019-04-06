@@ -54,7 +54,7 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            <!-- TODO -->
+            <!-- TODO share youtube TO queuetube -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -71,7 +71,7 @@
             android:supportsPictureInPicture="false"
             android:theme="@style/AppTheme.BackScreen" />
 
-        <service android:name=".util.services.KillNotificationService" />
+        <service android:name="com.arman.queuetube.services.KillNotificationService" />
     </application>
 
 </manifest>

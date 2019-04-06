@@ -7,13 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.arman.queuetube.R
 import com.arman.queuetube.activities.PlaylistActivity
 import com.arman.queuetube.config.Constants
-import com.arman.queuetube.fragments.VideoItemFragment
+import com.arman.queuetube.fragments.AsyncVideoListFragment
 import com.arman.queuetube.fragments.dialogs.CreatePlaylistFragment
+import com.arman.queuetube.listeners.OnSaveFinishedListener
 import com.arman.queuetube.listeners.OnTaskFinishedListener
 import com.arman.queuetube.model.VideoData
 import com.arman.queuetube.model.adapters.BaseTouchAdapter
@@ -22,11 +22,7 @@ import com.arman.queuetube.model.adapters.PlaylistsAdapter
 import com.arman.queuetube.modules.BaseTask
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
 
-class LibraryFragment : VideoItemFragment() {
-
-    private var historyView: RecyclerView? = null
-    var historyAdapter: PlaylistItemAdapter? = null
-        private set
+class LibraryFragment : AsyncVideoListFragment() {
 
     private var playlistsView: RecyclerView? = null
     var playlistsAdapter: PlaylistsAdapter? = null
@@ -34,7 +30,7 @@ class LibraryFragment : VideoItemFragment() {
 
     private var loadPlaylistsTask: BaseTask<Unit, MutableList<String>>? = null
 
-    private var emptyTextView: TextView? = null
+    private val onSaveFinishedListener: OnSaveFinishedListener = OnSaveFinishedListener { load() }
 
     private fun doLoadPlaylists(vararg aUnit: Unit?): MutableList<String> {
         val playlists = GsonPlaylistHelper.playlists
@@ -63,26 +59,12 @@ class LibraryFragment : VideoItemFragment() {
     }
 
     override fun doInBackground(vararg params: String): MutableList<VideoData> {
-        val playlist = GsonPlaylistHelper.getPlaylist(Constants.Json.Playlist.HISTORY)
-        return GsonPlaylistHelper.asPlaylist(playlist!!)
+        return GsonPlaylistHelper.asPlaylist(GsonPlaylistHelper.history!!, Constants.History.MAX_SIZE_SHORT)
     }
 
-    override fun onTaskFinished(result: MutableList<VideoData>) {
-        this.historyAdapter!!.setAll(result)
-        super.onTaskFinished(result)
-    }
-
-    override fun onSaveFinished() {
-        this.load()
+    override fun load(vararg params: String) {
+        super.load(*params)
         this.loadPlaylists()
-    }
-
-    override fun finishRefresh() {
-        if (this.historyAdapter?.isEmpty!!) {
-            this.emptyTextView?.visibility = View.VISIBLE
-        } else {
-            this.emptyTextView?.visibility = View.GONE
-        }
     }
 
     private fun loadPlaylistActivity(name: String) {
@@ -98,6 +80,16 @@ class LibraryFragment : VideoItemFragment() {
         this.startActivity(intent)
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        GsonPlaylistHelper.addOnSaveFinishedListener(onSaveFinishedListener)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        GsonPlaylistHelper.removeOnSaveFinishedListener(onSaveFinishedListener)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_library, container, false) as ViewGroup
     }
@@ -105,18 +97,13 @@ class LibraryFragment : VideoItemFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        this.emptyTextView = view.findViewById(R.id.recently_watched_empty_text) as TextView
+        this.listAdapter = PlaylistItemAdapter(R.layout.item_video_card_small, Constants.Json.Playlist.HISTORY)
+        this.listAdapter!!.onItemClickListener = this
+        this.listAdapter!!.onShowPopupMenuListener = this
 
-        this.historyView = view.findViewById(R.id.recently_watched_view) as RecyclerView
-        this.historyView!!.setHasFixedSize(true)
+        this.listView!!.adapter = this.listAdapter
 
-        this.historyAdapter = PlaylistItemAdapter(R.layout.item_video_card_small, Constants.Json.Playlist.HISTORY)
-        this.historyAdapter!!.onItemClickListener = this
-        this.historyAdapter!!.onShowPopupMenuListener = this
-
-        this.historyView!!.adapter = this.historyAdapter
-
-        val moreButton = view.findViewById(R.id.recently_watched_more_button) as Button
+        val moreButton = view.findViewById(R.id.list_more_button) as Button
         moreButton.setOnClickListener { loadPlaylistActivity(Constants.Json.Playlist.HISTORY) }
 
         this.playlistsView = view.findViewById(R.id.playlists_view) as RecyclerView

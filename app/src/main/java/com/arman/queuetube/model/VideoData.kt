@@ -1,19 +1,30 @@
 package com.arman.queuetube.model
 
+import android.os.Parcel
+import android.os.Parcelable
 import android.text.Html
 import com.arman.queuetube.config.Constants
 import com.google.api.services.youtube.model.SearchResult
 import com.google.api.services.youtube.model.Video
 import com.google.gson.JsonObject
-import org.json.JSONException
-import org.json.JSONObject
 
-class VideoData {
+class VideoData : Parcelable {
 
     companion object {
 
         const val PREFIX_THUMBNAIL_URL = "https://i.ytimg.com/vi/"
         const val POSTFIX_THUMBNAIL_URL = ".jpg"
+
+        @JvmField
+        val CREATOR = object : Parcelable.Creator<VideoData> {
+            override fun createFromParcel(parcel: Parcel): VideoData {
+                return VideoData(parcel)
+            }
+
+            override fun newArray(size: Int): Array<VideoData?> {
+                return arrayOfNulls(size)
+            }
+        }
 
     }
 
@@ -43,17 +54,21 @@ class VideoData {
 
     var isFavorited: Boolean = false
 
+    constructor(parcel: Parcel) : this() {
+        id = parcel.readString()
+        publishedOn = parcel.readString()
+        channel = parcel.readString()
+        isFavorited = parcel.readByte() != 0.toByte()
+    }
+
     constructor()
 
     constructor(id: String) {
         this.id = id
     }
 
-    constructor(title: String, id: String, publishedOn: String, channel: String, description: String) {
-        this.title = title
-        this.id = id
-        this.publishedOn = publishedOn
-        this.channel = channel
+    constructor(title: String, id: String, publishedOn: String, channel: String) {
+        this.setTo(title, id, publishedOn, channel)
     }
 
     constructor(result: SearchResult) {
@@ -68,8 +83,12 @@ class VideoData {
         this.setTo(obj)
     }
 
-    constructor(obj: JSONObject) {
-        this.setTo(obj)
+    fun setTo(title: String, id: String, publishedOn: String, channel: String, isFavorited: Boolean = false) {
+        this.title = title
+        this.id = id
+        this.publishedOn = publishedOn
+        this.channel = channel
+        this.isFavorited = isFavorited
     }
 
     fun setTo(result: SearchResult) {
@@ -91,16 +110,6 @@ class VideoData {
         this.id = obj.get(Constants.VideoData.ID).asString
         this.publishedOn = obj.get(Constants.VideoData.PUBLISHED_ON).asString
         this.channel = obj.get(Constants.VideoData.CHANNEL).asString
-    }
-
-    fun setTo(obj: JSONObject) {
-        try {
-            this.title = obj.getString(Constants.VideoData.TITLE)
-            this.id = obj.getString(Constants.VideoData.ID)
-            this.publishedOn = obj.getString(Constants.VideoData.PUBLISHED_ON)
-            this.channel = obj.getString(Constants.VideoData.CHANNEL)
-        } catch (e: JSONException) {
-        }
     }
 
     fun setTo(videoData: VideoData) {
@@ -130,6 +139,17 @@ class VideoData {
         result = 31 * result + (channel?.hashCode() ?: 0)
         result = 31 * result + isFavorited.hashCode()
         return result
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(id)
+        parcel.writeString(publishedOn)
+        parcel.writeString(channel)
+        parcel.writeByte(if (isFavorited) 1 else 0)
+    }
+
+    override fun describeContents(): Int {
+        return 0
     }
 
 }

@@ -1,4 +1,4 @@
-package com.arman.queuetube.util.notifications.receivers
+package com.arman.queuetube.receivers
 
 import android.app.Activity
 import android.content.BroadcastReceiver

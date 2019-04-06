@@ -25,7 +25,7 @@
                 android:textStyle="bold" />
 
             <Button
-                android:id="@+id/recently_watched_more_button"
+                android:id="@+id/list_more_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end|center_vertical"
@@ -36,16 +36,16 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/recently_watched_empty_text"
+            android:id="@+id/list_empty_text_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="25dp"
-            android:text="You have not watched anything yet"
+            android:text="@string/recently_watched_empty_text"
             android:textAlignment="center"
             android:visibility="gone" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recently_watched_view"
+            android:id="@+id/list_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -59,32 +59,6 @@
             android:text="Playlists"
             android:textSize="20sp"
             android:textStyle="bold" />
-
-        <!--<LinearLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="48dp"-->
-        <!--android:clickable="true"-->
-        <!--android:focusable="true"-->
-        <!--android:foreground="?selectableItemBackground"-->
-        <!--android:gravity="center_vertical"-->
-        <!--android:orientation="horizontal"-->
-        <!--android:padding="11dp">-->
-
-        <!--<TextView-->
-        <!--android:id="@+id/playlists_item_title"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_gravity="center_vertical"-->
-        <!--android:drawableStart="@drawable/ic_playlist_plus_black_24dp"-->
-        <!--android:maxLines="1"-->
-        <!--android:paddingStart="10dp"-->
-        <!--android:paddingEnd="10dp"-->
-        <!--android:text="CREATE A NEW PLAYLIST"-->
-        <!--android:textAlignment="center"-->
-        <!--android:textAllCaps="true"-->
-        <!--android:textSize="18sp" />-->
-
-        <!--</LinearLayout>-->
 
         <include layout="@layout/button_create_playlist" />
 

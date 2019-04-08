@@ -156,10 +156,8 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         if (intent != null) {
-            println(intent.getIntExtra(PlayEvent::class.qualifiedName, -1))
             val enumValue = intent.getEnumExtra<PlayEvent>()
             val videos = intent.getParcelableArrayListExtra<VideoData>(Constants.Fragment.Argument.VIDEO_LIST)
-            println(videos)
             if (enumValue != null) {
                 when (enumValue) {
                     PlayEvent.PLAY -> onPlay(videos.first())

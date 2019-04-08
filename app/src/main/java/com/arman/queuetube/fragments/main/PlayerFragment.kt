@@ -21,6 +21,7 @@ import com.arman.queuetube.util.notifications.NotificationHelper
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayer
+import com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayerView
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.listeners.YouTubePlayerInitListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.listeners.YouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.utils.YouTubePlayerTracker
@@ -34,6 +35,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
     private var isUp: Boolean = false
     private var swipeHeight: Float = 0f
 
+    private lateinit var ytPlayerView: YouTubePlayerView
     private var ytPlayer: YouTubePlayer? = null
     private var ytPlayerTracker: YouTubePlayerTracker? = null
     private var ytPlayerReady: Boolean = false
@@ -122,8 +124,9 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        youtube_player.release()
+        NotificationHelper.destroyNotification(context!!)
         activity!!.unregisterReceiver(this.broadcastReceiver)
+        this.ytPlayerView.release()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -142,7 +145,8 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
                         .rel(0)
                         .build()
 
-        youtube_player.initialize(this, true, options)
+        this.ytPlayerView = view.findViewById(R.id.youtube_player)
+        this.ytPlayerView.initialize(this, true, options)
 
         this.currentVideo = VideoData()
 

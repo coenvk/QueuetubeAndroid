@@ -13,14 +13,13 @@ import com.google.android.youtube.player.YouTubeThumbnailView
 
 open class YouTubeThumbnailViewHolder(view: View) : BaseTouchViewHolder<VideoData>(view) {
 
-    protected val thumbnailView: YouTubeThumbnailView
+    protected val thumbnailView: YouTubeThumbnailView = view.findViewById(R.id.youtube_thumbnail)
     protected var thumbnailLoader: YouTubeThumbnailLoader? = null
     protected var image: Drawable? = null
 
     protected var readyForLoadingYoutubeThumbnail: Boolean = false
 
     init {
-        this.thumbnailView = view.findViewById(R.id.youtube_thumbnail) as YouTubeThumbnailView
         this.thumbnailView.setTag(R.id.initialize, UNINITIALIZED)
         this.readyForLoadingYoutubeThumbnail = true
         this.initialize()

@@ -22,7 +22,7 @@ class QueueFragment : VideoListFragment(), BaseTouchAdapter.OnItemDragListener {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_queue, container, false) as ViewGroup
+        return inflater.inflate(R.layout.fragment_queue, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

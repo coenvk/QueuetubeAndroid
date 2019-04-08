@@ -4,6 +4,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arman.queuetube.model.viewholders.BaseTouchViewHolder
 import com.arman.queuetube.util.itemtouchhelper.adapters.ItemTouchHelperAdapter
 import java.util.*
+import kotlin.collections.ArrayList
 
 abstract class BaseTouchAdapter<E, VH : BaseTouchViewHolder<E>> : BaseAdapter<E, VH>, ItemTouchHelperAdapter {
 
@@ -12,7 +13,7 @@ abstract class BaseTouchAdapter<E, VH : BaseTouchViewHolder<E>> : BaseAdapter<E,
 
     constructor() : super()
 
-    constructor(dragListener: OnItemDragListener?) : this(null, dragListener) {}
+    constructor(dragListener: OnItemDragListener?) : this(null, dragListener)
 
     @JvmOverloads
     constructor(clickListener: OnItemClickListener?, dragListener: OnItemDragListener? = null) : super() {
@@ -20,12 +21,12 @@ abstract class BaseTouchAdapter<E, VH : BaseTouchViewHolder<E>> : BaseAdapter<E,
         this.onItemDragListener = dragListener
     }
 
-    constructor(items: MutableList<E>, clickListener: OnItemClickListener?, dragListener: OnItemDragListener?) : super(items) {
+    constructor(items: ArrayList<E>, clickListener: OnItemClickListener?, dragListener: OnItemDragListener?) : super(items) {
         this.onItemClickListener = clickListener
         this.onItemDragListener = dragListener
     }
 
-    constructor(items: MutableList<E>, clickListener: OnItemClickListener?) : super(items) {
+    constructor(items: ArrayList<E>, clickListener: OnItemClickListener?) : super(items) {
         this.onItemClickListener = clickListener
     }
 

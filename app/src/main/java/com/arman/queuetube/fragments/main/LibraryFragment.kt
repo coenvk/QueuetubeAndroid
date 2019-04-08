@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import androidx.recyclerview.widget.RecyclerView
 import com.arman.queuetube.R
 import com.arman.queuetube.activities.PlaylistActivity
@@ -21,10 +20,11 @@ import com.arman.queuetube.model.adapters.PlaylistItemAdapter
 import com.arman.queuetube.model.adapters.PlaylistsAdapter
 import com.arman.queuetube.modules.BaseTask
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
+import kotlinx.android.synthetic.main.button_create_playlist.*
+import kotlinx.android.synthetic.main.fragment_library.*
 
 class LibraryFragment : AsyncVideoListFragment() {
 
-    private var playlistsView: RecyclerView? = null
     var playlistsAdapter: PlaylistsAdapter? = null
         private set
 
@@ -91,7 +91,7 @@ class LibraryFragment : AsyncVideoListFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_library, container, false) as ViewGroup
+        return inflater.inflate(R.layout.fragment_library, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -101,13 +101,12 @@ class LibraryFragment : AsyncVideoListFragment() {
         this.listAdapter!!.onItemClickListener = this
         this.listAdapter!!.onShowPopupMenuListener = this
 
-        this.listView!!.adapter = this.listAdapter
+        list_view.adapter = this.listAdapter
 
-        val moreButton = view.findViewById(R.id.list_more_button) as Button
+        val moreButton = list_more_button
         moreButton.setOnClickListener { loadPlaylistActivity(Constants.Json.Playlist.HISTORY) }
 
-        this.playlistsView = view.findViewById(R.id.playlists_view) as RecyclerView
-        this.playlistsView!!.setHasFixedSize(true)
+        playlists_view.setHasFixedSize(true)
 
         this.playlistsAdapter = PlaylistsAdapter(object : BaseTouchAdapter.OnItemClickListener {
             override fun onItemClick(holder: RecyclerView.ViewHolder) {
@@ -116,9 +115,9 @@ class LibraryFragment : AsyncVideoListFragment() {
             }
         })
 
-        this.playlistsView!!.adapter = this.playlistsAdapter
+        playlists_view.adapter = this.playlistsAdapter
 
-        val createPlaylistButton = view.findViewById(R.id.playlists_create_playlist_button) as Button
+        val createPlaylistButton = playlists_create_playlist_button
         createPlaylistButton.setOnClickListener {
             val dialog = CreatePlaylistFragment()
             dialog.show(fragmentManager!!, "create_playlist_dialog")

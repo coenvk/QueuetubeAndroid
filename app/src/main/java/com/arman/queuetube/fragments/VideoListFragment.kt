@@ -10,7 +10,7 @@ import com.arman.queuetube.R
 import com.arman.queuetube.config.Constants
 import com.arman.queuetube.model.adapters.VideoItemAdapter
 import com.arman.queuetube.util.itemtouchhelper.VideoItemTouchHelper
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.android.synthetic.main.fragment_list.*
 
 abstract class VideoListFragment : VideoItemFragment() {
 
@@ -18,15 +18,10 @@ abstract class VideoListFragment : VideoItemFragment() {
     protected var isSortable: Boolean = true
     protected var isShufflable: Boolean = true
 
-    protected var emptyTextLayout: View? = null
-
-    protected var listView: RecyclerView? = null
     var listAdapter: VideoItemAdapter? = null
         protected set
 
     private var layoutManager: RecyclerView.LayoutManager? = null
-
-    protected var playAllButton: FloatingActionButton? = null
 
     protected var itemTouchHelper: ItemTouchHelper? = null
 
@@ -38,8 +33,12 @@ abstract class VideoListFragment : VideoItemFragment() {
         // TODO
     }
 
+    open fun onPlayAll() {
+        this.onPlayItemsListener?.onPlayAll(this.listAdapter!!.all)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_list, container, false) as ViewGroup
+        return inflater.inflate(R.layout.fragment_list, container, false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,40 +54,34 @@ abstract class VideoListFragment : VideoItemFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        this.emptyTextLayout = view.findViewById(R.id.list_empty_text_layout)
-
-        this.listView = view.findViewById(R.id.list_view)
-        this.listView!!.setHasFixedSize(true)
+        list_view.setHasFixedSize(true)
 
         this.listAdapter = VideoItemAdapter(this, this)
-        this.listView!!.adapter = this.listAdapter
+        list_view.adapter = this.listAdapter
 
-        this.listView!!.setItemViewCacheSize(25)
+        list_view.setItemViewCacheSize(25)
 
-        this.playAllButton = view.findViewById(R.id.list_play_all_button)
-        this.playAllButton?.setOnClickListener {
-            this@VideoListFragment.onPlayItemsListener?.onPlayAll(this@VideoListFragment.listAdapter!!.all)
-        }
+        list_play_all_button?.setOnClickListener { onPlayAll() }
 
         if (this.isDraggable) {
             val callback = VideoItemTouchHelper.Callback(this.listAdapter!!)
             this.itemTouchHelper = ItemTouchHelper(callback)
-            this.itemTouchHelper!!.attachToRecyclerView(this.listView)
+            this.itemTouchHelper!!.attachToRecyclerView(list_view)
         }
     }
 
     fun scrollToTop() {
-        if (this.listView != null && this.layoutManager != null) {
-            this.layoutManager!!.smoothScrollToPosition(this.listView, null, 0)
+        if (list_view != null && this.layoutManager != null) {
+            this.layoutManager!!.smoothScrollToPosition(list_view, null, 0)
         }
     }
 
     fun showEmptyText() {
-        this.emptyTextLayout?.visibility = View.VISIBLE
+        list_empty_text_layout?.visibility = View.VISIBLE
     }
 
     fun showList() {
-        this.emptyTextLayout?.visibility = View.GONE
+        list_empty_text_layout?.visibility = View.GONE
     }
 
     companion object {

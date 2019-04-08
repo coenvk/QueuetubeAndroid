@@ -2,7 +2,6 @@ package com.arman.queuetube.fragments.main
 
 import android.os.Bundle
 import android.view.*
-import android.widget.LinearLayout
 import android.widget.SearchView
 import com.arman.queuetube.R
 import com.arman.queuetube.fragments.AsyncVideoListFragment
@@ -40,7 +39,7 @@ class SearchFragment : AsyncVideoListFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_search, container, false) as ViewGroup
+        return inflater.inflate(R.layout.fragment_search, container, false)
     }
 
     override fun doInBackground(params: Array<out String>): MutableList<VideoData> {

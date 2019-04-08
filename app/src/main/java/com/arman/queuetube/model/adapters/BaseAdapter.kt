@@ -3,9 +3,8 @@ package com.arman.queuetube.model.adapters
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.arman.queuetube.model.viewholders.BaseViewHolder
-import java.util.*
 
-abstract class BaseAdapter<E, VH : BaseViewHolder<E>> @JvmOverloads constructor(protected var items: MutableList<E> = ArrayList()) : RecyclerView.Adapter<VH>() {
+abstract class BaseAdapter<E, VH : BaseViewHolder<E>> @JvmOverloads constructor(protected var items: ArrayList<E> = ArrayList()) : RecyclerView.Adapter<VH>() {
 
     val isEmpty: Boolean
         get() = this.items.isEmpty()
@@ -16,11 +15,59 @@ abstract class BaseAdapter<E, VH : BaseViewHolder<E>> @JvmOverloads constructor(
     val isNullOrEmpty: Boolean
         get() = this.items.isNullOrEmpty()
 
-    val all: List<E>
+    val all: ArrayList<E>
         get() = this.items
 
     operator fun get(index: Int): E {
         return this.items[index]
+    }
+
+    fun first(): E {
+        return this.items.first()
+    }
+
+    fun first(predicate: (E) -> Boolean): E {
+        return this.items.first(predicate)
+    }
+
+    fun firstOrNull(): E? {
+        return this.items.firstOrNull()
+    }
+
+    fun firstOrNull(predicate: (E) -> Boolean): E? {
+        return this.items.firstOrNull(predicate)
+    }
+
+    fun last(): E {
+        return this.items.last()
+    }
+
+    fun last(predicate: (E) -> Boolean): E {
+        return this.items.last(predicate)
+    }
+
+    fun lastOrNull(): E? {
+        return this.items.lastOrNull()
+    }
+
+    fun lastOrNull(predicate: (E) -> Boolean): E? {
+        return this.items.lastOrNull(predicate)
+    }
+
+    fun single(): E {
+        return this.items.single()
+    }
+
+    fun single(predicate: (E) -> Boolean): E {
+        return this.items.single(predicate)
+    }
+
+    fun singleOrNull(): E? {
+        return this.items.singleOrNull()
+    }
+
+    fun singleOrNull(predicate: (E) -> Boolean): E? {
+        return this.items.singleOrNull(predicate)
     }
 
     fun add(item: E): Boolean {

@@ -56,6 +56,7 @@ class VideoData : Parcelable {
 
     constructor(parcel: Parcel) : this() {
         id = parcel.readString()
+        title = parcel.readString()
         publishedOn = parcel.readString()
         channel = parcel.readString()
         isFavorited = parcel.readByte() != 0.toByte()
@@ -143,6 +144,7 @@ class VideoData : Parcelable {
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(id)
+        parcel.writeString(title)
         parcel.writeString(publishedOn)
         parcel.writeString(channel)
         parcel.writeByte(if (isFavorited) 1 else 0)

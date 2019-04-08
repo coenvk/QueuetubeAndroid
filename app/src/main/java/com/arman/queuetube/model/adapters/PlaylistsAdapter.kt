@@ -15,7 +15,7 @@ class PlaylistsAdapter : BaseTouchAdapter<String, PlaylistsViewHolder> {
 
     constructor(clickListener: BaseTouchAdapter.OnItemClickListener, dragListener: BaseTouchAdapter.OnItemDragListener) : super(clickListener, dragListener)
 
-    constructor(items: MutableList<String>, clickListener: BaseTouchAdapter.OnItemClickListener, dragListener: BaseTouchAdapter.OnItemDragListener) : super(items, clickListener, dragListener)
+    constructor(items: ArrayList<String>, clickListener: BaseTouchAdapter.OnItemClickListener, dragListener: BaseTouchAdapter.OnItemDragListener) : super(items, clickListener, dragListener)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlaylistsViewHolder {
         val inflater = LayoutInflater.from(parent.context)

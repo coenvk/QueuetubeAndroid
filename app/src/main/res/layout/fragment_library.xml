@@ -35,14 +35,21 @@
 
         </LinearLayout>
 
-        <TextView
+        <LinearLayout
             android:id="@+id/list_empty_text_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="25dp"
-            android:text="@string/recently_watched_empty_text"
-            android:textAlignment="center"
-            android:visibility="gone" />
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="25dp"
+                android:text="@string/recently_watched_empty_text"
+                android:textAlignment="center" />
+
+        </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list_view"

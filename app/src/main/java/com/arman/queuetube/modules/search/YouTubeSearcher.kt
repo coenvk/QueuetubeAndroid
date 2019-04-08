@@ -225,7 +225,7 @@ object YouTubeSearcher {
         try {
             this.videosList().chart = "mostPopular"
         } catch (e: IOException) {
-            return this.tmpVideoList as ArrayList<VideoData>
+            return this.tmpVideoList!!
         }
 
         try {
@@ -236,7 +236,7 @@ object YouTubeSearcher {
         } catch (e: IOException) {
         }
 
-        return this.tmpVideoList as ArrayList<VideoData>
+        return this.tmpVideoList!!
     }
 
     fun searchLiveMusic(): MutableList<VideoData> {
@@ -248,7 +248,7 @@ object YouTubeSearcher {
         try {
             this.searchList().setEventType("live").videoCategoryId = videoCategoryId
         } catch (e: IOException) {
-            return this.tmpVideoList as ArrayList<VideoData>
+            return this.tmpVideoList!!
         }
 
         try {
@@ -259,7 +259,7 @@ object YouTubeSearcher {
         } catch (e: IOException) {
         }
 
-        return this.tmpVideoList as ArrayList<VideoData>
+        return this.tmpVideoList!!
     }
 
     fun topMusicCharts(regionCode: String = "US"): MutableList<VideoData> {
@@ -272,7 +272,7 @@ object YouTubeSearcher {
             this.videosList().setRegionCode(regionCode).chart = "mostPopular"
             this.videosListQuery!!.videoCategoryId = videoCategoryId
         } catch (e: IOException) {
-            return this.tmpVideoList as ArrayList<VideoData>
+            return this.tmpVideoList!!
         }
 
         try {
@@ -283,7 +283,7 @@ object YouTubeSearcher {
         } catch (e: IOException) {
         }
 
-        return this.tmpVideoList as ArrayList<VideoData>
+        return this.tmpVideoList!!
     }
 
     fun searchByCategory(videoCategoryId: String): MutableList<VideoData> {
@@ -291,7 +291,7 @@ object YouTubeSearcher {
         try {
             this.searchList().videoCategoryId = videoCategoryId
         } catch (e: IOException) {
-            return this.tmpVideoList as ArrayList<VideoData>
+            return this.tmpVideoList!!
         }
 
         try {
@@ -302,7 +302,7 @@ object YouTubeSearcher {
         } catch (e: IOException) {
         }
 
-        return this.tmpVideoList as ArrayList<VideoData>
+        return this.tmpVideoList!!
     }
 
     fun searchByTopic(topicId: String): MutableList<VideoData> {
@@ -310,7 +310,7 @@ object YouTubeSearcher {
         try {
             this.searchList().topicId = topicId
         } catch (e: IOException) {
-            return this.tmpVideoList as ArrayList<VideoData>
+            return this.tmpVideoList!!
         }
 
         try {
@@ -321,7 +321,7 @@ object YouTubeSearcher {
         } catch (e: IOException) {
         }
 
-        return this.tmpVideoList as ArrayList<VideoData>
+        return this.tmpVideoList!!
     }
 
     fun search(keywords: String): MutableList<VideoData> {
@@ -329,7 +329,7 @@ object YouTubeSearcher {
         try {
             this.searchList().q = keywords
         } catch (e: IOException) {
-            return this.tmpVideoList as ArrayList<VideoData>
+            return this.tmpVideoList!!
         }
 
         try {
@@ -340,7 +340,7 @@ object YouTubeSearcher {
         } catch (e: IOException) {
         }
 
-        return this.tmpVideoList as ArrayList<VideoData>
+        return this.tmpVideoList!!
     }
 
     //    public enum ActionCode {

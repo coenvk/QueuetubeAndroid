@@ -7,29 +7,25 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import com.arman.queuetube.R
 import com.arman.queuetube.config.Constants
 import com.arman.queuetube.fragments.main.HomeFragment
 import com.arman.queuetube.fragments.main.LibraryFragment
 import com.arman.queuetube.fragments.main.PlayerFragment
 import com.arman.queuetube.fragments.main.SearchFragment
-import com.arman.queuetube.fragments.playlist.PlaylistFragment
 import com.arman.queuetube.listeners.OnPlayItemsListener
+import com.arman.queuetube.listeners.events.PlayEvent
 import com.arman.queuetube.model.VideoData
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
 import com.arman.queuetube.receivers.WifiReceiver
 import com.arman.queuetube.services.KillNotificationService
+import com.arman.queuetube.util.getEnumExtra
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationView.OnNavigationItemSelectedListener {
-
-    private var navigationView: BottomNavigationView? = null
-
-    private var appBarLayout: AppBarLayout? = null
-    private var toolbar: Toolbar? = null
 
     private var playerFragment: PlayerFragment? = null
 
@@ -42,19 +38,19 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
     private var currentFragment: Int = 0
 
     private fun enableScroll() {
-        val params = this.toolbar!!.layoutParams as AppBarLayout.LayoutParams
+        val params = toolbar.layoutParams as AppBarLayout.LayoutParams
         params.scrollFlags =
                 AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL or
                         AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or
                         AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP
-        this.toolbar!!.layoutParams = params
+        toolbar.layoutParams = params
     }
 
     private fun disableScroll() {
-        val params = this.toolbar!!.layoutParams as AppBarLayout.LayoutParams
+        val params = toolbar.layoutParams as AppBarLayout.LayoutParams
         params.scrollFlags = 0
-        this.toolbar!!.layoutParams = params
-        this.appBarLayout!!.setExpanded(true, false)
+        toolbar.layoutParams = params
+        appbar.setExpanded(true, false)
     }
 
     private fun setupWifiReceiver() {
@@ -62,17 +58,6 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
         val filter = IntentFilter()
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
         registerReceiver(this.wifiReceiver, filter)
-    }
-
-    private fun setupActionBar() {
-        this.appBarLayout = findViewById(R.id.appbar)
-        this.toolbar = this.appBarLayout!!.findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
-    }
-
-    private fun setupNavigationView() {
-        this.navigationView = findViewById(R.id.bottom_nav_bar)
-        this.navigationView!!.setOnNavigationItemSelectedListener(this)
     }
 
     private fun setupPlayerFragment() {
@@ -85,15 +70,6 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
             transaction.add(R.id.player_container, this.playerFragment!!)
         }
         transaction.commitNow()
-    }
-
-    private fun setupPlaylistFragment(playlistName: String): PlaylistFragment {
-        val bundle = Bundle()
-        bundle.putString(Constants.Fragment.Argument.PLAYLIST_NAME, playlistName)
-        val playlistFragment = PlaylistFragment()
-        playlistFragment.arguments = bundle
-        playlistFragment.onPlayItemsListener = this
-        return playlistFragment
     }
 
     fun switchToHomeFragment() {
@@ -169,8 +145,8 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
         startService(Intent(this, KillNotificationService::class.java))
 
         setupWifiReceiver()
-        setupActionBar()
-        setupNavigationView()
+        setSupportActionBar(toolbar)
+        bottom_nav_bar.setOnNavigationItemSelectedListener(this)
         switchToHomeFragment()
         setupPlayerFragment()
 
@@ -180,10 +156,24 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         if (intent != null) {
-            val action = intent.action
-            if (action == Intent.ACTION_SEND) {
-                val text = intent.getStringExtra(Intent.EXTRA_TEXT)
-                println(text)
+            println(intent.getIntExtra(PlayEvent::class.qualifiedName, -1))
+            val enumValue = intent.getEnumExtra<PlayEvent>()
+            val videos = intent.getParcelableArrayListExtra<VideoData>(Constants.Fragment.Argument.VIDEO_LIST)
+            println(videos)
+            if (enumValue != null) {
+                when (enumValue) {
+                    PlayEvent.PLAY -> onPlay(videos.first())
+                    PlayEvent.PLAY_NEXT -> onPlayNext(videos.first())
+                    PlayEvent.PLAY_NOW -> onPlayNow(videos.first())
+                    PlayEvent.PLAY_ALL -> onPlayAll(videos)
+                    PlayEvent.SHUFFLE -> onShuffle(videos)
+                }
+            } else {
+                val action = intent.action
+                if (action == Intent.ACTION_SEND) {
+                    val text = intent.getStringExtra(Intent.EXTRA_TEXT)
+                    println(text)
+                }
             }
         }
     }
@@ -219,7 +209,7 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
 //    }
 
     override fun onBackPressed() {
-        this.navigationView!!.menu.findItem(R.id.nav_item_home).isChecked = true
+        bottom_nav_bar.menu.findItem(R.id.nav_item_home).isChecked = true
         this.switchToHomeFragment()
     }
 

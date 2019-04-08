@@ -1,11 +1,10 @@
 package com.arman.queuetube.util.itemtouchhelper
 
 import android.graphics.Canvas
-
-import com.arman.queuetube.util.itemtouchhelper.adapters.ItemTouchHelperAdapter
-import com.arman.queuetube.util.itemtouchhelper.viewholders.ItemTouchHelperViewHolder
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.arman.queuetube.util.itemtouchhelper.adapters.ItemTouchHelperAdapter
+import com.arman.queuetube.util.itemtouchhelper.viewholders.ItemTouchHelperViewHolder
 
 class VideoItemTouchHelper(callback: Callback) : ItemTouchHelper(callback) {
 
@@ -88,9 +87,7 @@ class VideoItemTouchHelper(callback: Callback) : ItemTouchHelper(callback) {
             this.dragFromIndex = this.dragToIndex
 
             viewHolder.itemView.alpha = 1f
-            if (viewHolder is ItemTouchHelperViewHolder) {
-                (viewHolder as ItemTouchHelperViewHolder).onItemClear()
-            }
+            if (viewHolder is ItemTouchHelperViewHolder) viewHolder.onItemClear()
         }
 
     }

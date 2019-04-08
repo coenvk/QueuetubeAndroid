@@ -5,9 +5,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
-import android.view.View
-import com.arman.queuetube.R
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_main.*
 
 class WifiReceiver : BroadcastReceiver() {
 
@@ -16,7 +15,7 @@ class WifiReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         try {
             val activity = context as Activity
-            val container = activity.findViewById<View>(R.id.container)
+            val container = activity.container
             if (isOnline(context)) {
                 this.snackbar?.dismiss()
             } else {

@@ -7,6 +7,7 @@ import com.arman.queuetube.config.Constants
 import com.arman.queuetube.listeners.OnTaskFinishedListener
 import com.arman.queuetube.model.VideoData
 import com.arman.queuetube.modules.BaseTask
+import kotlinx.android.synthetic.main.fragment_list.*
 
 abstract class AsyncVideoListFragment : VideoListFragment(), OnTaskFinishedListener<MutableList<VideoData>> {
 
@@ -49,12 +50,12 @@ abstract class AsyncVideoListFragment : VideoListFragment(), OnTaskFinishedListe
     open fun finishLoad() {
         val videoCount = this.listAdapter!!.itemCount
         if (videoCount <= 0) {
-            this.playAllButton?.visibility = View.GONE
+            list_play_all_button?.visibility = View.GONE
             showEmptyText()
         } else {
             showList()
             scrollToTop()
-            this.playAllButton?.visibility = View.VISIBLE
+            list_play_all_button?.visibility = View.VISIBLE
         }
     }
 

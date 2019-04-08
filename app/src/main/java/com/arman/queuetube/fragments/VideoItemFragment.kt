@@ -77,7 +77,7 @@ abstract class VideoItemFragment : Fragment(), OnShowPopupMenuListener, BaseTouc
 
     override fun onItemClick(holder: RecyclerView.ViewHolder) {
         if (holder is VideoItemViewHolder) {
-            onPlayItemsListener?.onPlay(holder.item!!)
+            onAddToQueue(holder)
         }
     }
 

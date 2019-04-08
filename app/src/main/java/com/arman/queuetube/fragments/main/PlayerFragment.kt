@@ -7,8 +7,6 @@ import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.arman.queuetube.R
 import com.arman.queuetube.config.Constants
@@ -23,29 +21,19 @@ import com.arman.queuetube.util.notifications.NotificationHelper
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayer
-import com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayerView
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.listeners.YouTubePlayerInitListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.listeners.YouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.utils.YouTubePlayerTracker
+import kotlinx.android.synthetic.main.fragment_player.*
+import kotlinx.android.synthetic.main.inner_player.*
 
 class PlayerFragment : Fragment(), YouTubePlayerInitListener {
 
     private var broadcastReceiver: BroadcastReceiver? = null
 
-    private var contentFrame: View? = null
-
-    private var playerFrame: View? = null
-    private var openButton: ImageView? = null
     private var isUp: Boolean = false
     private var swipeHeight: Float = 0f
 
-    private var videoTitleView: TextView? = null
-
-    private var favoriteButton: ImageView? = null
-    private var addToPlaylistButton: ImageView? = null
-    private var shareButton: ImageView? = null
-
-    private var ytPlayerView: YouTubePlayerView? = null
     private var ytPlayer: YouTubePlayer? = null
     private var ytPlayerTracker: YouTubePlayerTracker? = null
     private var ytPlayerReady: Boolean = false
@@ -79,9 +67,9 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
 
     fun swipeUp() {
         if (!isUp) {
-            this.contentFrame!!.visibility = View.VISIBLE
+            player_content_frame.visibility = View.VISIBLE
             view!!.translationY = 0f
-            openButton!!.setImageResource(R.drawable.ic_chevron_down_white_36dp)
+            player_bar_open_button.setImageResource(R.drawable.ic_chevron_down_white_36dp)
             isUp = true
         }
     }
@@ -89,20 +77,17 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
     fun swipeDown() {
         if (isUp) {
             view!!.translationY = swipeHeight
-            contentFrame!!.visibility = View.GONE
-            openButton!!.setImageResource(R.drawable.ic_chevron_up_white_36dp)
+            player_content_frame.visibility = View.GONE
+            player_bar_open_button.setImageResource(R.drawable.ic_chevron_up_white_36dp)
             isUp = false
         }
     }
 
     private fun setupPlayerFrame() {
-        this.openButton = view!!.findViewById(R.id.player_bar_open_button) as ImageView
-        this.contentFrame = view!!.findViewById(R.id.player_content_frame) as View
+        this.swipeHeight = player_content_frame.height.toFloat()
+        player_content_frame.visibility = View.GONE
 
-        this.swipeHeight = this.contentFrame!!.height.toFloat()
-        this.contentFrame!!.visibility = View.GONE
-
-        this.openButton!!.setOnClickListener {
+        player_bar_open_button.setOnClickListener {
             if (isUp) {
                 swipeDown()
             } else {
@@ -137,36 +122,33 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        this.ytPlayerView?.release()
+        youtube_player.release()
         activity!!.unregisterReceiver(this.broadcastReceiver)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_player, container, false) as ViewGroup
+        return inflater.inflate(R.layout.fragment_player, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val options = IFramePlayerOptions.Builder().controls(0).autoplay(1).modestBranding(1).ivLoadPolicy(3).rel(0).build()
+        val options =
+                IFramePlayerOptions.Builder()
+                        .controls(0)
+                        .autoplay(1)
+                        .modestBranding(1)
+                        .ivLoadPolicy(3)
+                        .rel(0)
+                        .build()
 
-        this.ytPlayerView = view.findViewById(R.id.youtube_player) as YouTubePlayerView
-        this.ytPlayerView!!.initialize(this, true, options)
+        youtube_player.initialize(this, true, options)
 
         this.currentVideo = VideoData()
 
-        this.playerFrame = view.findViewById(R.id.player_fragment_layout)
-        this.videoTitleView = this.playerFrame!!.findViewById(R.id.video_title_text_view)
-
-        this.favoriteButton = this.playerFrame!!.findViewById(R.id.favorite_button) as ImageView
-        this.addToPlaylistButton = this.playerFrame!!.findViewById(R.id.add_to_playlist_button) as ImageView
-        this.shareButton = this.playerFrame!!.findViewById(R.id.share_button) as ImageView
-
-        this.favoriteButton!!.setOnClickListener { this@PlayerFragment.favoriteVideo(!this@PlayerFragment.currentVideo!!.isFavorited) }
-
-        this.addToPlaylistButton!!.setOnClickListener { this@PlayerFragment.showAddToPlaylistDialog() }
-
-        this.shareButton!!.setOnClickListener { VideoSharer.share(context!!, this@PlayerFragment.currentVideo!!) }
+        favorite_button.setOnClickListener { this@PlayerFragment.favoriteVideo(!this@PlayerFragment.currentVideo!!.isFavorited) }
+        add_to_playlist_button.setOnClickListener { this@PlayerFragment.showAddToPlaylistDialog() }
+        share_button.setOnClickListener { VideoSharer.share(context!!, this@PlayerFragment.currentVideo!!) }
 
         val bundle = Bundle()
         bundle.putBoolean(Constants.Fragment.Argument.IS_DRAGGABLE, true)
@@ -199,9 +181,9 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
 
     private fun adjustFavoriteButton(favorited: Boolean) {
         if (favorited) {
-            this.favoriteButton?.setImageDrawable(activity!!.getDrawable(R.drawable.ic_heart_white_36dp))
+            favorite_button.setImageDrawable(activity!!.getDrawable(R.drawable.ic_heart_white_36dp))
         } else {
-            this.favoriteButton?.setImageDrawable(activity!!.getDrawable(R.drawable.ic_heart_outline_white_36dp))
+            favorite_button.setImageDrawable(activity!!.getDrawable(R.drawable.ic_heart_outline_white_36dp))
         }
     }
 
@@ -251,7 +233,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
 
     fun playNext() {
         if (!tryPlayNext(!this.ytPlayerStopped)) {
-            this.playerFrame?.visibility = View.GONE
+            player_fragment_layout.visibility = View.GONE
             NotificationHelper.destroyNotification(context!!)
         }
     }
@@ -311,9 +293,9 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         val favorited = GsonPlaylistHelper.isFavorited(this.currentVideo!!)
         this.currentVideo?.isFavorited = favorited
         this.adjustFavoriteButton(favorited)
-        this.videoTitleView?.text = this.currentVideo?.title
-        if (this.playerFrame?.visibility == View.GONE) {
-            this.playerFrame?.visibility = View.VISIBLE
+        video_title_text_view.text = this.currentVideo?.title
+        if (player_fragment_layout.visibility == View.GONE) {
+            player_fragment_layout.visibility = View.VISIBLE
         }
         this.ytPlayer?.play()
         this.notificationHelper?.updateNotificationIfBuilt(this.currentVideo?.title!!, true)
@@ -326,9 +308,9 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         this.ytPlayer!!.addListener(this.ytPlayerTracker!!)
         this.ytPlayer!!.addListener(object : YouTubePlayerListener {
             override fun onReady() {
-                this@PlayerFragment.ytPlayerView!!.enableBackgroundPlayback(true)
+                this@PlayerFragment.youtube_player.enableBackgroundPlayback(true)
 
-                val uiController = this@PlayerFragment.ytPlayerView!!.playerUIController
+                val uiController = this@PlayerFragment.youtube_player.playerUIController
                 uiController.setCustomAction2(activity!!.getDrawable(R.drawable.ic_skip_next_white_36dp)!!) { this@PlayerFragment.skip() }
                 this@PlayerFragment.ytPlayerReady = true
             }

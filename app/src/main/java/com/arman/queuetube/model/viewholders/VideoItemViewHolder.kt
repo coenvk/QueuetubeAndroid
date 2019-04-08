@@ -8,11 +8,7 @@ import com.arman.queuetube.model.adapters.BaseTouchAdapter
 
 open class VideoItemViewHolder(view: View) : YouTubeThumbnailViewHolder(view) {
 
-    private val titleView: TextView
-
-    init {
-        this.titleView = view.findViewById(R.id.video_title) as TextView
-    }
+    private val titleView: TextView = view.findViewById(R.id.video_title)
 
     override fun bind(item: VideoData, clickListener: BaseTouchAdapter.OnItemClickListener?, dragListener: BaseTouchAdapter.OnItemDragListener?) {
         super.bind(item, clickListener, dragListener)

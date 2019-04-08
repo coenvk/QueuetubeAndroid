@@ -2,18 +2,14 @@ package com.arman.queuetube.fragments
 
 import android.os.Bundle
 import android.view.View
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.arman.queuetube.R
 import com.arman.queuetube.listeners.OnRefreshListener
+import kotlinx.android.synthetic.main.fragment_home.*
 
 abstract class RefreshVideoListFragment : AsyncVideoListFragment(), OnRefreshListener {
 
-    private var refreshLayout: SwipeRefreshLayout? = null
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        this.refreshLayout = view.findViewById(R.id.swipe_refresh_layout)
-        this.refreshLayout?.setOnRefreshListener { onRefresh() }
+        swipe_refresh_layout?.setOnRefreshListener { onRefresh() }
     }
 
     override fun onRefresh() {
@@ -22,7 +18,7 @@ abstract class RefreshVideoListFragment : AsyncVideoListFragment(), OnRefreshLis
 
     override fun finishLoad() {
         super.finishLoad()
-        this.refreshLayout?.isRefreshing = false
+        swipe_refresh_layout?.isRefreshing = false
     }
 
 }

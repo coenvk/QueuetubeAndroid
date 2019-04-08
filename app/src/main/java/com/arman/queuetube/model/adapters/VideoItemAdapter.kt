@@ -41,7 +41,7 @@ open class VideoItemAdapter : YouTubeThumbnailAdapter {
         this.onShowPopupMenuListener = onShowPopupMenuListener
     }
 
-    constructor(videoData: MutableList<VideoData>, clickListener: BaseTouchAdapter.OnItemClickListener?, dragListener: BaseTouchAdapter.OnItemDragListener?) : super(videoData, clickListener, dragListener)
+    constructor(videoData: ArrayList<VideoData>, clickListener: BaseTouchAdapter.OnItemClickListener?, dragListener: BaseTouchAdapter.OnItemDragListener?) : super(videoData, clickListener, dragListener)
 
     constructor(clickListener: BaseTouchAdapter.OnItemClickListener?) : super(clickListener)
 

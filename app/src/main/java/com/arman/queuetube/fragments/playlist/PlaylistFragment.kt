@@ -1,20 +1,23 @@
 package com.arman.queuetube.fragments.playlist
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import com.arman.queuetube.R
+import com.arman.queuetube.activities.MainActivity
 import com.arman.queuetube.config.Constants
 import com.arman.queuetube.fragments.RefreshVideoListFragment
 import com.arman.queuetube.fragments.dialogs.EditPlaylistNameFragment
 import com.arman.queuetube.listeners.OnDialogDismissListener
 import com.arman.queuetube.listeners.OnSaveFinishedListener
+import com.arman.queuetube.listeners.events.PlayEvent
 import com.arman.queuetube.model.VideoData
 import com.arman.queuetube.model.viewholders.BaseViewHolder
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
+import com.arman.queuetube.util.putExtra
+import kotlinx.android.synthetic.main.fragment_playlist.*
 
 class PlaylistFragment : RefreshVideoListFragment() {
 
@@ -24,9 +27,6 @@ class PlaylistFragment : RefreshVideoListFragment() {
         private set
 
     private var isEditable: Boolean = true
-
-    private var headerTitleView: TextView? = null
-    private var headerSubtitleView: TextView? = null
 
     private val onSaveFinishedListener: OnSaveFinishedListener = OnSaveFinishedListener { load() }
 
@@ -38,16 +38,16 @@ class PlaylistFragment : RefreshVideoListFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_playlist, container, false) as ViewGroup
+        return inflater.inflate(R.layout.fragment_playlist, container, false)
     }
 
     fun setTitle(title: String) {
         this.playlistName = title
-        this.headerTitleView!!.text = this.playlistName
+        playlist_header_title.text = this.playlistName
     }
 
     fun setSubtitle(subtitle: String) {
-        this.headerSubtitleView!!.text = subtitle
+        playlist_header_subtitle.text = subtitle
     }
 
     fun onEdit() {
@@ -83,22 +83,19 @@ class PlaylistFragment : RefreshVideoListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        this.headerTitleView = view.findViewById(R.id.playlist_header_title) as TextView
-        this.headerTitleView!!.text = this.playlistName
+        playlist_header_title.text = this.playlistName
 
-        this.headerSubtitleView = view.findViewById(R.id.playlist_header_subtitle) as TextView
-
-        val shuffleButton = view.findViewById(R.id.list_shuffle_button) as ImageView
+        val shuffleButton = list_shuffle_button
         if (this.isShufflable) {
             shuffleButton.setOnClickListener { onShuffle() }
         } else {
             shuffleButton.visibility = View.GONE
         }
 
-        val clearButton = view.findViewById(R.id.playlist_clear_button) as ImageView
+        val clearButton = playlist_clear_button
         clearButton.setOnClickListener { onClear() }
 
-        val editButton = view.findViewById(R.id.playlist_edit_button) as ImageView
+        val editButton = playlist_edit_button
         if (this.isEditable) {
             editButton.setOnClickListener { onEdit() }
         } else {
@@ -116,6 +113,61 @@ class PlaylistFragment : RefreshVideoListFragment() {
         val item = holder.item!!
         listAdapter!!.remove(item)
         GsonPlaylistHelper.removeFrom(this@PlaylistFragment.playlistName, item)
+    }
+
+    override fun onAddToQueue(holder: BaseViewHolder<VideoData>) {
+        if (onPlayItemsListener != null) {
+            super.onAddToQueue(holder)
+        } else {
+            val intent = Intent(context, MainActivity::class.java)
+            intent.putExtra(PlayEvent.PLAY)
+            intent.putParcelableArrayListExtra(Constants.Fragment.Argument.VIDEO_LIST, arrayListOf(holder.item))
+            startActivity(intent)
+        }
+    }
+
+    override fun onPlayNext(holder: BaseViewHolder<VideoData>) {
+        if (onPlayItemsListener != null) {
+            super.onPlayNext(holder)
+        } else {
+            val intent = Intent(context, MainActivity::class.java)
+            intent.putExtra(PlayEvent.PLAY_NEXT)
+            intent.putParcelableArrayListExtra(Constants.Fragment.Argument.VIDEO_LIST, arrayListOf(holder.item))
+            startActivity(intent)
+        }
+    }
+
+    override fun onPlayNow(holder: BaseViewHolder<VideoData>) {
+        if (onPlayItemsListener != null) {
+            super.onPlayNow(holder)
+        } else {
+            val intent = Intent(context, MainActivity::class.java)
+            intent.putExtra(PlayEvent.PLAY_NOW)
+            intent.putParcelableArrayListExtra(Constants.Fragment.Argument.VIDEO_LIST, arrayListOf(holder.item))
+            startActivity(intent)
+        }
+    }
+
+    override fun onPlayAll() {
+        if (onPlayItemsListener != null) {
+            super.onPlayAll()
+        } else {
+            val intent = Intent(context, MainActivity::class.java)
+            intent.putExtra(PlayEvent.PLAY_ALL)
+            intent.putParcelableArrayListExtra(Constants.Fragment.Argument.VIDEO_LIST, this.listAdapter!!.all)
+            startActivity(intent)
+        }
+    }
+
+    override fun onShuffle() {
+        if (onPlayItemsListener != null) {
+            super.onShuffle()
+        } else {
+            val intent = Intent(context, MainActivity::class.java)
+            intent.putExtra(PlayEvent.SHUFFLE)
+            intent.putParcelableArrayListExtra(Constants.Fragment.Argument.VIDEO_LIST, this.listAdapter!!.all)
+            startActivity(intent)
+        }
     }
 
     companion object {

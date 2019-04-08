@@ -39,6 +39,7 @@ class Constants {
                 const val IS_EDITABLE = "isEditable"
                 const val IS_REFRESHABLE = "isRefreshable"
                 const val LOAD_ON_START = "loadOnStart"
+                const val VIDEO_LIST = "videoList"
             }
         }
 

@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.arman.queuetube.R
+import com.arman.queuetube.activities.MainActivity
 import com.arman.queuetube.config.Constants
 import com.arman.queuetube.fragments.dialogs.AddToPlaylistFragment
 import com.arman.queuetube.fragments.pager.ViewPagerAdapter
@@ -19,6 +20,7 @@ import com.arman.queuetube.modules.search.YouTubeSearcher
 import com.arman.queuetube.receivers.NotificationReceiver
 import com.arman.queuetube.util.VideoSharer
 import com.arman.queuetube.util.notifications.NotificationHelper
+import com.arman.queuetube.views.SlidingUpLayout
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayer
@@ -26,6 +28,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayerView
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.listeners.YouTubePlayerInitListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.listeners.YouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.utils.YouTubePlayerTracker
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_player.*
 import kotlinx.android.synthetic.main.inner_player.*
 
@@ -175,7 +178,23 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         this.queueFragment!!.arguments = bundle
         fragmentManager!!.beginTransaction().add(R.id.queue_content_frame, this.queueFragment!!).commit()
 
-        setupPlayerFrame()
+        sliding_layout.panelSlideListener = object : SlidingUpLayout.PanelSlideListener {
+            override fun onPanelOpening(panel: View) {
+                (activity as? MainActivity)?.appbar?.setExpanded(true)
+            }
+
+            override fun onPanelClosing(panel: View) = Unit
+
+            override fun onPanelSlide(panel: View, slideOffset: Float) = Unit
+
+            override fun onPanelOpened(panel: View) {
+                player_bar_open_button.setImageResource(R.drawable.ic_chevron_down_white_36dp)
+            }
+
+            override fun onPanelClosed(panel: View) {
+                player_bar_open_button.setImageResource(R.drawable.ic_chevron_up_white_36dp)
+            }
+        }
 
         this.setupReceiver()
         this.notificationHelper = NotificationHelper(activity!!)

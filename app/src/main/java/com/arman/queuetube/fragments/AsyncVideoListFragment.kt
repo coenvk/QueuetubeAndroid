@@ -26,6 +26,7 @@ abstract class AsyncVideoListFragment : VideoListFragment(), OnTaskFinishedListe
     abstract fun doInBackground(params: Array<out String>): MutableList<VideoData>
 
     private fun doLoad(params: Array<out String>) {
+        list_load_layout?.visibility = View.VISIBLE
         if (task == null) {
             task = BaseTask(::doInBackground)
             task!!.onTaskFinishedListener = this
@@ -48,6 +49,7 @@ abstract class AsyncVideoListFragment : VideoListFragment(), OnTaskFinishedListe
     }
 
     open fun finishLoad() {
+        list_load_layout?.visibility = View.GONE
         val videoCount = this.listAdapter!!.itemCount
         if (videoCount <= 0) {
             list_play_all_button?.visibility = View.GONE

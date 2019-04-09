@@ -188,6 +188,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
             override fun onPanelSlide(panel: View, slideOffset: Float) = Unit
 
             override fun onPanelOpened(panel: View) {
+                onPanelOpening(panel)
                 player_bar_open_button.setImageResource(R.drawable.ic_chevron_down_white_36dp)
             }
 

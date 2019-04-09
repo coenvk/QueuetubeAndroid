@@ -14,40 +14,30 @@ open class VideoItemAdapter : YouTubeThumbnailAdapter {
     var onShowPopupMenuListener: OnShowPopupMenuListener? = null
     protected var itemResId: Int = R.layout.item_video
 
-    constructor() : super()
+    constructor(onShowPopupMenuListener: OnShowPopupMenuListener?) : super() {
+        this.onShowPopupMenuListener = onShowPopupMenuListener
+    }
 
-    constructor(onShowPopupMenuListener: OnShowPopupMenuListener?) : this(null, onShowPopupMenuListener)
+    constructor(itemResId: Int, dragListener: OnItemDragListener?) : super(dragListener) {
+        this.itemResId = itemResId
+    }
 
-    constructor(itemResId: Int, onShowPopupMenuListener: OnShowPopupMenuListener?) : super() {
+    constructor(itemResId: Int, clickListener: OnItemClickListener? = null, onShowPopupMenuListener: OnShowPopupMenuListener? = null) : super(clickListener) {
         this.itemResId = itemResId
         this.onShowPopupMenuListener = onShowPopupMenuListener
     }
 
-    constructor(itemResId: Int) : super() {
-        this.itemResId = itemResId
-    }
-
-    constructor(itemResId: Int, dragListener: OnItemDragListener) : super(dragListener) {
-        this.itemResId = itemResId
-    }
-
-    constructor(itemResId: Int, clickListener: OnItemClickListener) : super(clickListener) {
-        this.itemResId = itemResId
-    }
-
-    constructor(clickListener: OnItemClickListener?, onShowPopupMenuListener: OnShowPopupMenuListener?) : this(clickListener, null, onShowPopupMenuListener)
-
-    constructor(clickListener: OnItemClickListener?, dragListener: OnItemDragListener?, onShowPopupMenuListener: OnShowPopupMenuListener?) : super(clickListener, dragListener) {
+    constructor(clickListener: OnItemClickListener? = null, dragListener: OnItemDragListener? = null, onShowPopupMenuListener: OnShowPopupMenuListener? = null) : super(clickListener, dragListener) {
         this.onShowPopupMenuListener = onShowPopupMenuListener
     }
 
-    constructor(videoData: ArrayList<VideoData>, clickListener: BaseTouchAdapter.OnItemClickListener?, dragListener: BaseTouchAdapter.OnItemDragListener?) : super(videoData, clickListener, dragListener)
+    constructor(videoData: ArrayList<VideoData>, clickListener: OnItemClickListener?, dragListener: OnItemDragListener?) : super(videoData, clickListener, dragListener)
 
-    constructor(clickListener: BaseTouchAdapter.OnItemClickListener?) : super(clickListener)
+    constructor(clickListener: OnItemClickListener?) : super(clickListener)
 
-    constructor(dragListener: BaseTouchAdapter.OnItemDragListener?) : super(dragListener)
+    constructor(dragListener: OnItemDragListener?) : super(dragListener)
 
-    constructor(clickListener: BaseTouchAdapter.OnItemClickListener?, dragListener: BaseTouchAdapter.OnItemDragListener?) : super(clickListener, dragListener)
+    constructor(clickListener: OnItemClickListener?, dragListener: OnItemDragListener?) : super(clickListener, dragListener)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoItemViewHolder {
         val inflater = LayoutInflater.from(parent.context)

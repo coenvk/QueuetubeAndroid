@@ -4,7 +4,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arman.queuetube.model.viewholders.BaseTouchViewHolder
 import com.arman.queuetube.util.itemtouchhelper.adapters.ItemTouchHelperAdapter
 import java.util.*
-import kotlin.collections.ArrayList
 
 abstract class BaseTouchAdapter<E, VH : BaseTouchViewHolder<E>> : BaseAdapter<E, VH>, ItemTouchHelperAdapter {
 

@@ -8,11 +8,12 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.arman.queuetube.R
 import com.arman.queuetube.config.Constants
+import com.arman.queuetube.model.adapters.BaseTouchAdapter
 import com.arman.queuetube.model.adapters.VideoItemAdapter
 import com.arman.queuetube.util.itemtouchhelper.VideoItemTouchHelper
 import kotlinx.android.synthetic.main.fragment_list.*
 
-abstract class VideoListFragment : VideoItemFragment() {
+abstract class VideoListFragment : VideoItemFragment(), BaseTouchAdapter.OnItemDragListener {
 
     protected open var isDraggable: Boolean = false
     protected var isSortable: Boolean = true
@@ -37,6 +38,10 @@ abstract class VideoListFragment : VideoItemFragment() {
         this.onPlayItemsListener?.onPlayAll(this.listAdapter!!.all)
     }
 
+    override fun onItemDrag(holder: RecyclerView.ViewHolder) {
+        this.itemTouchHelper?.startDrag(holder)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_list, container, false)
     }
@@ -56,7 +61,7 @@ abstract class VideoListFragment : VideoItemFragment() {
 
         list_view.setHasFixedSize(true)
 
-        this.listAdapter = VideoItemAdapter(this, this)
+        this.listAdapter = VideoItemAdapter(this, this, this)
         list_view.adapter = this.listAdapter
 
         list_view.setItemViewCacheSize(25)
@@ -64,6 +69,7 @@ abstract class VideoListFragment : VideoItemFragment() {
         list_play_all_button?.setOnClickListener { onPlayAll() }
 
         if (this.isDraggable) {
+            this.itemTouchHelper?.attachToRecyclerView(null)
             val callback = VideoItemTouchHelper.Callback(this.listAdapter!!)
             this.itemTouchHelper = ItemTouchHelper(callback)
             this.itemTouchHelper!!.attachToRecyclerView(list_view)

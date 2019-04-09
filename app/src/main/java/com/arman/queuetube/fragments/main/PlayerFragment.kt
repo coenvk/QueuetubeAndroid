@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import com.arman.queuetube.R
 import com.arman.queuetube.config.Constants
 import com.arman.queuetube.fragments.dialogs.AddToPlaylistFragment
+import com.arman.queuetube.fragments.pager.ViewPagerAdapter
 import com.arman.queuetube.model.VideoData
 import com.arman.queuetube.model.adapters.VideoItemAdapter
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
@@ -47,6 +48,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         private set
 
     private var queueFragment: QueueFragment? = null
+    private var pagerAdapter: ViewPagerAdapter? = null
 
     private var notificationHelper: NotificationHelper? = null
 
@@ -54,7 +56,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         get() = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(getString(R.string.enable_autoplay_key), false)
 
     private val playlistAdapter: VideoItemAdapter
-        get() = this.queueFragment?.listAdapter!!
+        get() = this.queueFragment!!.listAdapter!!
 
     private fun setupReceiver() {
         this.broadcastReceiver = NotificationReceiver(this)
@@ -99,6 +101,17 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
 
         view!!.visibility = View.VISIBLE
     }
+
+//    private fun setupPager() {
+//        tabs.setupWithViewPager(view_pager)
+//
+//        this.pagerAdapter = ViewPagerAdapter(fragmentManager!!)
+//        view_pager.adapter = this.pagerAdapter
+//        view_pager.setPageTransformer(true, DepthPageTransformer())
+//
+//        this.pagerAdapter!!.addFragment(this.queueFragment!!)
+//        this.pagerAdapter!!.addFragment(this.recommendedFragment!!)
+//    }
 
     fun setQueueTo(videoData: Collection<VideoData>): Boolean {
         return this.playlistAdapter.setAll(videoData)
@@ -160,7 +173,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         bundle.putBoolean(Constants.Fragment.Argument.IS_SHUFFLABLE, false)
         this.queueFragment = QueueFragment()
         this.queueFragment!!.arguments = bundle
-        fragmentManager?.beginTransaction()?.add(R.id.queue_content_frame, this.queueFragment!!)?.commit()
+        fragmentManager!!.beginTransaction().add(R.id.queue_content_frame, this.queueFragment!!).commit()
 
         setupPlayerFrame()
 
@@ -200,7 +213,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         if (this.ytPlayerReady && this.ytPlayerVideoSet) {
             this.skip()
             if (this.playlistAdapter.isNotEmpty) {
-                this.queueFragment?.showList()
+                this.queueFragment!!.showList()
             }
         } else {
             ret = this.tryPlayNext()
@@ -230,7 +243,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
             }
         }
         if (this.playlistAdapter.isNotEmpty) {
-            this.queueFragment?.showList()
+            this.queueFragment!!.showList()
         }
         return ret
     }
@@ -243,7 +256,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
     }
 
     fun stop(autoplayIfEnabled: Boolean = false) {
-        this.queueFragment?.listAdapter?.clear()
+        this.playlistAdapter.clear()
         this.ytPlayerStopped = !autoplayIfEnabled
         this.ytPlayer?.seekTo(this.ytPlayerTracker!!.videoDuration)
     }
@@ -275,7 +288,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
 
         this.playNext()
         if (this.playlistAdapter.isEmpty) {
-            this.queueFragment?.showEmptyText()
+            this.queueFragment!!.showEmptyText()
         }
 
         this.ytPlayerStopped = false
@@ -336,37 +349,24 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
                 }
             }
 
-            override fun onPlaybackQualityChange(playbackQuality: PlayerConstants.PlaybackQuality) {
+            override fun onPlaybackQualityChange(playbackQuality: PlayerConstants.PlaybackQuality) = Unit
 
-            }
-
-            override fun onPlaybackRateChange(playbackRate: PlayerConstants.PlaybackRate) {
-
-            }
+            override fun onPlaybackRateChange(playbackRate: PlayerConstants.PlaybackRate) = Unit
 
             override fun onError(error: PlayerConstants.PlayerError) {
                 this@PlayerFragment.skip()
             }
 
-            override fun onApiChange() {
+            override fun onApiChange() = Unit
 
-            }
+            override fun onCurrentSecond(second: Float) = Unit
 
-            override fun onCurrentSecond(second: Float) {
+            override fun onVideoDuration(duration: Float) = Unit
 
-            }
+            override fun onVideoLoadedFraction(loadedFraction: Float) = Unit
 
-            override fun onVideoDuration(duration: Float) {
+            override fun onVideoId(videoId: String) = Unit
 
-            }
-
-            override fun onVideoLoadedFraction(loadedFraction: Float) {
-
-            }
-
-            override fun onVideoId(videoId: String) {
-
-            }
         })
     }
 

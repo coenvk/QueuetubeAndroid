@@ -12,21 +12,7 @@ class PlaylistItemAdapter : VideoItemAdapter {
         this.playlistName = playlistName
     }
 
-    constructor(playlistName: String, onShowPopupMenuListener: OnShowPopupMenuListener) : this(playlistName) {
-        this.onShowPopupMenuListener = onShowPopupMenuListener
-    }
-
-    constructor(playlistName: String, dragListener: OnItemDragListener) : super(dragListener) {
-        this.playlistName = playlistName
-    }
-
-    constructor(playlistName: String, clickListener: OnItemClickListener) : super(clickListener) {
-        this.playlistName = playlistName
-    }
-
-    constructor() : super()
-
-    constructor(playlistName: String) : super() {
+    constructor(playlistName: String, clickListener: OnItemClickListener? = null, dragListener: OnItemDragListener? = null, onShowPopupMenuListener: OnShowPopupMenuListener? = null) : super(clickListener, dragListener, onShowPopupMenuListener) {
         this.playlistName = playlistName
     }
 

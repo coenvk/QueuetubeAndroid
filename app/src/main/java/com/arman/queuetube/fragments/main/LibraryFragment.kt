@@ -16,8 +16,8 @@ import com.arman.queuetube.listeners.OnSaveFinishedListener
 import com.arman.queuetube.listeners.OnTaskFinishedListener
 import com.arman.queuetube.model.VideoData
 import com.arman.queuetube.model.adapters.BaseTouchAdapter
-import com.arman.queuetube.model.adapters.PlaylistItemAdapter
 import com.arman.queuetube.model.adapters.PlaylistsAdapter
+import com.arman.queuetube.model.adapters.VideoItemAdapter
 import com.arman.queuetube.modules.BaseTask
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
 import kotlinx.android.synthetic.main.button_create_playlist.*
@@ -97,10 +97,7 @@ class LibraryFragment : AsyncVideoListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        this.listAdapter = PlaylistItemAdapter(R.layout.item_video_card_small, Constants.Json.Playlist.HISTORY)
-        this.listAdapter!!.onItemClickListener = this
-        this.listAdapter!!.onShowPopupMenuListener = this
-
+        this.listAdapter = VideoItemAdapter(R.layout.item_video_card_small, this, this)
         list_view.adapter = this.listAdapter
 
         val moreButton = list_more_button

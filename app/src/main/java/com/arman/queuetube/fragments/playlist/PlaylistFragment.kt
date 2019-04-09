@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.MenuRes
+import androidx.recyclerview.widget.ItemTouchHelper
 import com.arman.queuetube.R
 import com.arman.queuetube.activities.MainActivity
 import com.arman.queuetube.config.Constants
@@ -14,14 +16,14 @@ import com.arman.queuetube.listeners.OnDialogDismissListener
 import com.arman.queuetube.listeners.OnSaveFinishedListener
 import com.arman.queuetube.listeners.events.PlayEvent
 import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.adapters.PlaylistItemAdapter
 import com.arman.queuetube.model.viewholders.BaseViewHolder
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
+import com.arman.queuetube.util.itemtouchhelper.VideoItemTouchHelper
 import com.arman.queuetube.util.putExtra
 import kotlinx.android.synthetic.main.fragment_playlist.*
 
 class PlaylistFragment : RefreshVideoListFragment() {
-
-    override var isDraggable: Boolean = true
 
     var playlistName: String = ""
         private set
@@ -30,7 +32,8 @@ class PlaylistFragment : RefreshVideoListFragment() {
 
     private val onSaveFinishedListener: OnSaveFinishedListener = OnSaveFinishedListener { load() }
 
-    override var popupMenuResId: Int = R.menu.popup_menu_playlist_item
+    @MenuRes
+    override val popupMenuResId: Int = R.menu.popup_menu_playlist_item
 
     override fun onDestroy() {
         super.onDestroy()
@@ -82,6 +85,16 @@ class PlaylistFragment : RefreshVideoListFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        this.listAdapter = PlaylistItemAdapter(this.playlistName, this, this, this)
+        list_view.adapter = this.listAdapter
+
+        if (this.isDraggable) {
+            this.itemTouchHelper?.attachToRecyclerView(null)
+            val callback = VideoItemTouchHelper.Callback(this.listAdapter!!)
+            this.itemTouchHelper = ItemTouchHelper(callback)
+            this.itemTouchHelper!!.attachToRecyclerView(list_view)
+        }
 
         playlist_header_title.text = this.playlistName
 

@@ -22,7 +22,7 @@ abstract class VideoItemFragment : Fragment(), OnShowPopupMenuListener, BaseTouc
     var onPlayItemsListener: OnPlayItemsListener? = null
 
     @MenuRes
-    protected open var popupMenuResId: Int = R.menu.popup_menu_list_item
+    protected open val popupMenuResId: Int = R.menu.popup_menu_list_item
 
     open fun onAddToQueue(holder: BaseViewHolder<VideoData>) {
         onPlayItemsListener?.onPlay(holder.item!!)

@@ -6,16 +6,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import androidx.annotation.MenuRes
 import androidx.recyclerview.widget.RecyclerView
 import com.arman.queuetube.R
 import com.arman.queuetube.fragments.VideoListFragment
 import com.arman.queuetube.model.VideoData
-import com.arman.queuetube.model.adapters.BaseTouchAdapter
 import com.arman.queuetube.model.viewholders.BaseViewHolder
 
-class QueueFragment : VideoListFragment(), BaseTouchAdapter.OnItemDragListener {
+class QueueFragment : VideoListFragment() {
 
-    override var popupMenuResId: Int = R.menu.popup_menu_queue_item
+    @MenuRes
+    override val popupMenuResId: Int = R.menu.popup_menu_queue_item
 
     override fun onRemoveFromPlaylist(holder: BaseViewHolder<VideoData>) {
         this.onItemClick(holder)
@@ -23,11 +24,6 @@ class QueueFragment : VideoListFragment(), BaseTouchAdapter.OnItemDragListener {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_queue, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        this.listAdapter!!.onItemDragListener = this
     }
 
     override fun onItemClick(holder: RecyclerView.ViewHolder) {
@@ -53,10 +49,6 @@ class QueueFragment : VideoListFragment(), BaseTouchAdapter.OnItemDragListener {
         })
 
         holder.itemView.startAnimation(animation)
-    }
-
-    override fun onItemDrag(holder: RecyclerView.ViewHolder) {
-        this.itemTouchHelper!!.startDrag(holder)
     }
 
 }

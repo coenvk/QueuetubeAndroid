@@ -70,6 +70,10 @@ abstract class BaseAdapter<E, VH : BaseViewHolder<E>> @JvmOverloads constructor(
         return this.items.singleOrNull(predicate)
     }
 
+    fun shuffle() {
+        this.items.shuffle()
+    }
+
     fun add(item: E): Boolean {
         val res = this.items.add(item)
         if (res) {

@@ -19,6 +19,7 @@
             android:tag="@string/youtube_player_tag" />
 
         <LinearLayout
+            android:id="@+id/video_title_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/bootstrap_gray_dark"

@@ -178,13 +178,24 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.action_search -> true
+            R.id.action_settings -> {
+                startActivity(Intent(this, SettingsActivity::class.java))
+                true
+            }
+            R.id.action_shuffle -> {
+                this.playerFragment!!.shuffleQueue()
+                true
+            }
+            R.id.action_clear -> {
+                this.playerFragment!!.clearQueue()
+                true
+            }
+            R.id.action_stop -> {
+                this.playerFragment!!.stop()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    fun openSettings(item: MenuItem) {
-        startActivity(Intent(this, SettingsActivity::class.java))
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -207,8 +218,10 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
 //    }
 
     override fun onBackPressed() {
-        bottom_nav_bar.menu.findItem(R.id.nav_item_home).isChecked = true
-        this.switchToHomeFragment()
+        if (!this.playerFragment!!.swipeDown()) {
+            bottom_nav_bar.menu.findItem(R.id.nav_item_home).isChecked = true
+            this.switchToHomeFragment()
+        }
     }
 
     override fun onDestroy() {

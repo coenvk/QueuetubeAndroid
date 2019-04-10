@@ -121,7 +121,7 @@ class SlidingUpLayout : ViewGroup {
 
         override fun onViewPositionChanged(changedView: View, left: Int, top: Int, dx: Int, dy: Int) {
             topOf = top
-            dragOffset = (top / dragRange).toFloat()
+            dragOffset = (top / dragRange.toFloat())
 
             contentView!!.alpha = 1 - dragOffset
 

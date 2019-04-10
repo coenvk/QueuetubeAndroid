@@ -72,37 +72,8 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         activity!!.registerReceiver(this.broadcastReceiver, filter)
     }
 
-    fun swipeUp() {
-        if (!isUp) {
-            player_content_frame.visibility = View.VISIBLE
-            view!!.translationY = 0f
-            player_bar_open_button.setImageResource(R.drawable.ic_chevron_down_white_36dp)
-            isUp = true
-        }
-    }
-
-    fun swipeDown() {
-        if (isUp) {
-            view!!.translationY = swipeHeight
-            player_content_frame.visibility = View.GONE
-            player_bar_open_button.setImageResource(R.drawable.ic_chevron_up_white_36dp)
-            isUp = false
-        }
-    }
-
-    private fun setupPlayerFrame() {
-        this.swipeHeight = player_content_frame.height.toFloat()
-        player_content_frame.visibility = View.GONE
-
-        player_bar_open_button.setOnClickListener {
-            if (isUp) {
-                swipeDown()
-            } else {
-                swipeUp()
-            }
-        }
-
-        view!!.visibility = View.VISIBLE
+    fun swipeDown(): Boolean {
+        return sliding_layout.closePanel()
     }
 
 //    private fun setupPager() {
@@ -115,6 +86,14 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
 //        this.pagerAdapter!!.addFragment(this.queueFragment!!)
 //        this.pagerAdapter!!.addFragment(this.recommendedFragment!!)
 //    }
+
+    fun shuffleQueue() {
+        this.playlistAdapter.shuffle()
+    }
+
+    fun clearQueue() {
+        this.playlistAdapter.clear()
+    }
 
     fun setQueueTo(videoData: Collection<VideoData>): Boolean {
         return this.playlistAdapter.setAll(videoData)
@@ -185,16 +164,15 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
 
             override fun onPanelClosing(panel: View) = Unit
 
-            override fun onPanelSlide(panel: View, slideOffset: Float) = Unit
+            override fun onPanelSlide(panel: View, slideOffset: Float) {
+                player_bar_open_button.rotation = 180.0f * (1 - slideOffset)
+            }
 
             override fun onPanelOpened(panel: View) {
                 onPanelOpening(panel)
-                player_bar_open_button.setImageResource(R.drawable.ic_chevron_down_white_36dp)
             }
 
-            override fun onPanelClosed(panel: View) {
-                player_bar_open_button.setImageResource(R.drawable.ic_chevron_up_white_36dp)
-            }
+            override fun onPanelClosed(panel: View) = Unit
         }
 
         this.setupReceiver()
@@ -348,6 +326,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
                 this@PlayerFragment.youtube_player.enableBackgroundPlayback(true)
 
                 val uiController = this@PlayerFragment.youtube_player.playerUIController
+                uiController.showFullscreenButton(false)
                 uiController.setCustomAction2(activity!!.getDrawable(R.drawable.ic_skip_next_white_36dp)!!) { this@PlayerFragment.skip() }
                 this@PlayerFragment.ytPlayerReady = true
             }
@@ -388,6 +367,20 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
             override fun onVideoId(videoId: String) = Unit
 
         })
+    }
+
+    fun enterFullScreen(): Boolean {
+        return if (!this.ytPlayerView.isFullScreen) {
+            this.ytPlayerView.enterFullScreen()
+            true
+        } else false
+    }
+
+    fun exitFullScreen(): Boolean {
+        return if (this.ytPlayerView.isFullScreen) {
+            this.ytPlayerView.exitFullScreen()
+            true
+        } else false
     }
 
 }

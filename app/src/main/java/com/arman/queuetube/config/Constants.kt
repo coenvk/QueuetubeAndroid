@@ -72,6 +72,13 @@ class Constants {
         }
     }
 
+    interface Preferences {
+        companion object {
+            const val FIRST_LAUNCH = "firstLaunch"
+            const val PREFERENCE = "Queuetube"
+        }
+    }
+
     interface Json {
 
         interface Key {

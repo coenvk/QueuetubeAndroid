@@ -36,6 +36,10 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".activities.IntroActivity"
+            android:label="@string/app_intro"
+            />
+
         <activity
             android:name=".activities.SettingsActivity"
             android:label="@string/title_activity_settings"

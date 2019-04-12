@@ -182,18 +182,6 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
                 startActivity(Intent(this, SettingsActivity::class.java))
                 true
             }
-            R.id.action_shuffle -> {
-                this.playerFragment!!.shuffleQueue()
-                true
-            }
-            R.id.action_clear -> {
-                this.playerFragment!!.clearQueue()
-                true
-            }
-            R.id.action_stop -> {
-                this.playerFragment!!.stop()
-                true
-            }
             else -> super.onOptionsItemSelected(item)
         }
     }

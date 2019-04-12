@@ -23,9 +23,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:maxLines="2"
                 android:gravity="start"
-                android:singleLine="false"/>
+                android:maxLines="2"
+                android:singleLine="false" />
 
         </LinearLayout>
 
@@ -40,8 +40,16 @@
             android:showDividers="middle">
 
             <Button
+                android:id="@+id/status_bar_button_stop"
+                style="?attr/buttonBarButtonStyle"
+                android:layout_width="@dimen/status_bar_expanded_button_size"
+                android:layout_height="@dimen/status_bar_expanded_button_size"
+                android:layout_margin="@dimen/status_bar_expanded_button_margin"
+                android:background="@drawable/ic_close_black_36dp" />
+
+            <Button
                 android:id="@+id/status_bar_button_play"
-                style="?android:attr/buttonBarButtonStyle"
+                style="?attr/buttonBarButtonStyle"
                 android:layout_width="@dimen/status_bar_expanded_button_size"
                 android:layout_height="@dimen/status_bar_expanded_button_size"
                 android:layout_margin="@dimen/status_bar_expanded_button_margin"
@@ -50,7 +58,7 @@
 
             <Button
                 android:id="@+id/status_bar_button_pause"
-                style="?android:attr/buttonBarButtonStyle"
+                style="?attr/buttonBarButtonStyle"
                 android:layout_width="@dimen/status_bar_expanded_button_size"
                 android:layout_height="@dimen/status_bar_expanded_button_size"
                 android:layout_margin="@dimen/status_bar_expanded_button_margin"
@@ -58,18 +66,11 @@
 
             <Button
                 android:id="@+id/status_bar_button_next"
-                style="?android:attr/buttonBarButtonStyle"
+                style="?attr/buttonBarButtonStyle"
                 android:layout_width="@dimen/status_bar_expanded_button_size"
                 android:layout_height="@dimen/status_bar_expanded_button_size"
                 android:layout_margin="@dimen/status_bar_expanded_button_margin"
                 android:background="@drawable/ic_skip_next_black_36dp" />
-
-            <Button
-                android:id="@+id/status_bar_button_stop"
-                android:layout_width="@dimen/status_bar_expanded_close_button_size"
-                android:layout_height="@dimen/status_bar_expanded_close_button_size"
-                android:layout_marginStart="@dimen/status_bar_expanded_button_margin"
-                android:background="@drawable/ic_close_black_36dp" />
 
         </LinearLayout>
 

@@ -131,17 +131,8 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val options =
-                IFramePlayerOptions.Builder()
-                        .controls(0)
-                        .autoplay(1)
-                        .modestBranding(1)
-                        .ivLoadPolicy(3)
-                        .rel(0)
-                        .build()
-
         this.ytPlayerView = view.findViewById(R.id.youtube_player)
-        this.ytPlayerView.initialize(this, true, options)
+        this.initializePlayer()
 
         this.currentVideo = VideoData()
 
@@ -177,6 +168,18 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
 
         this.setupReceiver()
         this.notificationHelper = NotificationHelper(activity!!)
+    }
+
+    private fun initializePlayer() {
+        val options =
+                IFramePlayerOptions.Builder()
+                        .controls(0)
+                        .autoplay(1)
+                        .modestBranding(1)
+                        .ivLoadPolicy(3)
+                        .rel(0)
+                        .build()
+        this.ytPlayerView.initialize(this, true, options)
     }
 
     fun updateVideo(favorited: Boolean) {
@@ -219,11 +222,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         return ret
     }
 
-    fun tryPlayNext(): Boolean {
-        return this.tryPlayNext(true)
-    }
-
-    fun tryPlayNext(autoplayIfEnabled: Boolean): Boolean {
+    fun tryPlayNext(autoplayIfEnabled: Boolean = true): Boolean {
         var ret = false
         if (this.ytPlayerReady && !this.ytPlayerVideoSet) {
             if (!this.playlistAdapter.isEmpty) {
@@ -308,10 +307,14 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         val favorited = GsonPlaylistHelper.isFavorited(this.currentVideo!!)
         this.currentVideo?.isFavorited = favorited
         this.adjustFavoriteButton(favorited)
-        video_title_text_view.text = this.currentVideo?.title
-        if (player_fragment_layout.visibility == View.GONE) {
-            player_fragment_layout.visibility = View.VISIBLE
+
+        this.currentVideo?.let {
+            video_title_text_view.text = it.title
+            if (player_fragment_layout.visibility == View.GONE) {
+                player_fragment_layout.visibility = View.VISIBLE
+            }
         }
+
         this.ytPlayer?.play()
         this.notificationHelper?.updateNotificationIfBuilt(this.currentVideo?.title!!, true)
         this.ytPlayerVideoSet = true
@@ -323,12 +326,15 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         this.ytPlayer!!.addListener(this.ytPlayerTracker!!)
         this.ytPlayer!!.addListener(object : YouTubePlayerListener {
             override fun onReady() {
-                this@PlayerFragment.youtube_player.enableBackgroundPlayback(true)
+                this@PlayerFragment.ytPlayerView.enableBackgroundPlayback(true)
 
-                val uiController = this@PlayerFragment.youtube_player.playerUIController
+                val uiController = this@PlayerFragment.ytPlayerView.playerUIController
                 uiController.showFullscreenButton(false)
+                uiController.setCustomAction1(activity!!.getDrawable(R.drawable.ic_close_white_36dp)!!) { this@PlayerFragment.stop() }
                 uiController.setCustomAction2(activity!!.getDrawable(R.drawable.ic_skip_next_white_36dp)!!) { this@PlayerFragment.skip() }
                 this@PlayerFragment.ytPlayerReady = true
+
+                tryPlayNext(false)
             }
 
             override fun onStateChange(state: PlayerConstants.PlayerState) {

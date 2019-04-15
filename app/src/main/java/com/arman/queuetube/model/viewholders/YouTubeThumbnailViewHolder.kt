@@ -11,17 +11,13 @@ import com.google.android.youtube.player.YouTubeInitializationResult
 import com.google.android.youtube.player.YouTubeThumbnailLoader
 import com.google.android.youtube.player.YouTubeThumbnailView
 
-open class YouTubeThumbnailViewHolder(view: View) : BaseTouchViewHolder<VideoData>(view) {
+open class YouTubeThumbnailViewHolder(view: View) : ImageViewHolder(view) {
 
-    protected val thumbnailView: YouTubeThumbnailView = view.findViewById(R.id.youtube_thumbnail)
     protected var thumbnailLoader: YouTubeThumbnailLoader? = null
     protected var image: Drawable? = null
 
-    protected var readyForLoadingYoutubeThumbnail: Boolean = false
-
     init {
-        this.thumbnailView.setTag(R.id.initialize, UNINITIALIZED)
-        this.readyForLoadingYoutubeThumbnail = true
+        this.imageView.setTag(R.id.initialize, UNINITIALIZED)
         this.initialize()
     }
 
@@ -29,11 +25,13 @@ open class YouTubeThumbnailViewHolder(view: View) : BaseTouchViewHolder<VideoDat
         if (this.readyForLoadingYoutubeThumbnail) {
             this.readyForLoadingYoutubeThumbnail = false
 
-            this.thumbnailView.setTag(R.id.initialize, INITIALIZING)
-            this.thumbnailView.setTag(R.id.thumbnailloader, null)
-            this.thumbnailView.setTag(R.id.videoId, "")
+            this.imageView.setTag(R.id.initialize, INITIALIZING)
+            this.imageView.setTag(R.id.thumbnailloader, null)
+            this.imageView.setTag(R.id.videoId, "")
 
-            this.thumbnailView.initialize(Constants.Key.API_KEY, object : YouTubeThumbnailView.OnInitializedListener {
+            val thumbnailView = this.imageView as YouTubeThumbnailView
+
+            thumbnailView.initialize(Constants.Key.API_KEY, object : YouTubeThumbnailView.OnInitializedListener {
                 override fun onInitializationSuccess(youTubeThumbnailView: YouTubeThumbnailView, youTubeThumbnailLoader: YouTubeThumbnailLoader) {
                     thumbnailView.setTag(R.id.initialize, INITIALIZED)
                     if (thumbnailLoader != null) {
@@ -69,10 +67,10 @@ open class YouTubeThumbnailViewHolder(view: View) : BaseTouchViewHolder<VideoDat
 
     override fun bind(item: VideoData, clickListener: BaseTouchAdapter.OnItemClickListener?, dragListener: BaseTouchAdapter.OnItemDragListener?) {
         super.bind(item, clickListener, dragListener)
-        this.thumbnailView.setImageDrawable(this.image)
-        this.thumbnailView.setTag(R.id.videoId, item.id)
+        this.imageView.setImageDrawable(this.image)
+        this.imageView.setTag(R.id.videoId, item.id)
 
-        val state = this.thumbnailView.getTag(R.id.initialize)
+        val state = this.imageView.getTag(R.id.initialize)
         when (state) {
             UNINITIALIZED -> this.initialize()
             INITIALIZED -> {
@@ -102,6 +100,7 @@ open class YouTubeThumbnailViewHolder(view: View) : BaseTouchViewHolder<VideoDat
         const val UNINITIALIZED = 1
         const val INITIALIZING = 2
         const val INITIALIZED = 3
+
     }
 
 }

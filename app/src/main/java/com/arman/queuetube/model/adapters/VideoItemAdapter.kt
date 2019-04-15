@@ -6,10 +6,10 @@ import android.view.ViewGroup
 import com.arman.queuetube.R
 import com.arman.queuetube.listeners.OnShowPopupMenuListener
 import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.viewholders.ImageViewHolder
 import com.arman.queuetube.model.viewholders.VideoItemViewHolder
-import com.arman.queuetube.model.viewholders.YouTubeThumbnailViewHolder
 
-open class VideoItemAdapter : YouTubeThumbnailAdapter {
+open class VideoItemAdapter : ImageAdapter {
 
     var onShowPopupMenuListener: OnShowPopupMenuListener? = null
     protected var itemResId: Int = R.layout.item_video
@@ -45,7 +45,7 @@ open class VideoItemAdapter : YouTubeThumbnailAdapter {
         return VideoItemViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: YouTubeThumbnailViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
         super.onBindViewHolder(holder, position)
         val optionsButton = holder.itemView.findViewById<View>(R.id.playlist_item_options_button)
         optionsButton.setOnClickListener { view -> onShowPopupMenuListener?.onShowPopupMenu(holder, view) }

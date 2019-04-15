@@ -4,9 +4,9 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.arman.queuetube.R
 import com.arman.queuetube.model.VideoData
-import com.arman.queuetube.model.viewholders.YouTubeThumbnailViewHolder
+import com.arman.queuetube.model.viewholders.ImageViewHolder
 
-open class YouTubeThumbnailAdapter : ImageAdapter {
+open class ImageAdapter : BaseTouchAdapter<VideoData, ImageViewHolder> {
 
     constructor() : super()
 
@@ -18,15 +18,15 @@ open class YouTubeThumbnailAdapter : ImageAdapter {
 
     constructor(clickListener: BaseTouchAdapter.OnItemClickListener?, dragListener: BaseTouchAdapter.OnItemDragListener?) : super(clickListener, dragListener)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): YouTubeThumbnailViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val view = inflater.inflate(R.layout.item_video, parent, false)
-        return YouTubeThumbnailViewHolder(view)
+        return ImageViewHolder(view)
     }
 
     companion object {
 
-        const val TAG = "YouTubeThumbnailAdapter"
+        const val TAG = "ImageAdapter"
 
     }
 

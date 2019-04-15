@@ -21,7 +21,7 @@ class BaseTask<Params, Result>() : AsyncTask<Params, Int, Result>() {
 
     override fun onPostExecute(result: Result?) {
         super.onPostExecute(result)
-        result?.let { this.onTaskFinishedListener?.onTaskFinished(result) }
+        result?.let { this.onTaskFinishedListener?.onTaskFinished(it) }
     }
 
     override fun onCancelled(result: Result?) {

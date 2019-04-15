@@ -26,6 +26,10 @@ android {
         all*.exclude group: 'com.google.guava', module: 'listenablefuture'
     }
 
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
 }
 
 dependencies {

@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutionException
 
 object YouTubeSearcher {
 
-    private const val SEARCH_MAX_RESULTS = 25L
+    private const val MAX_RESULTS = 25L
 
     private const val SEARCH_FIELDS = "items(id/videoId,snippet/title,snippet/channelTitle,snippet/publishedAt)"
     private const val VIDEOS_FIELDS = "items(id,snippet/title,snippet/channelTitle,snippet/publishedAt)"
@@ -36,27 +36,7 @@ object YouTubeSearcher {
     private var tmpVideoList: MutableList<VideoData>? = null
 
     @Throws(IOException::class)
-    fun searchList(): YouTube.Search.List {
-        return this.searchList(SEARCH_PART)
-    }
-
-    @Throws(IOException::class)
-    fun searchList(part: String): YouTube.Search.List {
-        return this.searchList(part, TYPE_VIDEO)
-    }
-
-    @Throws(IOException::class)
-    fun searchList(part: String, type: String): YouTube.Search.List {
-        return this.searchList(part, type, SEARCH_MAX_RESULTS)
-    }
-
-    @Throws(IOException::class)
-    fun searchList(part: String, type: String, maxResults: Long): YouTube.Search.List {
-        return this.searchList(part, type, maxResults, SEARCH_FIELDS)
-    }
-
-    @Throws(IOException::class)
-    fun searchList(part: String, type: String, maxResults: Long, fields: String): YouTube.Search.List {
+    fun searchList(part: String = SEARCH_PART, type: String = TYPE_VIDEO, maxResults: Long = MAX_RESULTS, fields: String = SEARCH_FIELDS): YouTube.Search.List {
         this.searchListQuery = this.youTube.search().list(part)
                 .setKey(Constants.Key.API_KEY)
                 .setType(type)
@@ -66,45 +46,16 @@ object YouTubeSearcher {
     }
 
     @Throws(IOException::class)
-    fun videosList(): YouTube.Videos.List {
-        return this.videosList(VIDEOS_PART)
-    }
-
-    @Throws(IOException::class)
-    fun videosList(maxResults: Long): YouTube.Videos.List {
-        return this.videosList(VIDEOS_PART, maxResults)
-    }
-
-    @Throws(IOException::class)
-    fun videosList(part: String?): YouTube.Videos.List {
-        return this.videosList(part, SEARCH_MAX_RESULTS)
-    }
-
-    @Throws(IOException::class)
-    fun videosList(part: String?, maxResults: Long): YouTube.Videos.List {
-        this.videosListQuery = this.youTube.videos().list(part!!)
+    fun videosList(part: String = VIDEOS_PART, maxResults: Long = MAX_RESULTS, fields: String = VIDEOS_FIELDS): YouTube.Videos.List {
+        this.videosListQuery = this.youTube.videos().list(part)
                 .setKey(Constants.Key.API_KEY)
                 .setMaxResults(maxResults)
+                .setFields(fields)
         return this.videosListQuery!!
     }
 
     @Throws(IOException::class)
-    fun videosList(part: String, id: String): YouTube.Videos.List {
-        return this.videosList(part, id, VIDEOS_FIELDS)
-    }
-
-    @Throws(IOException::class)
-    fun videosList(part: String, id: String, fields: String): YouTube.Videos.List {
-        return this.videosList(part, id, SEARCH_MAX_RESULTS, fields)
-    }
-
-    @Throws(IOException::class)
-    fun videosList(part: String, id: String, maxResults: Long): YouTube.Videos.List {
-        return this.videosList(part, id, maxResults, VIDEOS_FIELDS)
-    }
-
-    @Throws(IOException::class)
-    fun videosList(part: String, id: String, maxResults: Long, fields: String): YouTube.Videos.List {
+    fun videosList(part: String = VIDEOS_PART, id: String, maxResults: Long = MAX_RESULTS, fields: String = VIDEOS_FIELDS): YouTube.Videos.List {
         this.videosListQuery = this.youTube.videos().list(part)
                 .setKey(Constants.Key.API_KEY)
                 .setId(id)
@@ -114,17 +65,7 @@ object YouTubeSearcher {
     }
 
     @Throws(IOException::class)
-    fun videosList(part: String, chart: String, videoCategoryId: String, regionCode: String): YouTube.Videos.List {
-        return this.videosList(part, chart, videoCategoryId, regionCode, SEARCH_MAX_RESULTS)
-    }
-
-    @Throws(IOException::class)
-    fun videosList(part: String, chart: String, videoCategoryId: String, regionCode: String, maxResults: Long): YouTube.Videos.List {
-        return this.videosList(part, chart, videoCategoryId, regionCode, maxResults, VIDEOS_FIELDS)
-    }
-
-    @Throws(IOException::class)
-    fun videosList(part: String, chart: String, videoCategoryId: String, regionCode: String, maxResults: Long, fields: String): YouTube.Videos.List {
+    fun videosList(part: String, chart: String, videoCategoryId: String, regionCode: String, maxResults: Long = MAX_RESULTS, fields: String = VIDEOS_FIELDS): YouTube.Videos.List {
         this.videosListQuery = this.youTube.videos().list(part)
                 .setKey(Constants.Key.API_KEY)
                 .setChart(chart)
@@ -136,12 +77,7 @@ object YouTubeSearcher {
     }
 
     @Throws(IOException::class)
-    fun videosList(part: String, chart: String, videoCategoryId: String, maxResults: Long): YouTube.Videos.List {
-        return this.videosList(part, chart, videoCategoryId, maxResults, VIDEOS_FIELDS)
-    }
-
-    @Throws(IOException::class)
-    fun videosList(part: String, chart: String, videoCategoryId: String, maxResults: Long, fields: String): YouTube.Videos.List {
+    fun videosList(part: String, chart: String, videoCategoryId: String, maxResults: Long, fields: String = VIDEOS_FIELDS): YouTube.Videos.List {
         this.videosListQuery = this.youTube.videos().list(part)
                 .setKey(Constants.Key.API_KEY)
                 .setChart(chart)
@@ -153,7 +89,7 @@ object YouTubeSearcher {
 
     fun requestDetails(videoData: VideoData): VideoData {
         try {
-            this.videosList(videoData.id)
+            this.videosList(videoData.id!!)
         } catch (e: IOException) {
             return videoData
         }
@@ -186,7 +122,7 @@ object YouTubeSearcher {
 
     fun nextAutoplay(currentId: String): VideoData? {
         try {
-            this.searchList().relatedToVideoId = currentId
+            this.searchList().setMaxResults(5).relatedToVideoId = currentId
         } catch (e: IOException) {
             return VideoData()
         }
@@ -220,25 +156,6 @@ object YouTubeSearcher {
         return null
     }
 
-    fun topCharts(): MutableList<VideoData> {
-        this.tmpVideoList = ArrayList()
-        try {
-            this.videosList().chart = "mostPopular"
-        } catch (e: IOException) {
-            return this.tmpVideoList!!
-        }
-
-        try {
-            val results = this.videosListQuery!!.execute().items
-            for (i in results.indices) {
-                this.tmpVideoList!!.add(VideoData(results[i]))
-            }
-        } catch (e: IOException) {
-        }
-
-        return this.tmpVideoList!!
-    }
-
     fun searchLiveMusic(): MutableList<VideoData> {
         return searchLiveByCategory("10")
     }
@@ -263,14 +180,13 @@ object YouTubeSearcher {
     }
 
     fun topMusicCharts(regionCode: String = "US"): MutableList<VideoData> {
-        return topChartsByCategory(regionCode, "10")
+        return topCharts(regionCode, "10")
     }
 
-    fun topChartsByCategory(regionCode: String = "US", videoCategoryId: String = "0"): MutableList<VideoData> {
+    fun topCharts(regionCode: String = "US", videoCategoryId: String = "0"): MutableList<VideoData> {
         this.tmpVideoList = ArrayList()
         try {
-            this.videosList().setRegionCode(regionCode).chart = "mostPopular"
-            this.videosListQuery!!.videoCategoryId = videoCategoryId
+            this.videosList().setRegionCode(regionCode).setChart("mostPopular").videoCategoryId = videoCategoryId
         } catch (e: IOException) {
             return this.tmpVideoList!!
         }

@@ -313,6 +313,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
             if (player_fragment_layout.visibility == View.GONE) {
                 player_fragment_layout.visibility = View.VISIBLE
             }
+            this.ytPlayerView.playerUIController.enableLiveVideoUI(it.isLive())
         }
 
         this.ytPlayer?.play()

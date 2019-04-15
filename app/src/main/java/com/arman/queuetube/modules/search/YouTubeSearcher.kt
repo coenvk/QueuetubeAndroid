@@ -17,13 +17,11 @@ object YouTubeSearcher {
 
     private const val MAX_RESULTS = 25L
 
-    private const val SEARCH_FIELDS = "items(id/videoId,snippet/title,snippet/channelTitle,snippet/publishedAt)"
-    private const val VIDEOS_FIELDS = "items(id,snippet/title,snippet/channelTitle,snippet/publishedAt)"
-    private const val VIDEO_CATEGORIES_FIELDS = "items(id,snippet/title)"
+    private const val SEARCH_FIELDS = "items(id/videoId,snippet/title,snippet/channelTitle,snippet/publishedAt,snippet/liveBroadcastContent)"
+    private const val VIDEOS_FIELDS = "items(id,snippet/title,snippet/channelTitle,snippet/publishedAt,snippet/liveBroadcastContent)"
 
     private const val SEARCH_PART = "id,snippet"
     private const val VIDEOS_PART = "id,snippet"
-    private const val VIDEO_CATEGORIES_PART = "id,snippet"
 
     private const val TYPE_VIDEO = "video"
 

@@ -1,8 +1,10 @@
 package com.arman.queuetube.activities
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -14,12 +16,11 @@ import com.arman.queuetube.fragments.main.LibraryFragment
 import com.arman.queuetube.fragments.main.PlayerFragment
 import com.arman.queuetube.fragments.main.SearchFragment
 import com.arman.queuetube.listeners.OnPlayItemsListener
-import com.arman.queuetube.listeners.events.PlayEvent
 import com.arman.queuetube.model.VideoData
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
+import com.arman.queuetube.receivers.PlayReceiver
 import com.arman.queuetube.receivers.WifiReceiver
 import com.arman.queuetube.services.KillNotificationService
-import com.arman.queuetube.util.getEnumExtra
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.activity_main.*
@@ -34,6 +35,7 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
     private var libraryFragment: LibraryFragment? = null
 
     private var wifiReceiver: WifiReceiver? = null
+    private var playReceiver: PlayReceiver? = null
 
     private var currentFragment: Int = 0
 
@@ -53,11 +55,20 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
         appbar.setExpanded(true, false)
     }
 
-    private fun setupWifiReceiver() {
+    private fun setupReceivers() {
         this.wifiReceiver = WifiReceiver()
-        val filter = IntentFilter()
+        var filter = IntentFilter()
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
         registerReceiver(this.wifiReceiver, filter)
+
+        this.playReceiver = PlayReceiver(this)
+        filter = IntentFilter()
+        filter.addAction(Constants.Action.Play.PLAY_ACTION)
+        filter.addAction(Constants.Action.Play.PLAY_NEXT_ACTION)
+        filter.addAction(Constants.Action.Play.PLAY_NOW_ACTION)
+        filter.addAction(Constants.Action.Play.PLAY_ALL_ACTION)
+        filter.addAction(Constants.Action.Play.SHUFFLE_ACTION)
+        registerReceiver(this.playReceiver, filter)
     }
 
     private fun setupPlayerFragment() {
@@ -144,7 +155,7 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
 
         startService(Intent(this, KillNotificationService::class.java))
 
-        setupWifiReceiver()
+        setupReceivers()
         setSupportActionBar(toolbar)
         bottom_nav_bar.setOnNavigationItemSelectedListener(this)
         switchToHomeFragment()
@@ -156,22 +167,10 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         if (intent != null) {
-            val enumValue = intent.getEnumExtra<PlayEvent>()
-            val videos = intent.getParcelableArrayListExtra<VideoData>(Constants.Fragment.Argument.VIDEO_LIST)
-            if (enumValue != null) {
-                when (enumValue) {
-                    PlayEvent.PLAY -> onPlay(videos.first())
-                    PlayEvent.PLAY_NEXT -> onPlayNext(videos.first())
-                    PlayEvent.PLAY_NOW -> onPlayNow(videos.first())
-                    PlayEvent.PLAY_ALL -> onPlayAll(videos)
-                    PlayEvent.SHUFFLE -> onShuffle(videos)
-                }
-            } else {
-                val action = intent.action
-                if (action == Intent.ACTION_SEND) {
-                    val text = intent.getStringExtra(Intent.EXTRA_TEXT)
-                    println(text)
-                }
+            val action = intent.action
+            if (action == Intent.ACTION_SEND) {
+                val text = intent.getStringExtra(Intent.EXTRA_TEXT)
+                println(text)
             }
         }
     }
@@ -182,28 +181,37 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
                 startActivity(Intent(this, SettingsActivity::class.java))
                 true
             }
+            R.id.action_rate -> {
+                this.launchMarket()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun launchMarket() {
+        var uri = Uri.parse("market://details?id=$packageName")
+        val action = Intent.ACTION_VIEW
+        val flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        var marketIntent: Intent
+        try {
+            marketIntent = Intent(action, uri)
+            marketIntent.setPackage("com.android.vending")
+            marketIntent.flags = flags
+            startActivity(marketIntent)
+        } catch (e: ActivityNotFoundException) {
+            uri = Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
+            marketIntent = Intent(action, uri)
+            marketIntent.flags = flags
+            startActivity(marketIntent)
+        }
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_toolbar, menu)
         return true
     }
-
-//    override fun onBackPressed() {
-//        if (this.currentFragment == Constants.Fragment.HOME) {
-//            val viewPager = this.mainFragment!!.viewPager
-//            if (viewPager?.currentItem == 0) {
-//                super.onBackPressed()
-//            } else {
-//                viewPager?.currentItem = viewPager?.currentItem!! - 1
-//            }
-//        } else {
-//            this.navigationView!!.menu.findItem(R.id.nav_item_home).isChecked = true
-//            this.switchToHomeFragment()
-//        }
-//    }
 
     override fun onBackPressed() {
         if (!this.playerFragment!!.swipeDown()) {
@@ -214,6 +222,7 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
 
     override fun onDestroy() {
         super.onDestroy()
+        unregisterReceiver(this.playReceiver)
         unregisterReceiver(this.wifiReceiver)
     }
 

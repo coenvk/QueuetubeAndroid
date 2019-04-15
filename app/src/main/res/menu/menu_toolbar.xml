@@ -10,4 +10,10 @@
         android:title="Settings"
         app:showAsAction="collapseActionView" />
 
+    <item
+        android:id="@+id/action_rate"
+        android:icon="@drawable/ic_star_white_24dp"
+        android:title="Rate app"
+        app:showAsAction="collapseActionView" />
+
 </menu>

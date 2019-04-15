@@ -50,6 +50,10 @@ class Video() : Parcelable {
         @Expose
         lateinit var channelTitle: String
 
+        @SerializedName("liveBroadcastContent")
+        @Expose
+        lateinit var liveBroadcastContent: String
+
     }
 
     @SerializedName("id")
@@ -101,14 +105,24 @@ class Video() : Parcelable {
             _snippet.channelTitle = value
         }
 
+    var liveBroadcastContent: String
+        get() = _snippet.liveBroadcastContent
+        set(value) {
+            _snippet.liveBroadcastContent = value
+        }
+
+    fun isLive(): Boolean {
+        return this.liveBroadcastContent == "live"
+    }
+
     var isFavorite: Boolean = false
 
     constructor(id: String) : this() {
         this.id = id
     }
 
-    constructor(id: String, title: String, publishedAt: String, channelTitle: String, isFavorite: Boolean = false) : this() {
-        this.setTo(id, title, publishedAt, channelTitle, isFavorite)
+    constructor(id: String, title: String, publishedAt: String, channelTitle: String) : this() {
+        this.setTo(id, title, publishedAt, channelTitle)
     }
 
     constructor(result: SearchResult) : this() {
@@ -127,11 +141,12 @@ class Video() : Parcelable {
         this.setTo(obj)
     }
 
-    fun setTo(id: String, title: String, publishedOn: String, channelTitle: String, isFavorite: Boolean = false) {
+    fun setTo(id: String, title: String, publishedOn: String, channelTitle: String, liveBroadcastContent: String = "none", isFavorite: Boolean = false) {
         this.title = title
         this.id = id
         this.publishedAt = publishedOn
         this.channelTitle = channelTitle
+        this.liveBroadcastContent = liveBroadcastContent
         this.isFavorite = isFavorite
     }
 
@@ -140,6 +155,7 @@ class Video() : Parcelable {
         this.id = result.id.videoId
         this.publishedAt = result.snippet.publishedAt.toString()
         this.channelTitle = result.snippet.channelTitle
+        this.liveBroadcastContent = result.snippet.liveBroadcastContent
     }
 
     fun setTo(video: com.google.api.services.youtube.model.Video) {
@@ -147,6 +163,7 @@ class Video() : Parcelable {
         this.id = video.id
         this.publishedAt = video.snippet.publishedAt.toString()
         this.channelTitle = video.snippet.channelTitle
+        this.liveBroadcastContent = video.snippet.liveBroadcastContent
     }
 
     fun setTo(obj: JsonObject) {
@@ -154,6 +171,7 @@ class Video() : Parcelable {
         this.id = obj.get(Constants.VideoData.ID).asString
         this.publishedAt = obj.get(Constants.VideoData.PUBLISHED_AT).asString
         this.channelTitle = obj.get(Constants.VideoData.CHANNEL_TITLE).asString
+        this.liveBroadcastContent = obj.get(Constants.VideoData.LIVE_BROADCAST_CONTENT).asString
     }
 
     fun setTo(video: Video) {
@@ -161,6 +179,7 @@ class Video() : Parcelable {
         this.id = video.id
         this.channelTitle = video.channelTitle
         this.publishedAt = video.publishedAt
+        this.liveBroadcastContent = video.liveBroadcastContent
         this.isFavorite = video.isFavorite
     }
 
@@ -169,6 +188,7 @@ class Video() : Parcelable {
         title = parcel.readString()!!
         publishedAt = parcel.readString()!!
         channelTitle = parcel.readString()!!
+        liveBroadcastContent = parcel.readString()!!
         isFavorite = parcel.readByte() != 0.toByte()
     }
 
@@ -181,6 +201,7 @@ class Video() : Parcelable {
         parcel.writeString(title)
         parcel.writeString(publishedAt)
         parcel.writeString(channelTitle)
+        parcel.writeString(liveBroadcastContent)
         parcel.writeByte(if (isFavorite) 1 else 0)
     }
 
@@ -201,6 +222,7 @@ class Video() : Parcelable {
         result = 31 * result + id.hashCode()
         result = 31 * result + publishedAt.hashCode()
         result = 31 * result + channelTitle.hashCode()
+        result = 31 * result + liveBroadcastContent.hashCode()
         result = 31 * result + isFavorite.hashCode()
         return result
     }

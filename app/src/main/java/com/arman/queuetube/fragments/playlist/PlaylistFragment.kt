@@ -8,19 +8,16 @@ import android.view.ViewGroup
 import androidx.annotation.MenuRes
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.arman.queuetube.R
-import com.arman.queuetube.activities.MainActivity
 import com.arman.queuetube.config.Constants
 import com.arman.queuetube.fragments.RefreshVideoListFragment
 import com.arman.queuetube.fragments.dialogs.EditPlaylistNameFragment
 import com.arman.queuetube.listeners.OnDialogDismissListener
 import com.arman.queuetube.listeners.OnSaveFinishedListener
-import com.arman.queuetube.listeners.events.PlayEvent
 import com.arman.queuetube.model.VideoData
 import com.arman.queuetube.model.adapters.PlaylistItemAdapter
 import com.arman.queuetube.model.viewholders.BaseViewHolder
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
 import com.arman.queuetube.util.itemtouchhelper.VideoItemTouchHelper
-import com.arman.queuetube.util.putExtra
 import kotlinx.android.synthetic.main.fragment_playlist.*
 
 class PlaylistFragment : RefreshVideoListFragment() {
@@ -132,10 +129,9 @@ class PlaylistFragment : RefreshVideoListFragment() {
         if (onPlayItemsListener != null) {
             super.onAddToQueue(holder)
         } else {
-            val intent = Intent(context, MainActivity::class.java)
-            intent.putExtra(PlayEvent.PLAY)
+            val intent = Intent(Constants.Action.Play.PLAY_ACTION)
             intent.putParcelableArrayListExtra(Constants.Fragment.Argument.VIDEO_LIST, arrayListOf(holder.item))
-            startActivity(intent)
+            context!!.sendBroadcast(intent)
         }
     }
 
@@ -143,10 +139,9 @@ class PlaylistFragment : RefreshVideoListFragment() {
         if (onPlayItemsListener != null) {
             super.onPlayNext(holder)
         } else {
-            val intent = Intent(context, MainActivity::class.java)
-            intent.putExtra(PlayEvent.PLAY_NEXT)
+            val intent = Intent(Constants.Action.Play.PLAY_NEXT_ACTION)
             intent.putParcelableArrayListExtra(Constants.Fragment.Argument.VIDEO_LIST, arrayListOf(holder.item))
-            startActivity(intent)
+            context!!.sendBroadcast(intent)
         }
     }
 
@@ -154,10 +149,9 @@ class PlaylistFragment : RefreshVideoListFragment() {
         if (onPlayItemsListener != null) {
             super.onPlayNow(holder)
         } else {
-            val intent = Intent(context, MainActivity::class.java)
-            intent.putExtra(PlayEvent.PLAY_NOW)
+            val intent = Intent(Constants.Action.Play.PLAY_NOW_ACTION)
             intent.putParcelableArrayListExtra(Constants.Fragment.Argument.VIDEO_LIST, arrayListOf(holder.item))
-            startActivity(intent)
+            context!!.sendBroadcast(intent)
         }
     }
 
@@ -165,10 +159,9 @@ class PlaylistFragment : RefreshVideoListFragment() {
         if (onPlayItemsListener != null) {
             super.onPlayAll()
         } else {
-            val intent = Intent(context, MainActivity::class.java)
-            intent.putExtra(PlayEvent.PLAY_ALL)
+            val intent = Intent(Constants.Action.Play.PLAY_ALL_ACTION)
             intent.putParcelableArrayListExtra(Constants.Fragment.Argument.VIDEO_LIST, this.listAdapter!!.all)
-            startActivity(intent)
+            context!!.sendBroadcast(intent)
         }
     }
 
@@ -176,10 +169,9 @@ class PlaylistFragment : RefreshVideoListFragment() {
         if (onPlayItemsListener != null) {
             super.onShuffle()
         } else {
-            val intent = Intent(context, MainActivity::class.java)
-            intent.putExtra(PlayEvent.SHUFFLE)
+            val intent = Intent(Constants.Action.Play.SHUFFLE_ACTION)
             intent.putParcelableArrayListExtra(Constants.Fragment.Argument.VIDEO_LIST, this.listAdapter!!.all)
-            startActivity(intent)
+            context!!.sendBroadcast(intent)
         }
     }
 

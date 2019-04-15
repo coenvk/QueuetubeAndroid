@@ -25,7 +25,7 @@ class NotificationHelper(private val context: Context) {
 
     private var built: Boolean = false
 
-    private fun setListeners() {
+    private fun createIntents() {
         val playIntent = Intent(Constants.Action.PLAY_ACTION)
         val playPendingIntent = PendingIntent.getBroadcast(context, 1, playIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
@@ -64,7 +64,7 @@ class NotificationHelper(private val context: Context) {
         intent.addCategory(Intent.CATEGORY_LAUNCHER)
         val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        setListeners()
+        createIntents()
 
         builder!!
                 .setSmallIcon(R.drawable.ic_stat_name)

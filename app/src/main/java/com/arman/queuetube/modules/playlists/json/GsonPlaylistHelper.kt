@@ -188,10 +188,11 @@ object GsonPlaylistHelper {
 
     private fun createVideo(video: VideoData): JsonObject {
         val obj = JsonObject()
-        obj.addProperty(Constants.Json.Key.ID, video.id)
+        obj.addProperty(Constants.VideoData.ID, video.id)
         obj.addProperty(Constants.VideoData.TITLE, video.title)
         obj.addProperty(Constants.VideoData.CHANNEL_TITLE, video.channelTitle)
         obj.addProperty(Constants.VideoData.PUBLISHED_AT, video.publishedAt)
+        obj.addProperty(Constants.VideoData.LIVE_BROADCAST_CONTENT, video.liveBroadcastContent)
         return obj
     }
 
@@ -398,16 +399,6 @@ object GsonPlaylistHelper {
             return true
         }
         return false
-    }
-
-    private fun printInParts(string: String) {
-        val max = 1000
-        for (i in 0..string.length / max) {
-            val start = i * max
-            var end = (i + 1) * max
-            end = if (end > string.length) string.length else end
-            println(string.substring(start, end))
-        }
     }
 
     fun read(): JsonObject {

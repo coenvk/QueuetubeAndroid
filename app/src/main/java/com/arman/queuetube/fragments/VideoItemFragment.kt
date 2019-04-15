@@ -41,7 +41,7 @@ abstract class VideoItemFragment : Fragment(), OnShowPopupMenuListener, BaseTouc
     }
 
     open fun onAddToFavorites(holder: BaseViewHolder<VideoData>) {
-        holder.item!!.isFavorited = true
+        holder.item!!.isFavorite = true
         GsonPlaylistHelper.writeToIfNotFound(Constants.Json.Playlist.FAVORITES, holder.item!!)
     }
 

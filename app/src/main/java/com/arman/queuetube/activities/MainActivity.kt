@@ -138,7 +138,7 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        GsonPlaylistHelper.onCreate(this)
+        GsonPlaylistHelper.create(this)
 
         this.currentFragment = -1
 

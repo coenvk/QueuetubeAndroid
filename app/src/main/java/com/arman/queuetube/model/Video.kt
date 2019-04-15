@@ -152,8 +152,8 @@ class Video() : Parcelable {
     fun setTo(obj: JsonObject) {
         this.title = obj.get(Constants.VideoData.TITLE).asString
         this.id = obj.get(Constants.VideoData.ID).asString
-        this.publishedAt = obj.get(Constants.VideoData.PUBLISHED_ON).asString
-        this.channelTitle = obj.get(Constants.VideoData.CHANNEL).asString
+        this.publishedAt = obj.get(Constants.VideoData.PUBLISHED_AT).asString
+        this.channelTitle = obj.get(Constants.VideoData.CHANNEL_TITLE).asString
     }
 
     fun setTo(video: Video) {

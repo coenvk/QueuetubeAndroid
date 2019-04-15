@@ -136,7 +136,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
 
         this.currentVideo = VideoData()
 
-        favorite_button.setOnClickListener { this@PlayerFragment.favoriteVideo(!this@PlayerFragment.currentVideo!!.isFavorited) }
+        favorite_button.setOnClickListener { this@PlayerFragment.favoriteVideo(!this@PlayerFragment.currentVideo!!.isFavorite) }
         add_to_playlist_button.setOnClickListener { this@PlayerFragment.showAddToPlaylistDialog() }
         share_button.setOnClickListener { VideoSharer.share(context!!, this@PlayerFragment.currentVideo!!) }
 
@@ -183,7 +183,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
     }
 
     fun updateVideo(favorited: Boolean) {
-        this.currentVideo?.isFavorited = favorited
+        this.currentVideo?.isFavorite = favorited
         this.adjustFavoriteButton(favorited)
     }
 
@@ -305,7 +305,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         //        this.currentVideo.setTo(this.ytSearcher.requestDetails(this.currentVideo));
 
         val favorited = GsonPlaylistHelper.isFavorited(this.currentVideo!!)
-        this.currentVideo?.isFavorited = favorited
+        this.currentVideo?.isFavorite = favorited
         this.adjustFavoriteButton(favorited)
 
         this.currentVideo?.let {

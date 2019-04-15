@@ -49,17 +49,17 @@ class VideoData : Parcelable {
             return PREFIX_THUMBNAIL_URL + this.id + "/hqdefault" + POSTFIX_THUMBNAIL_URL
         }
     var id: String? = null
-    var publishedOn: String? = null
-    var channel: String? = null
+    var publishedAt: String? = null
+    var channelTitle: String? = null
 
-    var isFavorited: Boolean = false
+    var isFavorite: Boolean = false
 
     constructor(parcel: Parcel) : this() {
         id = parcel.readString()
         title = parcel.readString()
-        publishedOn = parcel.readString()
-        channel = parcel.readString()
-        isFavorited = parcel.readByte() != 0.toByte()
+        publishedAt = parcel.readString()
+        channelTitle = parcel.readString()
+        isFavorite = parcel.readByte() != 0.toByte()
     }
 
     constructor()
@@ -84,41 +84,41 @@ class VideoData : Parcelable {
         this.setTo(obj)
     }
 
-    fun setTo(title: String, id: String, publishedOn: String, channel: String, isFavorited: Boolean = false) {
+    fun setTo(title: String, id: String, publishedAt: String, channelTitle: String, isFavorite: Boolean = false) {
         this.title = title
         this.id = id
-        this.publishedOn = publishedOn
-        this.channel = channel
-        this.isFavorited = isFavorited
+        this.publishedAt = publishedAt
+        this.channelTitle = channelTitle
+        this.isFavorite = isFavorite
     }
 
     fun setTo(result: SearchResult) {
         this.title = result.snippet.title
         this.id = result.id.videoId
-        this.publishedOn = result.snippet.publishedAt.toString()
-        this.channel = result.snippet.channelTitle
+        this.publishedAt = result.snippet.publishedAt.toString()
+        this.channelTitle = result.snippet.channelTitle
     }
 
     fun setTo(video: Video) {
         this.title = video.snippet.title
         this.id = video.id
-        this.publishedOn = video.snippet.publishedAt.toString()
-        this.channel = video.snippet.channelTitle
+        this.publishedAt = video.snippet.publishedAt.toString()
+        this.channelTitle = video.snippet.channelTitle
     }
 
     fun setTo(obj: JsonObject) {
         this.title = obj.get(Constants.VideoData.TITLE).asString
         this.id = obj.get(Constants.VideoData.ID).asString
-        this.publishedOn = obj.get(Constants.VideoData.PUBLISHED_ON).asString
-        this.channel = obj.get(Constants.VideoData.CHANNEL).asString
+        this.publishedAt = obj.get(Constants.VideoData.PUBLISHED_AT).asString
+        this.channelTitle = obj.get(Constants.VideoData.CHANNEL_TITLE).asString
     }
 
     fun setTo(videoData: VideoData) {
         this.title = videoData.title
         this.id = videoData.id
-        this.channel = videoData.channel
-        this.publishedOn = videoData.publishedOn
-        this.isFavorited = videoData.isFavorited
+        this.channelTitle = videoData.channelTitle
+        this.publishedAt = videoData.publishedAt
+        this.isFavorite = videoData.isFavorite
     }
 
     override fun equals(o: Any?): Boolean {
@@ -136,18 +136,18 @@ class VideoData : Parcelable {
     override fun hashCode(): Int {
         var result = title?.hashCode() ?: 0
         result = 31 * result + (id?.hashCode() ?: 0)
-        result = 31 * result + (publishedOn?.hashCode() ?: 0)
-        result = 31 * result + (channel?.hashCode() ?: 0)
-        result = 31 * result + isFavorited.hashCode()
+        result = 31 * result + (publishedAt?.hashCode() ?: 0)
+        result = 31 * result + (channelTitle?.hashCode() ?: 0)
+        result = 31 * result + isFavorite.hashCode()
         return result
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(id)
         parcel.writeString(title)
-        parcel.writeString(publishedOn)
-        parcel.writeString(channel)
-        parcel.writeByte(if (isFavorited) 1 else 0)
+        parcel.writeString(publishedAt)
+        parcel.writeString(channelTitle)
+        parcel.writeByte(if (isFavorite) 1 else 0)
     }
 
     override fun describeContents(): Int {

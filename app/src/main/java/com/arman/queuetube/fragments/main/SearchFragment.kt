@@ -11,7 +11,6 @@ import com.arman.queuetube.modules.search.YouTubeSearcher
 class SearchFragment : AsyncVideoListFragment() {
 
     override var loadOnStart: Boolean = false
-        get() = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

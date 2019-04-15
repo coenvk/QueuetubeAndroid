@@ -1,5 +1,7 @@
 package com.arman.queuetube.model.adapters
 
+import android.util.DisplayMetrics
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

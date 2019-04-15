@@ -32,9 +32,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="5"
                 android:maxLines="3"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@color/textColorPrimary"
-                android:textSize="16sp" />
+                android:textAppearance="?android:attr/textAppearance"
+                android:textColor="@color/textColorPrimary" />
 
             <ImageView
                 android:id="@+id/playlist_item_options_button"

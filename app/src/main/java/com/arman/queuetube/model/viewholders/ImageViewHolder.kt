@@ -27,6 +27,7 @@ open class ImageViewHolder(view: View) : BaseTouchViewHolder<VideoData>(view) {
                     .placeholder(ColorDrawable(Color.GRAY))
                     .error(ColorDrawable(Color.RED))
                     .fit()
+                    .centerCrop()
                     .into(this.imageView, object : Callback {
                         override fun onSuccess() {
                             this@ImageViewHolder.readyForLoadingYoutubeThumbnail = true

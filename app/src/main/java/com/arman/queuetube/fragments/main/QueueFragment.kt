@@ -10,7 +10,7 @@ import androidx.annotation.MenuRes
 import androidx.recyclerview.widget.RecyclerView
 import com.arman.queuetube.R
 import com.arman.queuetube.fragments.VideoListFragment
-import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.Video
 import com.arman.queuetube.model.viewholders.BaseViewHolder
 
 class QueueFragment : VideoListFragment() {
@@ -18,7 +18,7 @@ class QueueFragment : VideoListFragment() {
     @MenuRes
     override val popupMenuResId: Int = R.menu.popup_menu_queue_item
 
-    override fun onRemoveFromPlaylist(holder: BaseViewHolder<VideoData>) {
+    override fun onRemoveFromPlaylist(holder: BaseViewHolder<Video>) {
         this.onItemClick(holder)
     }
 

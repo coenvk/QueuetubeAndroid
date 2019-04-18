@@ -4,11 +4,11 @@ import android.content.Context
 import android.content.Intent
 
 import com.arman.queuetube.R
-import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.Video
 
 object VideoSharer {
 
-    fun share(context: Context?, item: VideoData) {
+    fun share(context: Context?, item: Video) {
         context?.let {
             val shareIntent = Intent(Intent.ACTION_SEND)
             shareIntent.type = "text/plain"

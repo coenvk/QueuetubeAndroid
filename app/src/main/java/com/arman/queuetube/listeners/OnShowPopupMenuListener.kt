@@ -1,14 +1,14 @@
 package com.arman.queuetube.listeners
 
 import android.view.View
-import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.Video
 import com.arman.queuetube.model.viewholders.BaseViewHolder
 
 inline fun OnShowPopupMenuListener(
-        crossinline onShowPopupMenu: (BaseViewHolder<VideoData>, View) -> Unit
+        crossinline onShowPopupMenu: (BaseViewHolder<Video>, View) -> Unit
 ): OnShowPopupMenuListener {
     return object : OnShowPopupMenuListener {
-        override fun onShowPopupMenu(holder: BaseViewHolder<VideoData>, anchorView: View) {
+        override fun onShowPopupMenu(holder: BaseViewHolder<Video>, anchorView: View) {
             onShowPopupMenu(holder, anchorView)
         }
     }
@@ -16,6 +16,6 @@ inline fun OnShowPopupMenuListener(
 
 interface OnShowPopupMenuListener {
 
-    fun onShowPopupMenu(holder: BaseViewHolder<VideoData>, anchorView: View)
+    fun onShowPopupMenu(holder: BaseViewHolder<Video>, anchorView: View)
 
 }

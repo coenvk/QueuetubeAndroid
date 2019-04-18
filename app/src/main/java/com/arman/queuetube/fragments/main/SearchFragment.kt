@@ -5,7 +5,7 @@ import android.view.*
 import android.widget.SearchView
 import com.arman.queuetube.R
 import com.arman.queuetube.fragments.AsyncVideoListFragment
-import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.Video
 import com.arman.queuetube.modules.search.YouTubeSearcher
 
 class SearchFragment : AsyncVideoListFragment() {
@@ -41,7 +41,7 @@ class SearchFragment : AsyncVideoListFragment() {
         return inflater.inflate(R.layout.fragment_search, container, false)
     }
 
-    override fun doInBackground(params: Array<out String>): MutableList<VideoData> {
+    override fun doInBackground(params: Array<out String>): MutableList<Video> {
         return YouTubeSearcher.search(params[0])
     }
 

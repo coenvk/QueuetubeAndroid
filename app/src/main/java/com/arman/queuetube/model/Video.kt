@@ -5,11 +5,10 @@ import android.os.Parcelable
 import android.text.Html
 import com.arman.queuetube.config.Constants
 import com.google.api.services.youtube.model.SearchResult
+import com.google.api.services.youtube.model.Video
 import com.google.gson.JsonObject
-import com.google.gson.annotations.Expose
-import com.google.gson.annotations.SerializedName
 
-class Video() : Parcelable {
+class Video : Parcelable {
 
     companion object {
 
@@ -17,65 +16,22 @@ class Video() : Parcelable {
         const val POSTFIX_THUMBNAIL_URL = ".jpg"
 
         @JvmField
-        val CREATOR = object : Parcelable.Creator<Video> {
-            override fun createFromParcel(parcel: Parcel): Video {
+        val CREATOR = object : Parcelable.Creator<com.arman.queuetube.model.Video> {
+            override fun createFromParcel(parcel: Parcel): com.arman.queuetube.model.Video {
                 return Video(parcel)
             }
 
-            override fun newArray(size: Int): Array<Video?> {
+            override fun newArray(size: Int): Array<com.arman.queuetube.model.Video?> {
                 return arrayOfNulls(size)
             }
         }
 
     }
 
-    private inner class Id {
-
-        @SerializedName("videoId")
-        @Expose
-        lateinit var videoId: String
-    }
-
-    private inner class Snippet {
-
-        @SerializedName("title")
-        @Expose
-        lateinit var title: String
-
-        @SerializedName("publishedAt")
-        @Expose
-        lateinit var publishedAt: String
-
-        @SerializedName("channelTitle")
-        @Expose
-        lateinit var channelTitle: String
-
-        @SerializedName("liveBroadcastContent")
-        @Expose
-        lateinit var liveBroadcastContent: String
-
-    }
-
-    @SerializedName("id")
-    @Expose
-    private lateinit var _id: Id
-
-    @SerializedName("snippet")
-    @Expose
-    private lateinit var _snippet: Snippet
-
-    var id: String
-        get() = _id.videoId
-        set(value) {
-            _id.videoId = value
+    var title: String? = null
+        set(title) {
+            field = Html.fromHtml(title, Html.FROM_HTML_MODE_COMPACT).toString()
         }
-
-    var title: String
-        get() = _snippet.title
-        set(value) {
-            _snippet.title = Html.fromHtml(value, Html.FROM_HTML_MODE_COMPACT).toString()
-        }
-
     val thumbnailUrl: String
         get() {
             return PREFIX_THUMBNAIL_URL + this.id + "/default" + POSTFIX_THUMBNAIL_URL
@@ -86,30 +42,16 @@ class Video() : Parcelable {
         }
     val mediumThumbnailUrl: String
         get() {
-            return VideoData.PREFIX_THUMBNAIL_URL + this.id + "/mqdefault" + VideoData.POSTFIX_THUMBNAIL_URL
+            return PREFIX_THUMBNAIL_URL + this.id + "/mqdefault" + POSTFIX_THUMBNAIL_URL
         }
     val highThumbnailUrl: String
         get() {
-            return VideoData.PREFIX_THUMBNAIL_URL + this.id + "/hqdefault" + VideoData.POSTFIX_THUMBNAIL_URL
+            return PREFIX_THUMBNAIL_URL + this.id + "/hqdefault" + POSTFIX_THUMBNAIL_URL
         }
-
-    var publishedAt: String
-        get() = _snippet.publishedAt
-        set(value) {
-            _snippet.publishedAt = value
-        }
-
-    var channelTitle: String
-        get() = _snippet.channelTitle
-        set(value) {
-            _snippet.channelTitle = value
-        }
-
-    var liveBroadcastContent: String
-        get() = _snippet.liveBroadcastContent
-        set(value) {
-            _snippet.liveBroadcastContent = value
-        }
+    var id: String? = null
+    var publishedAt: String? = null
+    var channelTitle: String? = null
+    var liveBroadcastContent: String? = null
 
     fun isLive(): Boolean {
         return this.liveBroadcastContent == "live"
@@ -117,34 +59,41 @@ class Video() : Parcelable {
 
     var isFavorite: Boolean = false
 
-    constructor(id: String) : this() {
+    constructor(parcel: Parcel) : this() {
+        id = parcel.readString()
+        title = parcel.readString()
+        publishedAt = parcel.readString()
+        channelTitle = parcel.readString()
+        liveBroadcastContent = parcel.readString()
+        isFavorite = parcel.readByte() != 0.toByte()
+    }
+
+    constructor()
+
+    constructor(id: String) {
         this.id = id
     }
 
-    constructor(id: String, title: String, publishedAt: String, channelTitle: String) : this() {
-        this.setTo(id, title, publishedAt, channelTitle)
+    constructor(title: String, id: String, publishedAt: String, channelTitle: String) {
+        this.setTo(title, id, publishedAt, channelTitle)
     }
 
-    constructor(result: SearchResult) : this() {
+    constructor(result: SearchResult) {
         this.setTo(result)
     }
 
-    constructor(video: Video) : this() {
+    constructor(video: Video) {
         this.setTo(video)
     }
 
-    constructor(video: com.google.api.services.youtube.model.Video) : this() {
-        this.setTo(video)
-    }
-
-    constructor(obj: JsonObject) : this() {
+    constructor(obj: JsonObject) {
         this.setTo(obj)
     }
 
-    fun setTo(id: String, title: String, publishedOn: String, channelTitle: String, liveBroadcastContent: String = "none", isFavorite: Boolean = false) {
+    fun setTo(title: String, id: String, publishedAt: String, channelTitle: String, liveBroadcastContent: String = "none", isFavorite: Boolean = false) {
         this.title = title
         this.id = id
-        this.publishedAt = publishedOn
+        this.publishedAt = publishedAt
         this.channelTitle = channelTitle
         this.liveBroadcastContent = liveBroadcastContent
         this.isFavorite = isFavorite
@@ -158,7 +107,7 @@ class Video() : Parcelable {
         this.liveBroadcastContent = result.snippet.liveBroadcastContent
     }
 
-    fun setTo(video: com.google.api.services.youtube.model.Video) {
+    fun setTo(video: Video) {
         this.title = video.snippet.title
         this.id = video.id
         this.publishedAt = video.snippet.publishedAt.toString()
@@ -174,26 +123,35 @@ class Video() : Parcelable {
         this.liveBroadcastContent = obj.get(Constants.VideoData.LIVE_BROADCAST_CONTENT).asString
     }
 
-    fun setTo(video: Video) {
-        this.title = video.title
-        this.id = video.id
-        this.channelTitle = video.channelTitle
-        this.publishedAt = video.publishedAt
-        this.liveBroadcastContent = video.liveBroadcastContent
-        this.isFavorite = video.isFavorite
+    fun setTo(videoData: com.arman.queuetube.model.Video) {
+        this.title = videoData.title
+        this.id = videoData.id
+        this.channelTitle = videoData.channelTitle
+        this.publishedAt = videoData.publishedAt
+        this.liveBroadcastContent = videoData.liveBroadcastContent
+        this.isFavorite = videoData.isFavorite
     }
 
-    constructor(parcel: Parcel) : this() {
-        id = parcel.readString()!!
-        title = parcel.readString()!!
-        publishedAt = parcel.readString()!!
-        channelTitle = parcel.readString()!!
-        liveBroadcastContent = parcel.readString()!!
-        isFavorite = parcel.readByte() != 0.toByte()
+    override fun equals(o: Any?): Boolean {
+        if (o is com.arman.queuetube.model.Video) {
+            val other = o as com.arman.queuetube.model.Video?
+            return other?.id == this.id
+        }
+        return false
     }
 
     override fun toString(): String {
-        return "[$id]: $title"
+        return "[" + this.id + "]: " + this.title
+    }
+
+    override fun hashCode(): Int {
+        var result = title?.hashCode() ?: 0
+        result = 31 * result + (id?.hashCode() ?: 0)
+        result = 31 * result + (publishedAt?.hashCode() ?: 0)
+        result = 31 * result + (channelTitle?.hashCode() ?: 0)
+        result = 31 * result + (liveBroadcastContent?.hashCode() ?: 0)
+        result = 31 * result + isFavorite.hashCode()
+        return result
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -207,24 +165,6 @@ class Video() : Parcelable {
 
     override fun describeContents(): Int {
         return 0
-    }
-
-    override fun equals(o: Any?): Boolean {
-        if (o is VideoData) {
-            val other = o as VideoData?
-            return other?.id == this.id
-        }
-        return false
-    }
-
-    override fun hashCode(): Int {
-        var result = title.hashCode()
-        result = 31 * result + id.hashCode()
-        result = 31 * result + publishedAt.hashCode()
-        result = 31 * result + channelTitle.hashCode()
-        result = 31 * result + liveBroadcastContent.hashCode()
-        result = 31 * result + isFavorite.hashCode()
-        return result
     }
 
 }

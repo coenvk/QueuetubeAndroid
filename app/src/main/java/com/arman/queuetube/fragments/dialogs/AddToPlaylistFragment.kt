@@ -5,10 +5,9 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.arman.queuetube.config.Constants
-import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.Video
 import com.arman.queuetube.modules.BaseTask
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
-import com.arman.queuetube.util.Tuple
 import com.google.gson.JsonArray
 import java.util.*
 import java.util.concurrent.ExecutionException
@@ -16,21 +15,13 @@ import java.util.concurrent.ExecutionException
 class AddToPlaylistFragment : DialogFragment() {
 
     private var selectedItems: MutableList<Int>? = null
-    var video: VideoData? = null
+    var video: Video? = null
 
-    private val task = BaseTask<Unit, Tuple<Array<CharSequence?>, BooleanArray>> {
+    private val task = BaseTask<Unit, Pair<Array<CharSequence?>, BooleanArray>> {
         return@BaseTask loadPlaylists(GsonPlaylistHelper.userPlaylists)
     }
 
-//    @SuppressLint("StaticFieldLeak")
-//    private val task = object : AsyncTask<Unit, Int, Tuple<Array<CharSequence?>, BooleanArray>>() {
-//        override fun doInBackground(vararg voids: Unit): Tuple<Array<CharSequence?>, BooleanArray> {
-//            val playlists = GsonPlaylistHelper.userPlaylists
-//            return loadPlaylists(playlists)
-//        }
-//    }
-
-    private fun loadPlaylists(array: JsonArray): Tuple<Array<CharSequence?>, BooleanArray> {
+    private fun loadPlaylists(array: JsonArray): Pair<Array<CharSequence?>, BooleanArray> {
         val strings = arrayOfNulls<CharSequence>(array.size())
         val checked = BooleanArray(strings.size)
         for (i in strings.indices) {
@@ -45,7 +36,7 @@ class AddToPlaylistFragment : DialogFragment() {
                 }
             }
         }
-        return Tuple(strings, checked)
+        return Pair(strings, checked)
     }
 
     private fun createErrorDialog(): Dialog {
@@ -89,15 +80,14 @@ class AddToPlaylistFragment : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         this.selectedItems = ArrayList()
-        val tuple: Tuple<Array<CharSequence?>, BooleanArray>
-        try {
-            tuple = this.task.execute().get()
+        return try {
+            val (left, right) = this.task.execute().get()
+            createDialog(left, right)
         } catch (e: ExecutionException) {
-            return createErrorDialog()
+            createErrorDialog()
         } catch (e: InterruptedException) {
-            return createErrorDialog()
+            createErrorDialog()
         }
-        return createDialog(tuple.left, tuple.right)
     }
 
 }

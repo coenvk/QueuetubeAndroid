@@ -5,12 +5,12 @@ import android.content.Context
 import android.content.Intent
 import com.arman.queuetube.config.Constants
 import com.arman.queuetube.listeners.OnPlayItemsListener
-import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.Video
 
 class PlayReceiver(private val onPlayItemsListener: OnPlayItemsListener) : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        val videos = intent.getParcelableArrayListExtra<VideoData>(Constants.Fragment.Argument.VIDEO_LIST)
+        val videos = intent.getParcelableArrayListExtra<Video>(Constants.Fragment.Argument.VIDEO_LIST)
         when (intent.action) {
             Constants.Action.Play.PLAY_ACTION -> this.onPlayItemsListener.onPlay(videos.first())
             Constants.Action.Play.PLAY_NEXT_ACTION -> this.onPlayItemsListener.onPlayNext(videos.first())

@@ -14,7 +14,7 @@ import com.arman.queuetube.fragments.AsyncVideoListFragment
 import com.arman.queuetube.fragments.dialogs.CreatePlaylistFragment
 import com.arman.queuetube.listeners.OnSaveFinishedListener
 import com.arman.queuetube.listeners.OnTaskFinishedListener
-import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.Video
 import com.arman.queuetube.model.adapters.BaseTouchAdapter
 import com.arman.queuetube.model.adapters.PlaylistsAdapter
 import com.arman.queuetube.model.adapters.VideoItemAdapter
@@ -58,7 +58,7 @@ class LibraryFragment : AsyncVideoListFragment() {
         }
     }
 
-    override fun doInBackground(vararg params: String): MutableList<VideoData> {
+    override fun doInBackground(vararg params: String): MutableList<Video> {
         return GsonPlaylistHelper.asPlaylist(GsonPlaylistHelper.history!!, Constants.History.MAX_SIZE_SHORT)
     }
 

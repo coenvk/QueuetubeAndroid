@@ -6,7 +6,7 @@ import android.os.AsyncTask
 import com.arman.queuetube.config.Constants
 import com.arman.queuetube.listeners.OnSaveFinishedListener
 import com.arman.queuetube.listeners.OnTaskFinishedListener
-import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.Video
 import com.arman.queuetube.modules.BaseTask
 import com.arman.queuetube.modules.InBackground
 import com.google.gson.*
@@ -122,7 +122,7 @@ object GsonPlaylistHelper {
         }
     }
 
-    fun isFavorited(video: VideoData): Boolean {
+    fun isFavorited(video: Video): Boolean {
         val favorites = favorites
         for (i in 0 until favorites!!.size()) {
             val obj = favorites.get(i).asJsonObject
@@ -143,21 +143,21 @@ object GsonPlaylistHelper {
         return strings
     }
 
-    fun asPlaylist(array: JsonArray): MutableList<VideoData> {
-        val videos = ArrayList<VideoData>()
+    fun asPlaylist(array: JsonArray): MutableList<Video> {
+        val videos = ArrayList<Video>()
         for (i in 0 until array.size()) {
             val video = array.get(i).asJsonObject
-            val videoData = VideoData(video)
+            val videoData = Video(video)
             videos.add(videoData)
         }
         return videos
     }
 
-    fun asPlaylist(array: JsonArray, size: Int): MutableList<VideoData> {
-        val videos = ArrayList<VideoData>()
+    fun asPlaylist(array: JsonArray, size: Int): MutableList<Video> {
+        val videos = ArrayList<Video>()
         for (i in 0 until min(size, array.size())) {
             val video = array.get(i).asJsonObject
-            val videoData = VideoData(video)
+            val videoData = Video(video)
             videos.add(videoData)
         }
         return videos
@@ -186,7 +186,7 @@ object GsonPlaylistHelper {
         return false
     }
 
-    private fun createVideo(video: VideoData): JsonObject {
+    private fun createVideo(video: Video): JsonObject {
         val obj = JsonObject()
         obj.addProperty(Constants.VideoData.ID, video.id)
         obj.addProperty(Constants.VideoData.TITLE, video.title)
@@ -258,7 +258,7 @@ object GsonPlaylistHelper {
         return false
     }
 
-    fun reorder(name: String, video: VideoData, toIndex: Int): Boolean {
+    fun reorder(name: String, video: Video, toIndex: Int): Boolean {
         val root = read()
         val playlist = getPlaylist(root, name)
         if (playlist != null) {
@@ -277,7 +277,7 @@ object GsonPlaylistHelper {
         return false
     }
 
-    fun removeFrom(name: String, video: VideoData): Boolean {
+    fun removeFrom(name: String, video: Video): Boolean {
         val root = read()
         val playlist = getPlaylist(root, name)
         if (playlist != null) {
@@ -295,7 +295,7 @@ object GsonPlaylistHelper {
         return false
     }
 
-    fun writeToNew(name: String, video: VideoData): Boolean {
+    fun writeToNew(name: String, video: Video): Boolean {
         val root = read()
         val playlists = getPlaylists(root)
 
@@ -315,7 +315,7 @@ object GsonPlaylistHelper {
         return false
     }
 
-    fun writeToIfNotFound(name: String, video: VideoData): Boolean {
+    fun writeToIfNotFound(name: String, video: Video): Boolean {
         val root = read()
         val playlist = getPlaylist(root, name)
         if (playlist != null) {
@@ -334,7 +334,7 @@ object GsonPlaylistHelper {
         return false
     }
 
-    fun writeToIfNotFound(name: String, video: VideoData, index: Int): Boolean {
+    fun writeToIfNotFound(name: String, video: Video, index: Int): Boolean {
         val root = read()
         val playlist = getPlaylist(root, name)
         if (playlist != null) {
@@ -353,7 +353,7 @@ object GsonPlaylistHelper {
         return false
     }
 
-    fun writeToOrReorder(name: String, video: VideoData, index: Int): Boolean {
+    fun writeToOrReorder(name: String, video: Video, index: Int): Boolean {
         val root = read()
         val playlist = getPlaylist(root, name)
         if (playlist != null) {
@@ -375,7 +375,7 @@ object GsonPlaylistHelper {
         return false
     }
 
-    fun writeTo(name: String, video: VideoData, index: Int): Boolean {
+    fun writeTo(name: String, video: Video, index: Int): Boolean {
         val root = read()
         val playlist = getPlaylist(root, name)
         if (playlist != null) {
@@ -388,7 +388,7 @@ object GsonPlaylistHelper {
         return false
     }
 
-    fun writeTo(name: String, video: VideoData): Boolean {
+    fun writeTo(name: String, video: Video): Boolean {
         val root = read()
         val playlist = getPlaylist(root, name)
         if (playlist != null) {

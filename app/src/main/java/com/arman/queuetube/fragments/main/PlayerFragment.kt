@@ -13,7 +13,7 @@ import com.arman.queuetube.activities.MainActivity
 import com.arman.queuetube.config.Constants
 import com.arman.queuetube.fragments.dialogs.AddToPlaylistFragment
 import com.arman.queuetube.fragments.pager.ViewPagerAdapter
-import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.Video
 import com.arman.queuetube.model.adapters.VideoItemAdapter
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
 import com.arman.queuetube.modules.search.YouTubeSearcher
@@ -47,7 +47,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
     private var ytPlayerPlaying: Boolean = false
     private var ytPlayerStopped: Boolean = false
 
-    var currentVideo: VideoData? = null
+    var currentVideo: Video? = null
         private set
 
     private var queueFragment: QueueFragment? = null
@@ -95,19 +95,19 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         this.playlistAdapter.clear()
     }
 
-    fun setQueueTo(videoData: Collection<VideoData>): Boolean {
+    fun setQueueTo(videoData: Collection<Video>): Boolean {
         return this.playlistAdapter.setAll(videoData)
     }
 
-    fun addToQueue(videoData: Collection<VideoData>): Boolean {
+    fun addToQueue(videoData: Collection<Video>): Boolean {
         return this.playlistAdapter.addAll(videoData)
     }
 
-    fun addToQueue(video: VideoData): Boolean {
+    fun addToQueue(video: Video): Boolean {
         return this.playlistAdapter.add(video)
     }
 
-    fun addToQueue(index: Int, video: VideoData): Boolean {
+    fun addToQueue(index: Int, video: Video): Boolean {
         return this.playlistAdapter.add(index, video)
     }
 
@@ -134,7 +134,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         this.ytPlayerView = view.findViewById(R.id.youtube_player)
         this.initializePlayer()
 
-        this.currentVideo = VideoData()
+        this.currentVideo = Video()
 
         favorite_button.setOnClickListener { this@PlayerFragment.favoriteVideo(!this@PlayerFragment.currentVideo!!.isFavorite) }
         add_to_playlist_button.setOnClickListener { this@PlayerFragment.showAddToPlaylistDialog() }

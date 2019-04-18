@@ -1,33 +1,33 @@
 package com.arman.queuetube.listeners
 
 import com.arman.queuetube.listeners.events.PlayEvent
-import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.Video
 
 inline fun OnPlayItemsListener(
-        crossinline onPlayAll: (Collection<VideoData>) -> Unit = {},
-        crossinline onPlay: (VideoData) -> Unit = {},
-        crossinline onShuffle: (Collection<VideoData>) -> Unit = {},
-        crossinline onPlayNext: (VideoData) -> Unit = {},
-        crossinline onPlayNow: (VideoData) -> Unit = {}
+        crossinline onPlayAll: (Collection<Video>) -> Unit = {},
+        crossinline onPlay: (Video) -> Unit = {},
+        crossinline onShuffle: (Collection<Video>) -> Unit = {},
+        crossinline onPlayNext: (Video) -> Unit = {},
+        crossinline onPlayNow: (Video) -> Unit = {}
 ): OnPlayItemsListener {
     return object : OnPlayItemsListener {
-        override fun onPlayAll(videos: Collection<VideoData>) {
+        override fun onPlayAll(videos: Collection<Video>) {
             onPlayAll(videos)
         }
 
-        override fun onPlay(video: VideoData) {
+        override fun onPlay(video: Video) {
             onPlay(video)
         }
 
-        override fun onShuffle(videos: Collection<VideoData>) {
+        override fun onShuffle(videos: Collection<Video>) {
             onShuffle(videos)
         }
 
-        override fun onPlayNext(video: VideoData) {
+        override fun onPlayNext(video: Video) {
             onPlayNext(video)
         }
 
-        override fun onPlayNow(video: VideoData) {
+        override fun onPlayNow(video: Video) {
             onPlayNow(video)
         }
     }
@@ -35,17 +35,17 @@ inline fun OnPlayItemsListener(
 
 interface OnPlayItemsListener {
 
-    fun onPlayAll(videos: Collection<VideoData>)
+    fun onPlayAll(videos: Collection<Video>)
 
-    fun onPlay(video: VideoData)
+    fun onPlay(video: Video)
 
-    fun onShuffle(videos: Collection<VideoData>)
+    fun onShuffle(videos: Collection<Video>)
 
-    fun onPlayNext(video: VideoData)
+    fun onPlayNext(video: Video)
 
-    fun onPlayNow(video: VideoData)
+    fun onPlayNow(video: Video)
 
-    fun onPlay(videos: Collection<VideoData>, event: PlayEvent) {
+    fun onPlay(videos: Collection<Video>, event: PlayEvent) {
         when (event) {
             PlayEvent.PLAY -> onPlay(videos.first())
             PlayEvent.PLAY_NEXT -> onPlayNext(videos.first())

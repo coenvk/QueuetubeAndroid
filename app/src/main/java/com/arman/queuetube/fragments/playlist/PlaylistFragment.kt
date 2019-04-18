@@ -13,7 +13,7 @@ import com.arman.queuetube.fragments.RefreshVideoListFragment
 import com.arman.queuetube.fragments.dialogs.EditPlaylistNameFragment
 import com.arman.queuetube.listeners.OnDialogDismissListener
 import com.arman.queuetube.listeners.OnSaveFinishedListener
-import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.Video
 import com.arman.queuetube.model.adapters.PlaylistItemAdapter
 import com.arman.queuetube.model.viewholders.BaseViewHolder
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
@@ -75,7 +75,7 @@ class PlaylistFragment : RefreshVideoListFragment() {
         GsonPlaylistHelper.addOnSaveFinishedListener(onSaveFinishedListener)
     }
 
-    override fun doInBackground(vararg params: String): MutableList<VideoData> {
+    override fun doInBackground(vararg params: String): MutableList<Video> {
         val playlist = GsonPlaylistHelper.getPlaylist(this.playlistName)
         return GsonPlaylistHelper.asPlaylist(playlist!!)
     }
@@ -119,13 +119,13 @@ class PlaylistFragment : RefreshVideoListFragment() {
         this.setSubtitle("$videoCount videos")
     }
 
-    override fun onRemoveFromPlaylist(holder: BaseViewHolder<VideoData>) {
+    override fun onRemoveFromPlaylist(holder: BaseViewHolder<Video>) {
         val item = holder.item!!
         listAdapter!!.remove(item)
         GsonPlaylistHelper.removeFrom(this@PlaylistFragment.playlistName, item)
     }
 
-    override fun onAddToQueue(holder: BaseViewHolder<VideoData>) {
+    override fun onAddToQueue(holder: BaseViewHolder<Video>) {
         if (onPlayItemsListener != null) {
             super.onAddToQueue(holder)
         } else {
@@ -135,7 +135,7 @@ class PlaylistFragment : RefreshVideoListFragment() {
         }
     }
 
-    override fun onPlayNext(holder: BaseViewHolder<VideoData>) {
+    override fun onPlayNext(holder: BaseViewHolder<Video>) {
         if (onPlayItemsListener != null) {
             super.onPlayNext(holder)
         } else {
@@ -145,7 +145,7 @@ class PlaylistFragment : RefreshVideoListFragment() {
         }
     }
 
-    override fun onPlayNow(holder: BaseViewHolder<VideoData>) {
+    override fun onPlayNow(holder: BaseViewHolder<Video>) {
         if (onPlayItemsListener != null) {
             super.onPlayNow(holder)
         } else {

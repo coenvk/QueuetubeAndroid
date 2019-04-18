@@ -5,7 +5,7 @@ import android.os.DeadObjectException
 import android.view.View
 import com.arman.queuetube.R
 import com.arman.queuetube.config.Constants
-import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.Video
 import com.arman.queuetube.model.adapters.BaseTouchAdapter
 import com.google.android.youtube.player.YouTubeInitializationResult
 import com.google.android.youtube.player.YouTubeThumbnailLoader
@@ -65,7 +65,7 @@ open class YouTubeThumbnailViewHolder(view: View) : ImageViewHolder(view) {
         }
     }
 
-    override fun bind(item: VideoData, clickListener: BaseTouchAdapter.OnItemClickListener?, dragListener: BaseTouchAdapter.OnItemDragListener?) {
+    override fun bind(item: Video, clickListener: BaseTouchAdapter.OnItemClickListener?, dragListener: BaseTouchAdapter.OnItemDragListener?) {
         super.bind(item, clickListener, dragListener)
         this.imageView.setImageDrawable(this.image)
         this.imageView.setTag(R.id.videoId, item.id)

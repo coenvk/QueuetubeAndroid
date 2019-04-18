@@ -3,14 +3,14 @@ package com.arman.queuetube.model.adapters
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.arman.queuetube.R
-import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.Video
 import com.arman.queuetube.model.viewholders.ImageViewHolder
 
-open class ImageAdapter : BaseTouchAdapter<VideoData, ImageViewHolder> {
+open class ImageAdapter : BaseTouchAdapter<Video, ImageViewHolder> {
 
     constructor() : super()
 
-    constructor(videoData: ArrayList<VideoData>, clickListener: BaseTouchAdapter.OnItemClickListener?, dragListener: BaseTouchAdapter.OnItemDragListener?) : super(videoData, clickListener, dragListener)
+    constructor(videoData: ArrayList<Video>, clickListener: BaseTouchAdapter.OnItemClickListener?, dragListener: BaseTouchAdapter.OnItemDragListener?) : super(videoData, clickListener, dragListener)
 
     constructor(clickListener: BaseTouchAdapter.OnItemClickListener?) : super(clickListener)
 

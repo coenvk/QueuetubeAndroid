@@ -1,13 +1,11 @@
 package com.arman.queuetube.model.adapters
 
-import android.util.DisplayMetrics
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.arman.queuetube.R
 import com.arman.queuetube.listeners.OnShowPopupMenuListener
-import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.Video
 import com.arman.queuetube.model.viewholders.ImageViewHolder
 import com.arman.queuetube.model.viewholders.VideoItemViewHolder
 
@@ -33,7 +31,7 @@ open class VideoItemAdapter : ImageAdapter {
         this.onShowPopupMenuListener = onShowPopupMenuListener
     }
 
-    constructor(videoData: ArrayList<VideoData>, clickListener: OnItemClickListener?, dragListener: OnItemDragListener?) : super(videoData, clickListener, dragListener)
+    constructor(videoData: ArrayList<Video>, clickListener: OnItemClickListener?, dragListener: OnItemDragListener?) : super(videoData, clickListener, dragListener)
 
     constructor(clickListener: OnItemClickListener?) : super(clickListener)
 

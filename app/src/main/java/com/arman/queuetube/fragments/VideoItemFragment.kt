@@ -10,7 +10,7 @@ import com.arman.queuetube.config.Constants
 import com.arman.queuetube.fragments.dialogs.AddToPlaylistFragment
 import com.arman.queuetube.listeners.OnPlayItemsListener
 import com.arman.queuetube.listeners.OnShowPopupMenuListener
-import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.Video
 import com.arman.queuetube.model.adapters.BaseTouchAdapter
 import com.arman.queuetube.model.viewholders.BaseViewHolder
 import com.arman.queuetube.model.viewholders.VideoItemViewHolder
@@ -24,38 +24,38 @@ abstract class VideoItemFragment : Fragment(), OnShowPopupMenuListener, BaseTouc
     @MenuRes
     protected open val popupMenuResId: Int = R.menu.popup_menu_list_item
 
-    open fun onAddToQueue(holder: BaseViewHolder<VideoData>) {
+    open fun onAddToQueue(holder: BaseViewHolder<Video>) {
         onPlayItemsListener?.onPlay(holder.item!!)
     }
 
-    open fun onPlayNext(holder: BaseViewHolder<VideoData>) {
+    open fun onPlayNext(holder: BaseViewHolder<Video>) {
         onPlayItemsListener?.onPlayNext(holder.item!!)
     }
 
-    open fun onPlayNow(holder: BaseViewHolder<VideoData>) {
+    open fun onPlayNow(holder: BaseViewHolder<Video>) {
         onPlayItemsListener?.onPlayNow(holder.item!!)
     }
 
-    open fun onRemoveFromPlaylist(holder: BaseViewHolder<VideoData>) {
+    open fun onRemoveFromPlaylist(holder: BaseViewHolder<Video>) {
 
     }
 
-    open fun onAddToFavorites(holder: BaseViewHolder<VideoData>) {
+    open fun onAddToFavorites(holder: BaseViewHolder<Video>) {
         holder.item!!.isFavorite = true
         GsonPlaylistHelper.writeToIfNotFound(Constants.Json.Playlist.FAVORITES, holder.item!!)
     }
 
-    open fun onAddToPlaylist(holder: BaseViewHolder<VideoData>) {
+    open fun onAddToPlaylist(holder: BaseViewHolder<Video>) {
         val dialog = AddToPlaylistFragment()
         dialog.video = holder.item!!
         dialog.show(fragmentManager!!, "add_to_playlist_dialog")
     }
 
-    open fun onShare(holder: BaseViewHolder<VideoData>) {
+    open fun onShare(holder: BaseViewHolder<Video>) {
         VideoSharer.share(context, holder.item!!)
     }
 
-    final override fun onShowPopupMenu(holder: BaseViewHolder<VideoData>, anchorView: View) {
+    final override fun onShowPopupMenu(holder: BaseViewHolder<Video>, anchorView: View) {
         val optionsPopup = PopupMenu(context, anchorView)
         optionsPopup.menuInflater.inflate(this.popupMenuResId, optionsPopup.menu)
 

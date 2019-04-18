@@ -5,18 +5,18 @@ import android.graphics.drawable.ColorDrawable
 import android.view.View
 import android.widget.ImageView
 import com.arman.queuetube.R
-import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.Video
 import com.arman.queuetube.model.adapters.BaseTouchAdapter
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 
-open class ImageViewHolder(view: View) : BaseTouchViewHolder<VideoData>(view) {
+open class ImageViewHolder(view: View) : BaseTouchViewHolder<Video>(view) {
 
     protected val imageView: ImageView = view.findViewById(R.id.youtube_thumbnail)
 
     protected var readyForLoadingYoutubeThumbnail: Boolean = true
 
-    override fun bind(item: VideoData, clickListener: BaseTouchAdapter.OnItemClickListener?, dragListener: BaseTouchAdapter.OnItemDragListener?) {
+    override fun bind(item: Video, clickListener: BaseTouchAdapter.OnItemClickListener?, dragListener: BaseTouchAdapter.OnItemDragListener?) {
         super.bind(item, clickListener, dragListener)
 
         if (this.readyForLoadingYoutubeThumbnail) {

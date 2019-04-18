@@ -16,7 +16,7 @@ import com.arman.queuetube.fragments.main.LibraryFragment
 import com.arman.queuetube.fragments.main.PlayerFragment
 import com.arman.queuetube.fragments.main.SearchFragment
 import com.arman.queuetube.listeners.OnPlayItemsListener
-import com.arman.queuetube.model.VideoData
+import com.arman.queuetube.model.Video
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
 import com.arman.queuetube.receivers.PlayReceiver
 import com.arman.queuetube.receivers.WifiReceiver
@@ -226,29 +226,29 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
         unregisterReceiver(this.wifiReceiver)
     }
 
-    override fun onPlayAll(videos: Collection<VideoData>) {
+    override fun onPlayAll(videos: Collection<Video>) {
         if (playerFragment != null && videos.isNotEmpty() && playerFragment!!.setQueueTo(videos)) {
             playerFragment!!.forcePlayNext()
         }
     }
 
-    override fun onPlay(video: VideoData) {
+    override fun onPlay(video: Video) {
         if (playerFragment != null && playerFragment!!.addToQueue(video)) {
             playerFragment!!.tryPlayNext()
         }
     }
 
-    override fun onShuffle(videos: Collection<VideoData>) {
+    override fun onShuffle(videos: Collection<Video>) {
         onPlayAll(videos.shuffled())
     }
 
-    override fun onPlayNext(video: VideoData) {
+    override fun onPlayNext(video: Video) {
         if (playerFragment != null && playerFragment!!.addToQueue(0, video)) {
             playerFragment!!.tryPlayNext()
         }
     }
 
-    override fun onPlayNow(video: VideoData) {
+    override fun onPlayNow(video: Video) {
         if (playerFragment != null && playerFragment!!.addToQueue(0, video)) {
             playerFragment!!.forcePlayNext()
         }

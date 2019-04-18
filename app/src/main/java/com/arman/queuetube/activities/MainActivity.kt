@@ -18,12 +18,14 @@ import com.arman.queuetube.fragments.main.SearchFragment
 import com.arman.queuetube.listeners.OnPlayItemsListener
 import com.arman.queuetube.model.Video
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
+import com.arman.queuetube.modules.search.YouTubeService
 import com.arman.queuetube.receivers.PlayReceiver
 import com.arman.queuetube.receivers.WifiReceiver
 import com.arman.queuetube.services.KillNotificationService
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.regex.Pattern
 
 
 class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationView.OnNavigationItemSelectedListener {
@@ -170,7 +172,17 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
             val action = intent.action
             if (action == Intent.ACTION_SEND) {
                 val text = intent.getStringExtra(Intent.EXTRA_TEXT)
-                println(text)
+                val regex = """^(?:(?:https?:\/\/)?(?:www\.)?)?(youtube(?:-nocookie)?\.com|youtu\.be)\/.*?(?:embed|e|v|watch\?.*?v=)?\/?([a-zA-Z0-9]+)"""
+                val pattern = Pattern.compile(regex)
+                val matcher = pattern.matcher(text)
+                if (matcher.find()) {
+                    val videoId = matcher.group(2)
+                    if (videoId.length == 11) {
+                        var video = Video(videoId)
+                        video = YouTubeService.get().requestDetails(video)
+                        onPlay(video)
+                    }
+                }
             }
         }
     }

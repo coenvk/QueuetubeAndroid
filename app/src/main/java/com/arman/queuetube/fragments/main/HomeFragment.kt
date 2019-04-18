@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import com.arman.queuetube.R
 import com.arman.queuetube.fragments.RefreshVideoListFragment
 import com.arman.queuetube.model.Video
-import com.arman.queuetube.modules.search.YouTubeSearcher
+import com.arman.queuetube.modules.search.YouTubeService
 
 class HomeFragment : RefreshVideoListFragment() {
 
@@ -16,7 +16,7 @@ class HomeFragment : RefreshVideoListFragment() {
         get() = PreferenceManager.getDefaultSharedPreferences(context).getString(getString(R.string.select_region_key), "US")
 
     override fun doInBackground(vararg params: String): MutableList<Video> {
-        return YouTubeSearcher.topMusicCharts(regionCode!!)
+        return YouTubeService.get().topMusicCharts(regionCode!!)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

@@ -16,7 +16,7 @@ import com.arman.queuetube.fragments.pager.ViewPagerAdapter
 import com.arman.queuetube.model.Video
 import com.arman.queuetube.model.adapters.VideoItemAdapter
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
-import com.arman.queuetube.modules.search.YouTubeSearcher
+import com.arman.queuetube.modules.search.YouTubeService
 import com.arman.queuetube.receivers.NotificationReceiver
 import com.arman.queuetube.util.VideoSharer
 import com.arman.queuetube.util.notifications.NotificationHelper
@@ -231,7 +231,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
                 this.ytPlayer?.cueVideo(this.currentVideo?.id!!, 0f)
                 ret = true
             } else if (this.isAutoplayEnabled && autoplayIfEnabled) {
-                var nextVideo = YouTubeSearcher.nextAutoplay(this.currentVideo?.id!!)
+                var nextVideo = YouTubeService.get().nextAutoplay(this.currentVideo?.id!!)
                 if (nextVideo != null) {
                     this.currentVideo?.setTo(nextVideo)
                     this.ytPlayer?.cueVideo(this.currentVideo?.id!!, 0f)

@@ -3,6 +3,7 @@ package com.arman.queuetube.modules.search
 import android.annotation.SuppressLint
 import android.os.AsyncTask
 import com.arman.queuetube.config.Constants
+import com.arman.queuetube.model.Video
 import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
@@ -10,18 +11,33 @@ import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.SearchResult
 import java.io.IOException
 import java.util.concurrent.ExecutionException
+import com.google.api.services.youtube.model.Video as YtVideo
 
-object YouTubeSearcher {
+class YouTubeService {
 
-    private const val MAX_RESULTS = 25L
+    private constructor()
 
-    private const val SEARCH_FIELDS = "items(id/videoId,snippet/title,snippet/channelTitle,snippet/publishedAt,snippet/liveBroadcastContent)"
-    private const val VIDEOS_FIELDS = "items(id,snippet/title,snippet/channelTitle,snippet/publishedAt,snippet/liveBroadcastContent)"
+    companion object {
 
-    private const val SEARCH_PART = "id,snippet"
-    private const val VIDEOS_PART = "id,snippet"
+        const val MAX_RESULTS = 25L
 
-    private const val TYPE_VIDEO = "video"
+        const val SEARCH_FIELDS = "items(id/videoId,snippet/title,snippet/channelTitle,snippet/publishedAt,snippet/liveBroadcastContent)"
+        const val VIDEOS_FIELDS = "items(id,snippet/title,snippet/channelTitle,snippet/publishedAt,snippet/liveBroadcastContent)"
+
+        const val SEARCH_PART = "id,snippet"
+        const val VIDEOS_PART = "id,snippet"
+
+        const val TYPE_VIDEO = "video"
+
+        private val instance: YouTubeService by lazy {
+            YouTubeService()
+        }
+
+        fun get(): YouTubeService {
+            return instance
+        }
+
+    }
 
     private val youTube: YouTube = YouTube.Builder(NetHttpTransport(),
             JacksonFactory(), HttpRequestInitializer { }).setApplicationName("Queuetube").build()
@@ -29,7 +45,7 @@ object YouTubeSearcher {
     private var searchListQuery: YouTube.Search.List? = null
     private var videosListQuery: YouTube.Videos.List? = null
 
-    private var tmpVideoList: MutableList<com.arman.queuetube.model.Video>? = null
+    private var tmpVideoList: MutableList<Video>? = null
 
     @Throws(IOException::class)
     fun searchList(part: String = SEARCH_PART, type: String = TYPE_VIDEO, maxResults: Long = MAX_RESULTS, fields: String = SEARCH_FIELDS): YouTube.Search.List {
@@ -83,16 +99,16 @@ object YouTubeSearcher {
         return this.videosListQuery!!
     }
 
-    fun requestDetails(videoData: com.arman.queuetube.model.Video): com.arman.queuetube.model.Video {
+    fun requestDetails(videoData: Video): Video {
         try {
-            this.videosList(videoData.id!!)
+            this.videosList().setMaxResults(1).id = videoData.id!!
         } catch (e: IOException) {
             return videoData
         }
 
-        @SuppressLint("StaticFieldLeak") val task = object : AsyncTask<Unit, Unit, MutableList<com.google.api.services.youtube.model.Video>>() {
-            override fun doInBackground(vararg params: Unit): MutableList<com.google.api.services.youtube.model.Video> {
-                val videoList = ArrayList<com.google.api.services.youtube.model.Video>()
+        @SuppressLint("StaticFieldLeak") val task = object : AsyncTask<Unit, Unit, MutableList<YtVideo>>() {
+            override fun doInBackground(vararg params: Unit): MutableList<YtVideo> {
+                val videoList = ArrayList<YtVideo>()
                 try {
                     val response = videosListQuery!!.execute()
                     videoList.addAll(response.items)
@@ -104,7 +120,7 @@ object YouTubeSearcher {
         }
         try {
             val videoList = task.execute().get()
-            if (videoList != null && videoList.size > 0) {
+            if (videoList != null && videoList.isNotEmpty()) {
                 val video = videoList[0]
                 videoData.setTo(video)
             }
@@ -116,11 +132,11 @@ object YouTubeSearcher {
         return videoData
     }
 
-    fun nextAutoplay(currentId: String): com.arman.queuetube.model.Video? {
+    fun nextAutoplay(currentId: String): Video? {
         try {
             this.searchList().setMaxResults(5).relatedToVideoId = currentId
         } catch (e: IOException) {
-            return com.arman.queuetube.model.Video()
+            return Video()
         }
 
         @SuppressLint("StaticFieldLeak") val task = object : AsyncTask<Unit, Unit, MutableList<SearchResult>>() {
@@ -137,7 +153,7 @@ object YouTubeSearcher {
         }
         try {
             val results = task.execute().get()
-            val videoData = com.arman.queuetube.model.Video()
+            val videoData = Video()
             for (i in results.indices.reversed()) {
                 val result = results[i]
                 if (currentId != result.id.videoId) {
@@ -152,11 +168,11 @@ object YouTubeSearcher {
         return null
     }
 
-    fun searchLiveMusic(): MutableList<com.arman.queuetube.model.Video> {
+    fun searchLiveMusic(): MutableList<Video> {
         return searchLiveByCategory("10")
     }
 
-    fun searchLiveByCategory(videoCategoryId: String): MutableList<com.arman.queuetube.model.Video> {
+    fun searchLiveByCategory(videoCategoryId: String): MutableList<Video> {
         this.tmpVideoList = ArrayList()
         try {
             this.searchList().setEventType("live").videoCategoryId = videoCategoryId
@@ -167,7 +183,7 @@ object YouTubeSearcher {
         try {
             val results = this.searchListQuery!!.execute().items
             for (i in results.indices) {
-                this.tmpVideoList!!.add(com.arman.queuetube.model.Video(results[i]))
+                this.tmpVideoList!!.add(Video(results[i]))
             }
         } catch (e: IOException) {
         }
@@ -175,11 +191,11 @@ object YouTubeSearcher {
         return this.tmpVideoList!!
     }
 
-    fun topMusicCharts(regionCode: String = "US"): MutableList<com.arman.queuetube.model.Video> {
+    fun topMusicCharts(regionCode: String = "US"): MutableList<Video> {
         return topCharts(regionCode, "10")
     }
 
-    fun topCharts(regionCode: String = "US", videoCategoryId: String = "0"): MutableList<com.arman.queuetube.model.Video> {
+    fun topCharts(regionCode: String = "US", videoCategoryId: String = "0"): MutableList<Video> {
         this.tmpVideoList = ArrayList()
         try {
             this.videosList().setRegionCode(regionCode).setChart("mostPopular").videoCategoryId = videoCategoryId
@@ -190,7 +206,7 @@ object YouTubeSearcher {
         try {
             val results = this.videosListQuery!!.execute().items
             for (i in results.indices) {
-                this.tmpVideoList!!.add(com.arman.queuetube.model.Video(results[i]))
+                this.tmpVideoList!!.add(Video(results[i]))
             }
         } catch (e: IOException) {
         }
@@ -198,7 +214,7 @@ object YouTubeSearcher {
         return this.tmpVideoList!!
     }
 
-    fun searchByCategory(videoCategoryId: String): MutableList<com.arman.queuetube.model.Video> {
+    fun searchByCategory(videoCategoryId: String): MutableList<Video> {
         this.tmpVideoList = ArrayList()
         try {
             this.searchList().videoCategoryId = videoCategoryId
@@ -209,7 +225,7 @@ object YouTubeSearcher {
         try {
             val results = this.searchListQuery!!.execute().items
             for (i in results.indices) {
-                this.tmpVideoList!!.add(com.arman.queuetube.model.Video(results[i]))
+                this.tmpVideoList!!.add(Video(results[i]))
             }
         } catch (e: IOException) {
         }
@@ -217,7 +233,7 @@ object YouTubeSearcher {
         return this.tmpVideoList!!
     }
 
-    fun searchByTopic(topicId: String): MutableList<com.arman.queuetube.model.Video> {
+    fun searchByTopic(topicId: String): MutableList<Video> {
         this.tmpVideoList = ArrayList()
         try {
             this.searchList().topicId = topicId
@@ -228,7 +244,7 @@ object YouTubeSearcher {
         try {
             val results = this.searchListQuery!!.execute().items
             for (i in results.indices) {
-                this.tmpVideoList!!.add(com.arman.queuetube.model.Video(results[i]))
+                this.tmpVideoList!!.add(Video(results[i]))
             }
         } catch (e: IOException) {
         }
@@ -236,7 +252,7 @@ object YouTubeSearcher {
         return this.tmpVideoList!!
     }
 
-    fun search(keywords: String): MutableList<com.arman.queuetube.model.Video> {
+    fun search(keywords: String): MutableList<Video> {
         this.tmpVideoList = ArrayList()
         try {
             this.searchList().q = keywords
@@ -247,44 +263,12 @@ object YouTubeSearcher {
         try {
             val results = this.searchListQuery!!.execute().items
             for (i in results.indices) {
-                this.tmpVideoList!!.add(com.arman.queuetube.model.Video(results[i]))
+                this.tmpVideoList!!.add(Video(results[i]))
             }
         } catch (e: IOException) {
         }
 
         return this.tmpVideoList!!
     }
-
-    //    public enum ActionCode {
-    //
-    //        Activities(),
-    //        Captions(),
-    //        ChannelBanners(),
-    //        Channels(),
-    //        ChannelSections(),
-    //        Comments(),
-    //        CommentThreads(),
-    //        FanFundingEvents(),
-    //        GuideCategories(),
-    //        I18nLanguages(),
-    //        I18nRegions(),
-    //        LiveBroadcasts(),
-    //        LiveChatBans(),
-    //        LiveChatMessages(),
-    //        LiveChatModerators(),
-    //        LiveStreams(),
-    //        PlaylistItems(),
-    //        Playlists(),
-    //        Search(),
-    //        Sponsors(),
-    //        Subscriptions(),
-    //        SuperChatEvents(),
-    //        Thumbnails(),
-    //        VideoAbuseReportReasons(),
-    //        VideoCategories(),
-    //        Videos(),
-    //        Watermarks()
-    //
-    //    }
 
 }

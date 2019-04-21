@@ -17,28 +17,31 @@ class WifiReceiver : BroadcastReceiver() {
         try {
             val activity = context as? Activity
             activity?.let {
-                if (isOnline(context)) {
-                    this.flashbar?.dismiss()
-                } else {
-                    this.flashbar = Flashbar.Builder(it)
-                            .gravity(Flashbar.Gravity.TOP)
-                            .title("No connection!")
-                            .message("You have lost connection to the internet")
-                            .backgroundColorRes(R.color.colorPrimaryDark)
-                            .showIcon()
-                            .icon(R.drawable.wifi_strength_off)
-                            .iconColorFilterRes(android.R.color.white)
-                            .iconAnimation(
-                                    FlashAnim.with(it)
-                                            .animateIcon()
-                                            .pulse()
-                                            .alpha()
-                                            .duration(750)
-                                            .accelerate()
-                            )
-                            .enableSwipeToDismiss()
-                            .build()
-                    this.flashbar!!.show()
+                when {
+                    isOnline(context) -> this.flashbar?.dismiss()
+                    this.flashbar?.isShowing() != true -> {
+                        this.flashbar = Flashbar.Builder(it)
+                                .gravity(Flashbar.Gravity.TOP)
+                                .title("No connection!")
+                                .message("You have lost connection to the internet")
+                                .backgroundColorRes(R.color.colorPrimaryDark)
+                                .showIcon()
+                                .icon(R.drawable.wifi_strength_off)
+                                .iconColorFilterRes(android.R.color.white)
+                                .iconAnimation(
+                                        FlashAnim.with(it)
+                                                .animateIcon()
+                                                .pulse()
+                                                .alpha()
+                                                .duration(750)
+                                                .accelerate()
+                                )
+                                .enableSwipeToDismiss()
+                                .build()
+                        this.flashbar!!.show()
+                    }
+                    else -> {
+                    }
                 }
             }
         } catch (e: Exception) {

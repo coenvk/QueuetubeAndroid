@@ -46,20 +46,27 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
 
     private var bottomNavUp: Boolean = true
 
-    private fun enableScroll() {
+    fun enableScroll(): Int {
         val params = toolbar.layoutParams as AppBarLayout.LayoutParams
+        val flags = params.scrollFlags
         params.scrollFlags =
                 AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL or
                         AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or
                         AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP
         toolbar.layoutParams = params
+        return flags
     }
 
-    private fun disableScroll() {
+    fun setScroll(scrollFlags: Int) {
+        val params = toolbar.layoutParams as AppBarLayout.LayoutParams
+        params.scrollFlags = scrollFlags
+        toolbar.layoutParams = params
+    }
+
+    fun disableScroll() {
         val params = toolbar.layoutParams as AppBarLayout.LayoutParams
         params.scrollFlags = 0
         toolbar.layoutParams = params
-        appbar.setExpanded(true, false)
     }
 
     fun hideBottomBar() {

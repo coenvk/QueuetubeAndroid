@@ -31,7 +31,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_player.*
 import kotlinx.android.synthetic.main.inner_player.*
 
-class PlayerFragment : Fragment(), YouTubePlayerInitListener {
+class PlayerFragment : Fragment(), YouTubePlayerInitListener, SlidingUpLayout.PanelSlideListener {
 
     private var broadcastReceiver: BroadcastReceiver? = null
 
@@ -132,29 +132,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         this.queueFragment!!.arguments = bundle
         fragmentManager!!.beginTransaction().add(R.id.queue_content_frame, this.queueFragment!!, QueueFragment.TAG).commit()
 
-        sliding_layout.panelSlideListener = object : SlidingUpLayout.PanelSlideListener {
-            override fun onPanelOpening(panel: View) {
-                (activity as? MainActivity)?.appbar?.setExpanded(false)
-                (activity as? MainActivity)?.hideBottomBar()
-            }
-
-            override fun onPanelClosing(panel: View) {
-                (activity as? MainActivity)?.appbar?.setExpanded(true)
-                (activity as? MainActivity)?.showBottomBar()
-            }
-
-            override fun onPanelSlide(panel: View, slideOffset: Float) {
-                player_bar_open_button.rotation = 180.0f * (1 - slideOffset)
-            }
-
-            override fun onPanelOpened(panel: View) {
-                onPanelOpening(panel)
-            }
-
-            override fun onPanelClosed(panel: View) {
-                onPanelClosing(panel)
-            }
-        }
+        sliding_layout.panelSlideListener = this
 
         this.setupReceiver()
         this.notificationHelper = NotificationHelper(activity!!)
@@ -378,6 +356,38 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
             this.ytPlayerView.exitFullScreen()
             true
         } else false
+    }
+
+    private var flags = 0
+
+    override fun onPanelOpening(panel: View) {
+        val mainActivity = activity as? MainActivity
+        mainActivity?.let {
+            flags = it.enableScroll()
+            it.appbar?.setExpanded(false)
+            it.hideBottomBar()
+        }
+    }
+
+    override fun onPanelClosing(panel: View) {
+        val mainActivity = activity as? MainActivity
+        mainActivity?.let {
+            it.setScroll(flags)
+            it.appbar?.setExpanded(true)
+            it.showBottomBar()
+        }
+    }
+
+    override fun onPanelSlide(panel: View, slideOffset: Float) {
+        player_bar_open_button.rotation = 180.0f * (1 - slideOffset)
+    }
+
+    override fun onPanelOpened(panel: View) {
+        onPanelOpening(panel)
+    }
+
+    override fun onPanelClosed(panel: View) {
+        onPanelClosing(panel)
     }
 
     companion object {

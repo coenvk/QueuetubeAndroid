@@ -51,4 +51,10 @@ class QueueFragment : VideoListFragment() {
         holder.itemView.startAnimation(animation)
     }
 
+    companion object {
+
+        const val TAG = "QueueFragment"
+
+    }
+
 }

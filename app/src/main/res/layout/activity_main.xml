@@ -43,10 +43,8 @@
             android:id="@+id/player_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="?attr/actionBarSize"
             android:gravity="bottom"
-            android:orientation="vertical"
-            app:layout_dodgeInsetEdges="bottom" />
+            android:orientation="vertical" />
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottom_nav_bar"
@@ -62,7 +60,6 @@
             app:itemIconTint="@drawable/bottom_nav_item_colors"
             app:itemTextColor="@drawable/bottom_nav_item_colors"
             app:labelVisibilityMode="labeled"
-            app:layout_dodgeInsetEdges="bottom"
             app:menu="@menu/bottom_nav_items" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

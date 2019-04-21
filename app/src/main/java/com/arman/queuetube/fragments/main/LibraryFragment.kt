@@ -59,7 +59,7 @@ class LibraryFragment : AsyncVideoListFragment() {
     }
 
     override fun doInBackground(vararg params: String): MutableList<Video> {
-        return GsonPlaylistHelper.asPlaylist(GsonPlaylistHelper.history!!, Constants.History.MAX_SIZE_SHORT)
+        return GsonPlaylistHelper.asPlaylist(GsonPlaylistHelper.history!!, Constants.History.MAX_SIZE_SMALL)
     }
 
     override fun load(vararg params: String) {
@@ -119,6 +119,12 @@ class LibraryFragment : AsyncVideoListFragment() {
             val dialog = CreatePlaylistFragment()
             dialog.show(fragmentManager!!, "create_playlist_dialog")
         }
+    }
+
+    companion object {
+
+        const val TAG = "LibraryFragment"
+
     }
 
 }

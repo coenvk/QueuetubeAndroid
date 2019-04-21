@@ -31,13 +31,11 @@
                 android:layout_height="wrap_content"
                 android:padding="8dp"
                 android:textColor="@android:color/white"
-                android:textSize="18sp" />
+                android:textSize="16sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="12dp"
+                android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:orientation="horizontal"
                 android:weightSum="3">
@@ -46,25 +44,25 @@
                     android:id="@+id/favorite_button"
                     style="@style/Widget.AppCompat.ActionButton"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:src="@drawable/ic_heart_outline_white_36dp" />
+                    android:src="@drawable/ic_heart_outline_white_24dp" />
 
                 <ImageView
                     android:id="@+id/add_to_playlist_button"
                     style="@style/Widget.AppCompat.ActionButton"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:src="@drawable/ic_playlist_plus_white_36dp" />
+                    android:src="@drawable/ic_playlist_plus_white_24dp" />
 
                 <ImageView
                     android:id="@+id/share_button"
                     style="@style/Widget.AppCompat.ActionButton"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:src="@drawable/ic_share_variant_white_36dp" />
+                    android:src="@drawable/ic_share_variant_white_24dp" />
 
             </LinearLayout>
 

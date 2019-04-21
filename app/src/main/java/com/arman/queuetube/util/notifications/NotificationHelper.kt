@@ -26,16 +26,16 @@ class NotificationHelper(private val context: Context) {
     private var built: Boolean = false
 
     private fun createIntents() {
-        val playIntent = Intent(Constants.Action.PLAY_ACTION)
+        val playIntent = Intent(Constants.Action.Notification.PLAY_ACTION)
         val playPendingIntent = PendingIntent.getBroadcast(context, 1, playIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        val pauseIntent = Intent(Constants.Action.PAUSE_ACTION)
+        val pauseIntent = Intent(Constants.Action.Notification.PAUSE_ACTION)
         val pausePendingIntent = PendingIntent.getBroadcast(context, 2, pauseIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        val nextIntent = Intent(Constants.Action.NEXT_ACTION)
+        val nextIntent = Intent(Constants.Action.Notification.NEXT_ACTION)
         val nextPendingIntent = PendingIntent.getBroadcast(context, 3, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        val closeIntent = Intent(Constants.Action.STOP_ACTION)
+        val closeIntent = Intent(Constants.Action.Notification.STOP_ACTION)
         val closePendingIntent = PendingIntent.getBroadcast(context, 4, closeIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         view!!.setOnClickPendingIntent(R.id.status_bar_button_play, playPendingIntent)
@@ -59,7 +59,7 @@ class NotificationHelper(private val context: Context) {
         this.builder = NotificationCompat.Builder(context.applicationContext, Constants.Notification.CHANNEL_ID)
 
         val intent = Intent(context, MainActivity::class.java)
-        intent.action = Constants.Action.MAIN_ACTION
+        intent.action = Constants.Action.Notification.MAIN_ACTION
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         intent.addCategory(Intent.CATEGORY_LAUNCHER)
         val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)

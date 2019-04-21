@@ -1,6 +1,6 @@
 package com.arman.queuetube.config
 
-class Constants {
+sealed class Constants {
 
     interface Action {
 
@@ -14,12 +14,14 @@ class Constants {
             }
         }
 
-        companion object {
-            const val MAIN_ACTION = "com.arman.queuetube.notification.action.main"
-            const val PLAY_ACTION = "com.arman.queuetube.notification.action.play"
-            const val PAUSE_ACTION = "com.arman.queuetube.notification.action.pause"
-            const val NEXT_ACTION = "com.arman.queuetube.notification.action.next"
-            const val STOP_ACTION = "com.arman.queuetube.notification.action.stop"
+        interface Notification {
+            companion object {
+                const val MAIN_ACTION = "com.arman.queuetube.notification.action.main"
+                const val PLAY_ACTION = "com.arman.queuetube.notification.action.play"
+                const val PAUSE_ACTION = "com.arman.queuetube.notification.action.pause"
+                const val NEXT_ACTION = "com.arman.queuetube.notification.action.next"
+                const val STOP_ACTION = "com.arman.queuetube.notification.action.stop"
+            }
         }
 
     }
@@ -81,14 +83,14 @@ class Constants {
 
     interface History {
         companion object {
-            const val MAX_SIZE_SHORT = 8
+            const val MAX_SIZE_SMALL = 8
         }
     }
 
     interface Preferences {
         companion object {
             const val FIRST_LAUNCH = "firstLaunch"
-            const val PREFERENCE = "Queuetube"
+            const val PREFERENCE = "Queuetube Preference"
         }
     }
 

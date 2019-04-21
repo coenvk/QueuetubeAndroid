@@ -45,4 +45,10 @@ class SearchFragment : AsyncVideoListFragment() {
         return YouTubeService.get().search(params[0])
     }
 
+    companion object {
+
+        const val TAG = "SearchFragment"
+
+    }
+
 }

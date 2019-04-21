@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.arman.queuetube.R
 import com.arman.queuetube.config.Constants
@@ -41,6 +42,10 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
 
     private var currentFragment: Int = 0
 
+    private var savedInstanceState: Bundle? = null
+
+    private var bottomNavUp: Boolean = true
+
     private fun enableScroll() {
         val params = toolbar.layoutParams as AppBarLayout.LayoutParams
         params.scrollFlags =
@@ -55,6 +60,39 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
         params.scrollFlags = 0
         toolbar.layoutParams = params
         appbar.setExpanded(true, false)
+    }
+
+    fun hideBottomBar() {
+        if (bottomNavUp) {
+            with(bottom_nav_bar, {
+                animate()
+                        .translationY(height.toFloat())
+                        .alpha(0f)
+                        .withEndAction {
+                            visibility = View.GONE
+                            bottomNavUp = false
+                        }
+            })
+        }
+    }
+
+    fun showBottomBar() {
+        if (!bottomNavUp) {
+            with(bottom_nav_bar, {
+                visibility = View.VISIBLE
+                animate()
+                        .translationY(0f)
+                        .alpha(1f)
+                        .withEndAction {
+                            bottomNavUp = true
+                        }
+            })
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        this.savedInstanceState = outState
     }
 
     private fun setupReceivers() {
@@ -75,25 +113,40 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
 
     private fun setupPlayerFragment() {
         val transaction = supportFragmentManager.beginTransaction()
-        if (this.playerFragment != null) {
-            transaction.show(this.playerFragment!!)
-            this.refreshVideoFavorited()
-        } else {
-            this.playerFragment = PlayerFragment()
-            transaction.add(R.id.player_container, this.playerFragment!!)
+        when {
+            this.playerFragment != null -> {
+                transaction.show(this.playerFragment!!)
+                this.refreshVideoFavorited()
+            }
+            else -> {
+                this.playerFragment = supportFragmentManager.findFragmentByTag(PlayerFragment.TAG) as PlayerFragment?
+                if (this.playerFragment != null) {
+                    transaction.show(this.playerFragment!!)
+                    this.refreshVideoFavorited()
+                } else {
+                    this.playerFragment = PlayerFragment()
+                    transaction.add(R.id.player_container, this.playerFragment!!, PlayerFragment.TAG)
+                }
+            }
         }
         transaction.commitNow()
     }
 
-    fun switchToHomeFragment() {
+    private fun switchToHomeFragment() {
         if (this.currentFragment != Constants.Fragment.HOME) {
             val transaction = supportFragmentManager.beginTransaction()
-            if (this.homeFragment != null) {
-                transaction.show(this.homeFragment!!)
-            } else {
-                this.homeFragment = HomeFragment()
-                this.homeFragment!!.onPlayItemsListener = this
-                transaction.add(R.id.content_frame, this.homeFragment!!)
+            when {
+                this.homeFragment != null -> transaction.show(this.homeFragment!!)
+                else -> {
+                    this.homeFragment = supportFragmentManager.findFragmentByTag(HomeFragment.TAG) as HomeFragment?
+                    if (this.homeFragment != null) {
+                        transaction.show(this.homeFragment!!)
+                    } else {
+                        this.homeFragment = HomeFragment()
+                        this.homeFragment!!.onPlayItemsListener = this
+                        transaction.add(R.id.content_frame, this.homeFragment!!, HomeFragment.TAG)
+                    }
+                }
             }
             this.searchFragment?.let { transaction.hide(this.searchFragment!!) }
             this.libraryFragment?.let { transaction.hide(this.libraryFragment!!) }
@@ -103,15 +156,21 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
         }
     }
 
-    fun switchToSearchFragment() {
+    private fun switchToSearchFragment() {
         if (this.currentFragment != Constants.Fragment.SEARCH) {
             val transaction = supportFragmentManager.beginTransaction()
-            if (this.searchFragment != null) {
-                transaction.show(this.searchFragment!!)
-            } else {
-                this.searchFragment = SearchFragment()
-                this.searchFragment!!.onPlayItemsListener = this
-                transaction.add(R.id.content_frame, this.searchFragment!!)
+            when {
+                this.searchFragment != null -> transaction.show(this.searchFragment!!)
+                else -> {
+                    this.searchFragment = supportFragmentManager.findFragmentByTag(SearchFragment.TAG) as SearchFragment?
+                    if (this.searchFragment != null) {
+                        transaction.show(this.searchFragment!!)
+                    } else {
+                        this.searchFragment = SearchFragment()
+                        this.searchFragment!!.onPlayItemsListener = this
+                        transaction.add(R.id.content_frame, this.searchFragment!!, SearchFragment.TAG)
+                    }
+                }
             }
             this.homeFragment?.let { transaction.hide(this.homeFragment!!) }
             this.libraryFragment?.let { transaction.hide(this.libraryFragment!!) }
@@ -121,15 +180,21 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
         }
     }
 
-    fun switchToLibraryFragment() {
+    private fun switchToLibraryFragment() {
         if (this.currentFragment != Constants.Fragment.LIBRARY) {
             val transaction = supportFragmentManager.beginTransaction()
-            if (this.libraryFragment != null) {
-                transaction.show(this.libraryFragment!!)
-            } else {
-                this.libraryFragment = LibraryFragment()
-                this.libraryFragment!!.onPlayItemsListener = this
-                transaction.add(R.id.content_frame, this.libraryFragment!!)
+            when {
+                this.libraryFragment != null -> transaction.show(this.libraryFragment!!)
+                else -> {
+                    this.libraryFragment = supportFragmentManager.findFragmentByTag(LibraryFragment.TAG) as LibraryFragment?
+                    if (this.libraryFragment != null) {
+                        transaction.show(this.libraryFragment!!)
+                    } else {
+                        this.libraryFragment = LibraryFragment()
+                        this.libraryFragment!!.onPlayItemsListener = this
+                        transaction.add(R.id.content_frame, this.libraryFragment!!, LibraryFragment.TAG)
+                    }
+                }
             }
             this.homeFragment?.let { transaction.hide(this.homeFragment!!) }
             this.searchFragment?.let { transaction.hide(this.searchFragment!!) }
@@ -172,8 +237,7 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
             val action = intent.action
             if (action == Intent.ACTION_SEND) {
                 val text = intent.getStringExtra(Intent.EXTRA_TEXT)
-                val regex = """^(?:(?:https?:\/\/)?(?:www\.)?)?(youtube(?:-nocookie)?\.com|youtu\.be)\/.*?(?:embed|e|v|watch\?.*?v=)?\/?([a-zA-Z0-9]+)"""
-                val pattern = Pattern.compile(regex)
+                val pattern = Pattern.compile(YOUTUBE_REGEX)
                 val matcher = pattern.matcher(text)
                 if (matcher.find()) {
                     val videoId = matcher.group(2)
@@ -288,6 +352,8 @@ class MainActivity : AppCompatActivity(), OnPlayItemsListener, BottomNavigationV
     companion object {
 
         const val TAG = "MainActivity"
+
+        const val YOUTUBE_REGEX = """^(?:(?:https?:\/\/)?(?:www\.)?)?(youtube(?:-nocookie)?\.com|youtu\.be)\/.*?(?:embed|e|v|watch\?.*?v=)?\/?([a-zA-Z0-9]+)"""
 
     }
 

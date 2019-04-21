@@ -12,7 +12,6 @@ import com.arman.queuetube.R
 import com.arman.queuetube.activities.MainActivity
 import com.arman.queuetube.config.Constants
 import com.arman.queuetube.fragments.dialogs.AddToPlaylistFragment
-import com.arman.queuetube.fragments.pager.ViewPagerAdapter
 import com.arman.queuetube.model.Video
 import com.arman.queuetube.model.adapters.VideoItemAdapter
 import com.arman.queuetube.modules.playlists.json.GsonPlaylistHelper
@@ -36,9 +35,6 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
 
     private var broadcastReceiver: BroadcastReceiver? = null
 
-    private var isUp: Boolean = false
-    private var swipeHeight: Float = 0f
-
     private lateinit var ytPlayerView: YouTubePlayerView
     private var ytPlayer: YouTubePlayer? = null
     private var ytPlayerTracker: YouTubePlayerTracker? = null
@@ -51,7 +47,6 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         private set
 
     private var queueFragment: QueueFragment? = null
-    private var pagerAdapter: ViewPagerAdapter? = null
 
     private var notificationHelper: NotificationHelper? = null
 
@@ -64,28 +59,17 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
     private fun setupReceiver() {
         this.broadcastReceiver = NotificationReceiver(this)
         val filter = IntentFilter()
-        filter.addAction(Constants.Action.NEXT_ACTION)
-        filter.addAction(Constants.Action.MAIN_ACTION)
-        filter.addAction(Constants.Action.PAUSE_ACTION)
-        filter.addAction(Constants.Action.PLAY_ACTION)
-        filter.addAction(Constants.Action.STOP_ACTION)
+        filter.addAction(Constants.Action.Notification.NEXT_ACTION)
+        filter.addAction(Constants.Action.Notification.MAIN_ACTION)
+        filter.addAction(Constants.Action.Notification.PAUSE_ACTION)
+        filter.addAction(Constants.Action.Notification.PLAY_ACTION)
+        filter.addAction(Constants.Action.Notification.STOP_ACTION)
         activity!!.registerReceiver(this.broadcastReceiver, filter)
     }
 
     fun swipeDown(): Boolean {
         return sliding_layout.closePanel()
     }
-
-//    private fun setupPager() {
-//        tabs.setupWithViewPager(view_pager)
-//
-//        this.pagerAdapter = ViewPagerAdapter(fragmentManager!!)
-//        view_pager.adapter = this.pagerAdapter
-//        view_pager.setPageTransformer(true, DepthPageTransformer())
-//
-//        this.pagerAdapter!!.addFragment(this.queueFragment!!)
-//        this.pagerAdapter!!.addFragment(this.recommendedFragment!!)
-//    }
 
     fun shuffleQueue() {
         this.playlistAdapter.shuffle()
@@ -111,7 +95,7 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         return this.playlistAdapter.add(index, video)
     }
 
-    fun showAddToPlaylistDialog() {
+    private fun showAddToPlaylistDialog() {
         val dialog = AddToPlaylistFragment()
         dialog.video = this.currentVideo!!
         dialog.show(fragmentManager!!, "add_to_playlist_dialog")
@@ -146,14 +130,18 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
         bundle.putBoolean(Constants.Fragment.Argument.IS_SHUFFLABLE, false)
         this.queueFragment = QueueFragment()
         this.queueFragment!!.arguments = bundle
-        fragmentManager!!.beginTransaction().add(R.id.queue_content_frame, this.queueFragment!!).commit()
+        fragmentManager!!.beginTransaction().add(R.id.queue_content_frame, this.queueFragment!!, QueueFragment.TAG).commit()
 
         sliding_layout.panelSlideListener = object : SlidingUpLayout.PanelSlideListener {
             override fun onPanelOpening(panel: View) {
-                (activity as? MainActivity)?.appbar?.setExpanded(true)
+                (activity as? MainActivity)?.appbar?.setExpanded(false)
+                (activity as? MainActivity)?.hideBottomBar()
             }
 
-            override fun onPanelClosing(panel: View) = Unit
+            override fun onPanelClosing(panel: View) {
+                (activity as? MainActivity)?.appbar?.setExpanded(true)
+                (activity as? MainActivity)?.showBottomBar()
+            }
 
             override fun onPanelSlide(panel: View, slideOffset: Float) {
                 player_bar_open_button.rotation = 180.0f * (1 - slideOffset)
@@ -163,7 +151,9 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
                 onPanelOpening(panel)
             }
 
-            override fun onPanelClosed(panel: View) = Unit
+            override fun onPanelClosed(panel: View) {
+                onPanelClosing(panel)
+            }
         }
 
         this.setupReceiver()
@@ -199,9 +189,9 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
 
     private fun adjustFavoriteButton(favorited: Boolean) {
         if (favorited) {
-            favorite_button.setImageDrawable(activity!!.getDrawable(R.drawable.ic_heart_white_36dp))
+            favorite_button.setImageDrawable(activity!!.getDrawable(R.drawable.ic_heart_white_24dp))
         } else {
-            favorite_button.setImageDrawable(activity!!.getDrawable(R.drawable.ic_heart_outline_white_36dp))
+            favorite_button.setImageDrawable(activity!!.getDrawable(R.drawable.ic_heart_outline_white_24dp))
         }
     }
 
@@ -388,6 +378,12 @@ class PlayerFragment : Fragment(), YouTubePlayerInitListener {
             this.ytPlayerView.exitFullScreen()
             true
         } else false
+    }
+
+    companion object {
+
+        const val TAG = "PlayerFragment"
+
     }
 
 }

@@ -2,12 +2,14 @@ package com.arman.queuetube.views
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.MotionEventCompat
 import androidx.core.view.ViewCompat
 import androidx.customview.widget.ViewDragHelper
+import com.arman.queuetube.R
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -22,10 +24,14 @@ class SlidingUpLayout : ViewGroup {
     private var initialMotionX: Float = 0f
     private var initialMotionY: Float = 0f
 
-    private var dragRange: Int = 0
     private var topOf: Int = 0
     private var dragOffset: Float = 0f
     private var firstLayout: Boolean = true
+
+    private var actionBarSize: Int = 0
+
+    private val dragRange: Int
+        get() = height - headerView!!.height - actionBarSize
 
     var panelSlideListener: PanelSlideListener? = null
 
@@ -47,13 +53,14 @@ class SlidingUpLayout : ViewGroup {
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         this.firstLayout = true
+        val tv = TypedValue()
+        if (context.theme.resolveAttribute(R.attr.actionBarSize, tv, true)) {
+            this.actionBarSize = TypedValue.complexToDimensionPixelSize(tv.data, resources.displayMetrics)
+        }
     }
 
     private fun smoothSlideTo(slideOffset: Float): Boolean {
         val topBound = paddingTop
-        if (dragRange != height - headerView!!.height) {
-            dragRange = height - headerView!!.height
-        }
         val y = topBound + slideOffset * this.dragRange
         if (this.dragHelper.smoothSlideViewTo(this.headerView!!, this.headerView!!.left, y.toInt())) {
             ViewCompat.postInvalidateOnAnimation(this)
@@ -74,7 +81,6 @@ class SlidingUpLayout : ViewGroup {
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        dragRange = h - headerView!!.height
         if (h != oldh) {
             this.firstLayout = true
         }
@@ -83,7 +89,6 @@ class SlidingUpLayout : ViewGroup {
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         this.dragHelper.setEdgeTrackingEnabled(ViewDragHelper.EDGE_TOP)
 
-        this.dragRange = height - this.headerView!!.height
         this.headerView!!.layout(
                 0,
                 topOf,
@@ -110,11 +115,14 @@ class SlidingUpLayout : ViewGroup {
         }
 
         override fun onViewDragStateChanged(state: Int) {
-            if (dragHelper.viewDragState == ViewDragHelper.STATE_IDLE) {
-                if (dragOffset <= 0) {
-                    panelSlideListener?.onPanelOpened(headerView!!)
-                } else {
-                    panelSlideListener?.onPanelClosed(headerView!!)
+            when (state) {
+                ViewDragHelper.STATE_DRAGGING -> panelSlideListener?.onPanelOpening(headerView!!)
+                ViewDragHelper.STATE_IDLE -> {
+                    if (dragOffset <= 0) {
+                        panelSlideListener?.onPanelOpened(headerView!!)
+                    } else {
+                        panelSlideListener?.onPanelClosed(headerView!!)
+                    }
                 }
             }
         }

@@ -13,10 +13,10 @@ class NotificationReceiver(private val playerFragment: PlayerFragment) : Broadca
     override fun onReceive(context: Context, intent: Intent) {
         Log.d(TAG, "Received notification action: " + intent.action!!)
         when (intent.action) {
-            Constants.Action.PLAY_ACTION -> this.playerFragment.play()
-            Constants.Action.PAUSE_ACTION -> this.playerFragment.pause()
-            Constants.Action.NEXT_ACTION -> this.playerFragment.skip()
-            Constants.Action.STOP_ACTION -> this.playerFragment.stop()
+            Constants.Action.Notification.PLAY_ACTION -> this.playerFragment.play()
+            Constants.Action.Notification.PAUSE_ACTION -> this.playerFragment.pause()
+            Constants.Action.Notification.NEXT_ACTION -> this.playerFragment.skip()
+            Constants.Action.Notification.STOP_ACTION -> this.playerFragment.stop()
             else -> {
             }
         }
